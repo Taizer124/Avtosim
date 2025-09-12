@@ -1,0 +1,698 @@
+{
+    "name": "InputController",
+    "maps": [
+        {
+            "name": "Buttons",
+            "id": "366fc144-7b11-4055-81f7-aeb29843cad1",
+            "actions": [
+                {
+                    "name": "Dpad",
+                    "type": "PassThrough",
+                    "id": "c28dad5a-4545-4f5a-b7a6-67d4ca0a9d46",
+                    "expectedControlType": "Dpad",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Home",
+                    "type": "PassThrough",
+                    "id": "64b446df-975a-4e02-94b6-f3776a4dac41",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "East",
+                    "type": "PassThrough",
+                    "id": "1c3e07a3-7101-4608-a1c4-74cb5d7027df",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Left Bumper",
+                    "type": "PassThrough",
+                    "id": "af28ae4b-4cd6-4f43-a86d-1045ba710102",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Right Bumper",
+                    "type": "PassThrough",
+                    "id": "fde1c166-6999-4625-a3d0-9db2c5374f59",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Left Shift",
+                    "type": "PassThrough",
+                    "id": "c11f392f-8942-4ad1-8dee-e16a2470a4a1",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Right Shift",
+                    "type": "PassThrough",
+                    "id": "b59f17e9-8ff8-4fe6-8395-1e38af3b6cd3",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Right Stick",
+                    "type": "PassThrough",
+                    "id": "0248e9b9-1dfb-4bbd-a879-91020040238c",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Left Stick",
+                    "type": "PassThrough",
+                    "id": "2bc9ae33-7048-4dd8-b65a-e02397f765f1",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Left Turn",
+                    "type": "PassThrough",
+                    "id": "34e0ed7c-b41f-4de2-ba12-fc3fb0b76467",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Right Turn",
+                    "type": "PassThrough",
+                    "id": "5fca0010-b7c0-45fa-af32-9a3bcffb9945",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Minus",
+                    "type": "PassThrough",
+                    "id": "9f4b7cce-07f1-4d71-8ce4-0a11f6770251",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "North",
+                    "type": "PassThrough",
+                    "id": "056ae5b5-d61a-4d50-bbb1-ee3246589ac7",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Options",
+                    "type": "PassThrough",
+                    "id": "afdb6d6f-eff7-4aa2-a3f1-3136a0bd7642",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Plus",
+                    "type": "PassThrough",
+                    "id": "7ec90107-83c6-4be4-8be1-6760334b32f6",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Return",
+                    "type": "PassThrough",
+                    "id": "5cb9e380-49e2-4872-afcc-bfc7827ff1df",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Share",
+                    "type": "PassThrough",
+                    "id": "7d00e2e0-b565-4b65-83e6-caf7145a3daf",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "South",
+                    "type": "PassThrough",
+                    "id": "e4892a76-937c-4ba9-b09d-80d75a3fa065",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "West",
+                    "type": "PassThrough",
+                    "id": "18b2c3bb-1c41-4fb4-991c-e1ed97dc5610",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "285f676c-cc2c-4ec3-bbee-aa5db607c2ea",
+                    "path": "<Logitech G29 Racing Wheel>/hatSwitch",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Dpad",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f7b0a020-1a75-4373-8723-79b16e1ad518",
+                    "path": "<Logitech G29 Racing Wheel>/homeButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Home",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2f74b8af-bd28-4269-918f-f7ad9a14eb8d",
+                    "path": "<Logitech G29 Racing Wheel>/eastButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "East",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "eb568b1f-28d1-48d6-8649-ece22a69b163",
+                    "path": "<Logitech G29 Racing Wheel>/leftBumperButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Left Bumper",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6fcd4a03-0374-4139-85ff-3f8a7c68824b",
+                    "path": "<Logitech G29 Racing Wheel>/leftShiftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Left Shift",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "40147922-a6e1-4a95-8089-3d3a774617f1",
+                    "path": "<Logitech G29 Racing Wheel>/leftStickButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Left Stick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "364d1fd5-935c-4528-ad7f-9bf11f3d388d",
+                    "path": "<Logitech G29 Racing Wheel>/leftTurnButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Left Turn",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ae86d439-6302-4779-8ca5-8566cebbcc36",
+                    "path": "<Logitech G29 Racing Wheel>/rightTurnButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Right Turn",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "55279cb7-43d3-439f-bf0d-75793f70ace6",
+                    "path": "<Logitech G29 Racing Wheel>/rightBumperButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Right Bumper",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "cf8c79ef-8c04-4567-8a69-3d3a772aa783",
+                    "path": "<Logitech G29 Racing Wheel>/rightStickButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Right Stick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9071e17d-326b-45ac-9e1b-8863dbdf5280",
+                    "path": "<Logitech G29 Racing Wheel>/minusButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Minus",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9d5a828f-69ce-4b5f-b709-9e55e285ed68",
+                    "path": "<Logitech G29 Racing Wheel>/northButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "North",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f038c92b-7e17-4452-820d-a8d70dd33f3b",
+                    "path": "<Logitech G29 Racing Wheel>/optionsButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Options",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ffd245f9-9f5b-487f-bcd2-4750691ac8e0",
+                    "path": "<Logitech G29 Racing Wheel>/plusButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Plus",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "23c9878f-b692-4bcf-8aa9-42db802520df",
+                    "path": "<Logitech G29 Racing Wheel>/returnButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Return",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0019497a-245c-4a97-a0b2-706ddefbac1e",
+                    "path": "<Logitech G29 Racing Wheel>/shareButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Share",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "07da0fcb-9095-4a0a-8e09-b27deb9bb4cb",
+                    "path": "<Logitech G29 Racing Wheel>/southButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "South",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3e860e19-b41d-47ca-b76a-ee1bdb42bc69",
+                    "path": "<Logitech G29 Racing Wheel>/westButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "West",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "184eac69-20fc-4e1f-8089-25117bb1859e",
+                    "path": "<Logitech G29 Racing Wheel>/rightShiftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Right Shift",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Steering wheel",
+            "id": "89471281-14ca-4c02-9469-39482cff8fe7",
+            "actions": [
+                {
+                    "name": "Steering_Steering",
+                    "type": "PassThrough",
+                    "id": "c210cc6b-6dbf-4750-96f7-d6391fd4e5c8",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Steering_Stick",
+                    "type": "PassThrough",
+                    "id": "5fd1879f-58f5-4404-8213-d69947add039",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "b92063b8-3ec8-4d39-85d1-d38b9fd92004",
+                    "path": "<Logitech G29 Racing Wheel>/Steering",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Steering_Steering",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a8fcf12e-ef1c-4c67-a48f-4aecbc425dd8",
+                    "path": "<Logitech G29 Racing Wheel>/stick/x",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Steering_Stick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Pedals",
+            "id": "aaf7a826-6625-44cf-b9df-3a5b6ac04bf1",
+            "actions": [
+                {
+                    "name": "Throttle",
+                    "type": "PassThrough",
+                    "id": "d6d9a278-00f3-4985-9413-408b55a3f3f6",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Clutch",
+                    "type": "PassThrough",
+                    "id": "72009cd4-f547-4845-bc9b-7a54c33e051a",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Brake",
+                    "type": "PassThrough",
+                    "id": "d85a4b36-5ae2-4b5d-8caa-f1a5dcbca282",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "138d1530-b475-4da5-a752-a680c2b874ef",
+                    "path": "<Logitech G29 Racing Wheel>/throttleAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Throttle",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "23c462a6-d9b2-4140-ae65-03d64daa6a0d",
+                    "path": "<Logitech G29 Racing Wheel>/clutchAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Clutch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2a00d829-94e4-42aa-87e2-fef9c1a28a2f",
+                    "path": "<Logitech G29 Racing Wheel>/brakeAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Brake",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Transmission",
+            "id": "4066e94a-157f-4f51-a458-518a190216c0",
+            "actions": [
+                {
+                    "name": "Shifter 1",
+                    "type": "PassThrough",
+                    "id": "d718378e-51bc-4d70-9291-4b216fbf18da",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Shifter 2",
+                    "type": "PassThrough",
+                    "id": "e7b4681f-ae5f-49e0-8c54-3e2b312716a8",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Shifter 3",
+                    "type": "PassThrough",
+                    "id": "ce1a9fe4-8885-428a-938e-c94692ffa420",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Shifter 4",
+                    "type": "PassThrough",
+                    "id": "f3de7074-35e3-4585-a9bd-07607cf38d39",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Shifter 5",
+                    "type": "PassThrough",
+                    "id": "9a595845-1a10-4cc9-a7b0-6f67be862548",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Shifter 6",
+                    "type": "PassThrough",
+                    "id": "940045f6-a587-4e9b-b99a-ffceaa60eeb1",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Shifter 7",
+                    "type": "PassThrough",
+                    "id": "05a540fb-c032-40e5-a9da-09a8ef28c029",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "1ee13dbb-68c2-4078-bc0c-c2edbb607344",
+                    "path": "<Logitech G29 Racing Wheel>/shifter1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Shifter 1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b48abf65-1b78-4e94-99ac-b84eca9b868e",
+                    "path": "<Logitech G29 Racing Wheel>/shifter2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Shifter 2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8eb4f026-a740-471e-8cf3-4bb99420b0a7",
+                    "path": "<Logitech G29 Racing Wheel>/shifter3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Shifter 3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "03390530-4184-4bc1-a2bf-6a17fa00f649",
+                    "path": "<Logitech G29 Racing Wheel>/shifter4",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Shifter 4",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b50223d5-9011-4297-b37b-69b181ac9a36",
+                    "path": "<Logitech G29 Racing Wheel>/shifter5",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Shifter 5",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "99023c05-692a-47c8-bd75-fe699ff6997f",
+                    "path": "<Logitech G29 Racing Wheel>/shifter6",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Shifter 6",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9f95bf68-a3ca-4a1d-ba8a-6438368e3812",
+                    "path": "<Logitech G29 Racing Wheel>/shifter7",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Logitech G29",
+                    "action": "Shifter 7",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Handbrake",
+            "id": "c0bf132c-2b6e-4479-9632-d098ec0fa04f",
+            "actions": [
+                {
+                    "name": "Handbrake",
+                    "type": "PassThrough",
+                    "id": "9dc519ac-1b13-406a-b03a-0a0624a71978",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "2e0501f1-5b0e-43d6-9fbd-35f5addc0cb8",
+                    "path": "<HID::wch.cn Hand Brake>/trigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Handbrake",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "Logitech G29",
+            "bindingGroup": "Logitech G29",
+            "devices": [
+                {
+                    "devicePath": "<Logitech G29 Racing Wheel>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        }
+    ]
+}
