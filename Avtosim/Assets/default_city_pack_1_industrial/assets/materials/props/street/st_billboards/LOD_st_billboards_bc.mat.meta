@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c0dacf2970f7b1c4693228da2f3baa23
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 90883
+  packageName: Default City Pack 1 industrial URP
+  packageVersion: 1.0
+  assetPath: Assets/default_city_pack_1_industrial/assets/materials/props/street/st_billboards/LOD_st_billboards_bc.mat
+  uploadId: 665993

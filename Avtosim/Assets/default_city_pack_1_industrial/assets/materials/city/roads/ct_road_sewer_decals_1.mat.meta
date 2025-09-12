@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 9e02a2121ecc12e468fdbaad94e07c72
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 90883
+  packageName: Default City Pack 1 industrial URP
+  packageVersion: 1.0
+  assetPath: Assets/default_city_pack_1_industrial/assets/materials/city/roads/ct_road_sewer_decals_1.mat
+  uploadId: 665993

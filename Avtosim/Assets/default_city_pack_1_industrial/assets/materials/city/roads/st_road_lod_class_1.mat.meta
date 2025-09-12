@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a30c72f51dfcdfd4b9ad1e230a5d1aeb
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 90883
+  packageName: Default City Pack 1 industrial URP
+  packageVersion: 1.0
+  assetPath: Assets/default_city_pack_1_industrial/assets/materials/city/roads/st_road_lod_class_1.mat
+  uploadId: 665993

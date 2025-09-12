@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ec383e5474d370f46a278559c2f4f144
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 90883
+  packageName: Default City Pack 1 industrial URP
+  packageVersion: 1.0
+  assetPath: Assets/default_city_pack_1_industrial/assets/materials/props/street/st_postbox/st_postbox_patch_graffiti_a.mat
+  uploadId: 665993

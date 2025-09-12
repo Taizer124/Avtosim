@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d6903ce490942674e9a617a8b192fbe8
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 90883
+  packageName: Default City Pack 1 industrial URP
+  packageVersion: 1.0
+  assetPath: Assets/default_city_pack_1_industrial/assets/materials/props/street/st_bins/dumpster_part_1_class_1_bc.mat
+  uploadId: 665993

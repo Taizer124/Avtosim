@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 455e2869747ef8c4ab8889e01f9d83d6
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 90883
+  packageName: Default City Pack 1 industrial URP
+  packageVersion: 1.0
+  assetPath: Assets/default_city_pack_1_industrial/assets/materials/city/ind_redlight_street/ind_three_build_8/ind_three_build_door_class_1_bc.mat
+  uploadId: 665993

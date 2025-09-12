@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3d57a25a54afaf5488c883251e99ab9a
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 90883
+  packageName: Default City Pack 1 industrial URP
+  packageVersion: 1.0
+  assetPath: Assets/default_city_pack_1_industrial/assets/materials/city/ind_redlight_street/ind_redlight_build_3/ind_build_3_rollup_class_1_bc.mat
+  uploadId: 665993

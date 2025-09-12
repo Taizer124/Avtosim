@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e1cc8b2c01815a542916aa4ff5042dd3
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 90883
+  packageName: Default City Pack 1 industrial URP
+  packageVersion: 1.0
+  assetPath: Assets/default_city_pack_1_industrial/assets/materials/city/ind_redlight_street/ind_redlight_build_1/ind_build_1_window_bc.mat
+  uploadId: 665993

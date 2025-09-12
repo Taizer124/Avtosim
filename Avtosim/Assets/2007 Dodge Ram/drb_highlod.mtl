@@ -1,0 +1,126 @@
+
+newmtl Car_Body_Paint
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\drb_main.dds
+
+newmtl Wheel
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\drb_wheel.dds
+
+newmtl Discs
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\disc.dds
+
+newmtl Cabin
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\drb_cabin.dds
+
+newmtl Shiny_Metal
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\drb_main.dds
+
+newmtl Matt
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\drb_main.dds
+
+newmtl Lights_Pod
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\drb_lights.dds
+
+newmtl Lights_Glass
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\drb_lights.dds
+
+newmtl Suspension
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\suspension.dds
+
+newmtl Window_Netting
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\drb_glass.dds
+
+newmtl Spare_Wheel
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\
+
+newmtl Spare_Tyre_Wall
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\
+
+newmtl Spare_Tyre_Tread
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\
+
+newmtl Grills
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\grills.dds
+
+newmtl Aerials
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\
+
+newmtl Tyre_Wall
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\drb_wheel.dds
+
+newmtl Tyre_Tread
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\tread.dds
+
+newmtl Lights_Satin
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\drb_lights.dds

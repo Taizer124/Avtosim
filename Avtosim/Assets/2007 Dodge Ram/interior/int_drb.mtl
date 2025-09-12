@@ -1,0 +1,161 @@
+
+newmtl Sticker_08
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\sticker_08.dds
+
+newmtl Sticker_09
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\sticker_09.dds
+
+newmtl Sticker_07
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\sticker_07.dds
+
+newmtl Sticker_06
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\sticker_06.dds
+
+newmtl Sticker_04
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\sticker_04.dds
+
+newmtl Sticker_05
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\sticker_05.dds
+
+newmtl Sticker_03
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\sticker_03.dds
+
+newmtl Sticker_02
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\sticker_02.dds
+
+newmtl Sticker_01
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\sticker_01.dds
+
+newmtl gps
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\int_gps_background.dds
+
+newmtl mirror
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\int_mirror_dm_c.dds
+
+newmtl limit_lights
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\int_indicator.dds
+
+newmtl Leather
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\int_drb_main.dds
+
+newmtl Shiny_Painted_Metal
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\int_drb_main.dds
+
+newmtl bare_metal
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\int_drb_main.dds
+
+newmtl Chrome
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\int_drb_main.dds
+
+newmtl shiny_plastic
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\int_drb_main.dds
+
+newmtl Matt
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\int_drb_main.dds
+
+newmtl dials_shny_dials_shiny_low_spec
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\int_drb_dials.dds
+
+newmtl dials_shny_dials_shiny
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\int_drb_dials.dds
+
+newmtl dials_dials_dials_dials_dials_matt
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\int_drb_dials.dds
+
+newmtl interior_netting_windows
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\int_drb_glass.dds
+
+newmtl gear_indicator
+ka 1.00 1.00 1.00
+kd 1.00 1.00 1.00
+ks 0.00 0.00 0.00
+Ns 50
+map_Kd d:\dirt 2\2007 dodge ram\interior\int_gear.dds

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c14b777b5d498004eba61d96639f10e8
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 90883
+  packageName: Default City Pack 1 industrial URP
+  packageVersion: 1.0
+  assetPath: Assets/default_city_pack_1_industrial/assets/materials/city/ind_blk_mainten/lod_blk_3_mainten_bc.mat
+  uploadId: 665993
