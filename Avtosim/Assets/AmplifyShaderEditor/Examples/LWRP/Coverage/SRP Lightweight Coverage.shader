@@ -31,7 +31,7 @@ Shader "ASESampleShaders/SRP Lightweight/Coverage"
 }
 /*ASEBEGIN
 Version=18934
-1920;23;1920;983;400.3787;1131.308;1;True;False
+2310;88;1902;965;391.3787;1122.308;1;False;False
 Node;AmplifyShaderEditor.RangedFloatNode;168;-64,-400;Float;False;Property;_NormalScale;Normal Scale;2;0;Create;True;0;0;0;False;0;False;0;1;0;1;0;1;FLOAT;0
 Node;AmplifyShaderEditor.LerpOp;604;1040,-592;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
 Node;AmplifyShaderEditor.LerpOp;610;1040,-96;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
@@ -61,4 +61,4 @@ WireConnection;603;0;132;0
 WireConnection;132;5;168;0
 WireConnection;601;5;613;0
 ASEEND*/
-//CHKSM=D7BEDAB072A53916F8C195295D88D94A1EF74544
+//CHKSM=CAC1F1D01924F1423AE1C1ABC5CE56080B976B01
