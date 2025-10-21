@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db281c34c26671247bcffab06267e07e, type: 3}
+  m_Name: Inline6
+  m_EditorClassIdentifier: 
+  TorqueCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 1000
+      value: 300.92923
+      inSlope: 0.059212495
+      outSlope: 0.059212495
+      tangentMode: 35
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 5309.975
+      value: 556.1336
+      inSlope: -0.11674867
+      outSlope: -0.11674867
+      tangentMode: 35
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 6019.905
+      value: 348.3302
+      inSlope: -0.29270983
+      outSlope: -0.29270983
+      tangentMode: 33
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  ForcedInductionSO: {fileID: 11400000, guid: 34d5b0c7e22c196499a2957645df5309, type: 2}
+  MaxSpeed: 290

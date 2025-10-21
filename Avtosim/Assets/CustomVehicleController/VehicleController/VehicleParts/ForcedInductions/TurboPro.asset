@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a07113725e0bf9b40a510170f9f94e8e, type: 3}
+  m_Name: TurboPro
+  m_EditorClassIdentifier: 
+  ForcedInductionType: 1
+  MaxBoostPressure: 30
+  TurboRPMPercentDelay: 0
+  TurboSpoolUpTime: 0.6
+  TurboSpoolDownTime: 1.3
+  AntiLagSystemInstalled: 1
+  AntiLagEffect: 0.6
+  AntiLagVisualEffectChance: 0.5

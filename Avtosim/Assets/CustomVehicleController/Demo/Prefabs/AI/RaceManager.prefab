@@ -1,0 +1,250 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5639585660632359561
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 337767788688118822}
+  - component: {fileID: 8460579412236555432}
+  - component: {fileID: 5148576204004832299}
+  - component: {fileID: 6904797159156263336}
+  - component: {fileID: 97889011784823909}
+  m_Layer: 0
+  m_Name: RaceManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &337767788688118822
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5639585660632359561}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4642796859239426385}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8460579412236555432
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5639585660632359561}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2842ca6cbc78cb45b5769e83e7aac62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _positionEvaluator: {fileID: 6904797159156263336}
+  _lapCount: 1
+  _raceEndNormilizedTime: 1
+  _podiumPlaces: 1
+  _startCountdownTime: 3
+  RaceStartCondition: 1
+  _waitForOtherRacersTime: 10
+  OnCountdownStarted:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 97889011784823909}
+        m_TargetAssemblyTypeName: Assets.VehicleController.RaceManagerDebug, Assembly-CSharp
+        m_MethodName: OnCountdownStarted
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnRaceStarted:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 97889011784823909}
+        m_TargetAssemblyTypeName: Assets.VehicleController.RaceManagerDebug, Assembly-CSharp
+        m_MethodName: OnRaceStarted
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnPlayerFinishedFirst:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 97889011784823909}
+        m_TargetAssemblyTypeName: RaceManagerTest, Assembly-CSharp
+        m_MethodName: OnPlayerFinishedFirst
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnPlayerFinished:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 97889011784823909}
+        m_TargetAssemblyTypeName: RaceManagerTest, Assembly-CSharp
+        m_MethodName: OnPlayerFinished
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnPodiumPlacedTaken:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 97889011784823909}
+        m_TargetAssemblyTypeName: RaceManagerTest, Assembly-CSharp
+        m_MethodName: OnPodiumPlacesTaken
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnAllRacersFinished:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 97889011784823909}
+        m_TargetAssemblyTypeName: RaceManagerTest, Assembly-CSharp
+        m_MethodName: OnAllRacersFinished
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnRaceEnd:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 97889011784823909}
+        m_TargetAssemblyTypeName: RaceManagerTest, Assembly-CSharp
+        m_MethodName: OnRaceEnded
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &5148576204004832299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5639585660632359561}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d0afdef60a163044b6621f64c987f1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _raceManager: {fileID: 8460579412236555432}
+  _spawnCondition: 0
+  UniqueOnly: 0
+  RandomizePlayerPos: 1
+  PlayerPosIndex: 3
+  PlayerVehiclePrefab: {fileID: 2435264928939189949, guid: 66cc4fa09a1d68d41973fc3cbea9229f,
+    type: 3}
+  RacerAIVehiclePrefabArray:
+  - {fileID: 4870393667082634329, guid: 8751d10e36416074f843267f14c12177, type: 3}
+  StartPosition: {fileID: 4642796859239426385}
+  Rows: 2
+  Columns: 2
+  HorizontalDistanceBetweenSpawnPoints: 8
+  VerticalDistanceBetweenSpawnPoints: 10
+--- !u!114 &6904797159156263336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5639585660632359561}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5df78b2758bc514ba43203228af529a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _splineContainer: {fileID: 0}
+  _lookAheadDistance: 15
+--- !u!114 &97889011784823909
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5639585660632359561}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d16aec00d139ef64ba6e5b7f8e28dca4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _raceManager: {fileID: 8460579412236555432}
+  _racersProgressList: []
+  CountdownTimeLeft: 0
+  WaitForOthersTimeLeft: 0
+  Logs: 
+--- !u!1 &6332450735376461529
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4642796859239426385}
+  m_Layer: 0
+  m_Name: StartPos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4642796859239426385
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6332450735376461529}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 337767788688118822}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

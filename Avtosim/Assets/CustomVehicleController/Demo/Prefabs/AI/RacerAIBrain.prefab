@@ -1,0 +1,118 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8423410754715024355
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 149975394490873878}
+  - component: {fileID: 232533417979921388}
+  - component: {fileID: 4374506532480770601}
+  - component: {fileID: 765794753869483196}
+  - component: {fileID: 2052172245416691110}
+  - component: {fileID: 4572563764344700248}
+  m_Layer: 0
+  m_Name: RacerAIBrain
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &149975394490873878
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8423410754715024355}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &232533417979921388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8423410754715024355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82d86ba154b7d0742a23e25989ed4a13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _raycastAmount: 13
+  _maxAngleBetweenRays: 7
+  _rayLength: 60
+  _rearRayLength: 4
+  _maxHorizontalDistance: 100
+  _collisionLayer:
+    serializedVersion: 2
+    m_Bits: 0
+--- !u!114 &4374506532480770601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8423410754715024355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f02d4597c8df0954e92e6a97700e8559, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _vehicleController: {fileID: 0}
+  _raycastSensor: {fileID: 232533417979921388}
+  _raceParticipant: {fileID: 2052172245416691110}
+  _inputProvider: {fileID: 765794753869483196}
+  _AIInterestModifier: 5
+  _AIDangerModifier: 5
+  _riskiness: 0.9
+--- !u!114 &765794753869483196
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8423410754715024355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc9a96b1dd0ef59499c9001bda407b72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2052172245416691110
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8423410754715024355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5aeb264f5b7a5e46983ba91f6a06d72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _vehicleController: {fileID: 0}
+  _collider: {fileID: 0}
+  _isPlayer: 0
+--- !u!114 &4572563764344700248
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8423410754715024355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 160af194e226cc84ba15fe1a5172615f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _raycastSensor: {fileID: 232533417979921388}
+  Debug: 1
