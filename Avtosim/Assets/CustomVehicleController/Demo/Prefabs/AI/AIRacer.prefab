@@ -5034,7 +5034,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 232533417979921388, guid: 5757671a9750b1e4f87942ec664b9d6a, type: 3}
       propertyPath: _collisionLayer.m_Bits
-      value: 192
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 232533417979921388, guid: 5757671a9750b1e4f87942ec664b9d6a, type: 3}
       propertyPath: _frontCollisionRayLength
@@ -5050,11 +5050,11 @@ PrefabInstance:
       objectReference: {fileID: 1514200815484472728}
     - target: {fileID: 4374506532480770601, guid: 5757671a9750b1e4f87942ec664b9d6a, type: 3}
       propertyPath: _riskiness
-      value: 0.9806
+      value: 0.9115
       objectReference: {fileID: 0}
     - target: {fileID: 4374506532480770601, guid: 5757671a9750b1e4f87942ec664b9d6a, type: 3}
       propertyPath: _AIDangerModifier
-      value: 2
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 4374506532480770601, guid: 5757671a9750b1e4f87942ec664b9d6a, type: 3}
       propertyPath: _vehicleController
@@ -5062,7 +5062,7 @@ PrefabInstance:
       objectReference: {fileID: 1514200815484472728}
     - target: {fileID: 4374506532480770601, guid: 5757671a9750b1e4f87942ec664b9d6a, type: 3}
       propertyPath: _AIInterestModifier
-      value: 6
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 8423410754715024355, guid: 5757671a9750b1e4f87942ec664b9d6a, type: 3}
       propertyPath: m_Name
