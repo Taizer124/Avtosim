@@ -60,6 +60,7 @@ public class RaceStartZone : MonoBehaviour
         {
             StopCoroutine(_countdownCoroutine);
             _countdownCoroutine = null;
+            OnCountdownFinished?.Invoke();
         }
         _isCountdownRunning = false;
     }

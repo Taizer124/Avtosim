@@ -10,7 +10,7 @@ namespace Assets.VehicleController
         [SerializeField] private InputControllerReader _wheelInput;
 
         [Header("Input Mapping")]
-        [SerializeField] private bool _useSequentialShifting = true;
+        [SerializeField] private bool _useSequentialShifting = false;
 
         // Для хранения состояний ввода
         private float _gasInput;
