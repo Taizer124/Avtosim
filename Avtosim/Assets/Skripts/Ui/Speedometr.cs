@@ -12,21 +12,26 @@ public class SimpleSpeedDisplay : MonoBehaviour
     [SerializeField] private Text _speedText;
     [SerializeField] private TextMeshProUGUI _speedTextTMP;
     [SerializeField] private TextMeshProUGUI _gearTextTMP;
-    [SerializeField] private TextMeshProUGUI _nitroTextTMP;
     [SerializeField] private TextMeshProUGUI _rpmTextTMP;
 
     [Header("UI Sliders")]
     [SerializeField] private Slider _rpmSlider;
-    [SerializeField] private Slider _nitroSlider;
-    [SerializeField] private Slider _boostSlider;
+
+    [Header("Needle References")]
+    [SerializeField] private Image _speedNeedle;
+    [SerializeField] private Image _rpmNeedle;
+
+    [Header("Needle Settings")]
+    [SerializeField] private float _speedMinAngle = 45f;
+    [SerializeField] private float _speedMaxAngle = -225f;
+    [SerializeField] private float _rpmMinAngle = 45f;
+    [SerializeField] private float _rpmMaxAngle = -225f;
+    [SerializeField] private float _maxSpeed = 200f;
 
     [Header("Display Settings")]
     [SerializeField] private bool _showKMH = true;
     [SerializeField] private bool _roundToInteger = true;
-    [SerializeField] private string _speedSuffix = " km/h";
-    [SerializeField] private string _rpmSuffix = " RPM";
     [SerializeField] private bool _showGear = true;
-    [SerializeField] private bool _showNitro = true;
     [SerializeField] private bool _showRPM = true;
 
     private void Start()
@@ -63,11 +68,14 @@ public class SimpleSpeedDisplay : MonoBehaviour
         // Обновляем скорость
         UpdateSpeedDisplay(carStats.SpeedInKMperH);
 
-        // Обновляем дополнительные показатели как во втором коде
+        // Обновляем дополнительные показатели
         UpdateAdditionalDisplays(carStats);
 
-        // Обновляем слайдеры
-        UpdateSliders(carStats);
+        // Обновляем слайдер
+        UpdateSlider(carStats);
+
+        // Обновляем стрелки
+        UpdateNeedles(carStats);
     }
 
     private void UpdateSpeedDisplay(float speed)
@@ -75,9 +83,6 @@ public class SimpleSpeedDisplay : MonoBehaviour
         string speedText = _roundToInteger ?
             Mathf.Abs((int)speed).ToString() :
             Mathf.Abs(speed).ToString("F1");
-
-        if (!string.IsNullOrEmpty(_speedSuffix))
-            speedText += _speedSuffix;
 
         // Обновляем текстовые компоненты (оба типа)
         if (_speedTextTMP != null)
@@ -89,13 +94,9 @@ public class SimpleSpeedDisplay : MonoBehaviour
 
     private void UpdateAdditionalDisplays(CurrentCarStats carStats)
     {
-        // Обновляем передачу (как во втором коде)
+        // Обновляем передачу
         if (_showGear && _gearTextTMP != null)
             _gearTextTMP.text = carStats.CurrentGear;
-
-        // Обновляем нитро (как во втором коде)
-        if (_showNitro && _nitroTextTMP != null)
-            _nitroTextTMP.text = carStats.NitroBottlesLeft.ToString();
 
         // Обновляем RPM текст
         if (_showRPM && _rpmTextTMP != null)
@@ -104,39 +105,41 @@ public class SimpleSpeedDisplay : MonoBehaviour
                 ((int)carStats.EngineRPMPercent).ToString() :
                 carStats.EngineRPMPercent.ToString("F1");
 
-            if (!string.IsNullOrEmpty(_rpmSuffix))
-                rpmText += _rpmSuffix;
-
             _rpmTextTMP.text = rpmText;
         }
     }
 
-    private void UpdateSliders(CurrentCarStats carStats)
+    private void UpdateSlider(CurrentCarStats carStats)
     {
-        // Обновляем слайдеры как во втором коде
+        // Обновляем слайдер RPM
         if (_rpmSlider != null)
             _rpmSlider.value = carStats.EngineRPMPercent;
+    }
 
-        if (_nitroSlider != null)
-            _nitroSlider.value = carStats.NitroPercentLeft;
-        if (_boostSlider != null)
-            _boostSlider.value = carStats.ForcedInductionBoostPercent;
+
+    private void UpdateNeedles(CurrentCarStats carStats)
+    {
+        // Обновляем стрелку скорости
+        if (_speedNeedle != null)
+        {
+            float speedNormalized = Mathf.Clamp01(carStats.SpeedInKMperH / _maxSpeed);
+            float speedAngle = Mathf.Lerp(_speedMinAngle, _speedMaxAngle, speedNormalized);
+            _speedNeedle.transform.localEulerAngles = new Vector3(0, 0, speedAngle);
+        }
+
+        // Обновляем стрелку RPM
+        if (_rpmNeedle != null)
+        {
+            float rpmNormalized = Mathf.Clamp01(carStats.EngineRPMPercent / 100f);
+            float rpmAngle = Mathf.Lerp(_rpmMinAngle, _rpmMaxAngle, rpmNormalized);
+            _rpmNeedle.transform.localEulerAngles = new Vector3(0, 0, rpmAngle);
+        }
     }
 
     // Методы для настройки из других скриптов
     public void SetVehicle(CustomVehicleController vehicle)
     {
         _vehicleController = vehicle;
-    }
-
-    public void SetSpeedSuffix(string suffix)
-    {
-        _speedSuffix = suffix;
-    }
-
-    public void SetRPMSuffix(string suffix)
-    {
-        _rpmSuffix = suffix;
     }
 
     public void SetTextColor(Color color)
@@ -150,9 +153,6 @@ public class SimpleSpeedDisplay : MonoBehaviour
         if (_gearTextTMP != null)
             _gearTextTMP.color = color;
 
-        if (_nitroTextTMP != null)
-            _nitroTextTMP.color = color;
-
         if (_rpmTextTMP != null)
             _rpmTextTMP.color = color;
     }
@@ -164,13 +164,6 @@ public class SimpleSpeedDisplay : MonoBehaviour
             _gearTextTMP.gameObject.SetActive(show);
     }
 
-    public void ShowNitro(bool show)
-    {
-        _showNitro = show;
-        if (_nitroTextTMP != null)
-            _nitroTextTMP.gameObject.SetActive(show);
-    }
-
     public void ShowRPM(bool show)
     {
         _showRPM = show;
@@ -178,5 +171,7 @@ public class SimpleSpeedDisplay : MonoBehaviour
             _rpmTextTMP.gameObject.SetActive(show);
         if (_rpmSlider != null)
             _rpmSlider.gameObject.SetActive(show);
+        if (_rpmNeedle != null)
+            _rpmNeedle.gameObject.SetActive(show);
     }
 }
