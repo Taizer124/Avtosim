@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edcff6acdb053f94f8f24625cb58963b, type: 3}
+  m_Name: RotarySound
+  m_EditorClassIdentifier: 
+  RPMStep: 500
+  EngineRPMRangeArray:
+  - {fileID: 8300000, guid: 3b2d2862c1b99564c9e1aeee492b83c0, type: 3}
+  - {fileID: 8300000, guid: a9bbfcc5344dd1e46a2b7627c6b0a08a, type: 3}
+  - {fileID: 8300000, guid: b4252cc61d1237440bb69cd24570e6d2, type: 3}
+  - {fileID: 8300000, guid: 3158237609bbbcf4ebec3f6653035314, type: 3}
+  - {fileID: 8300000, guid: bf6e21c9bf0227e4c94f6334b58dda78, type: 3}
+  - {fileID: 8300000, guid: 3103beceebe624f4e9329f39ca4eb066, type: 3}
+  - {fileID: 8300000, guid: 28bd9420131e6074eba2d785dbc753d9, type: 3}
+  - {fileID: 8300000, guid: da0a06c5af6272048ae30d85c7b86273, type: 3}
+  - {fileID: 8300000, guid: df614a8832adf6f4da3c793b6c08a97f, type: 3}
+  - {fileID: 8300000, guid: 7c37d2f36afe61047bbad2415d479c40, type: 3}
+  - {fileID: 8300000, guid: dda9e25a6928459458a8ab9b4c1cda91, type: 3}
+  - {fileID: 8300000, guid: 257cd0b2b7ad46c4bba5213eaaadeb80, type: 3}
+  - {fileID: 8300000, guid: d5ba5b4fb684c924c971e4e5a4640a52, type: 3}
+  - {fileID: 8300000, guid: f1e57c8a4272cb34c89ffc58535e0fb7, type: 3}
+  - {fileID: 8300000, guid: 243d91447f8b63a41b14c9a805a24dee, type: 3}
+  - {fileID: 8300000, guid: fca1f394e77181946be2a75c1e0b6289, type: 3}
+  - {fileID: 8300000, guid: d4db7cb1d6b9c5e40bc06400a5283f9f, type: 3}
+  - {fileID: 8300000, guid: 6180018ce899be44ea35d7bbff196e66, type: 3}

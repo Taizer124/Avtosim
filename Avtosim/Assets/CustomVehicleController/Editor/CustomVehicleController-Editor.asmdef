@@ -1,0 +1,24 @@
+{
+    "name": "CustomVehicleController-Editor",
+    "rootNamespace": "Assets.VehicleControllerEditor",
+    "references": [
+        "GUID:2508049b3dd4d9b448a10a961ff29a22"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.inputsystem",
+            "expression": "1.0.0",
+            "define": "INPUT_SYSTEM_INSTALLED"
+        }
+    ],
+    "noEngineReferences": false
+}

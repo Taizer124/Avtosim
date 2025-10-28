@@ -9,6 +9,7 @@ TagManager:
   - TransType
   - DrivetrainType
   - PresetType
+  - RacerProgress
   layers:
   - Default
   - TransparentFX

@@ -1,0 +1,81 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/CustomVehicleController/Editor/EngineEditor/EnginePartCreatorWindow.uss?fileID=7433441132597879392&amp;guid=bf99a60161b7b2240a38274c54600818&amp;type=3#EnginePartCreatorWindow" />
+    <Style src="project://database/Assets/CustomVehicleController/Editor/VehicleEditor/CustomVehicleControllerEditor.uss?fileID=7433441132597879392&amp;guid=9f551b9d52d180344a8ae87f68e28a6e&amp;type=3#CustomVehicleControllerEditor" />
+    <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="DocsLinkButton" style="opacity: 1; position: relative; flex-direction: row; align-self: auto; justify-content: flex-start; align-items: auto; width: 172px; height: 17px; background-color: rgba(188, 188, 188, 0); border-left-color: rgba(149, 149, 149, 0); border-right-color: rgba(149, 149, 149, 0); border-top-color: rgba(149, 149, 149, 0); border-bottom-color: rgba(149, 149, 149, 0); padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 5px; margin-right: 0; margin-bottom: 0; margin-left: 0;">
+        <ui:VisualElement class="helpButton" style="flex-grow: 0; align-self: center; margin-top: 0; margin-right: 5px; border-left-color: rgb(255, 255, 255); border-right-color: rgb(255, 255, 255); border-top-color: rgb(255, 255, 255); border-bottom-color: rgb(255, 255, 255); flex-shrink: 0;" />
+        <ui:Label tabindex="-1" text="Online Documentation" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DocsLabel" style="align-self: auto; -unity-text-align: middle-left; -unity-font: url(&apos;project://database/Assets/CustomVehicleController/Editor/Font/VegurBold-rYOp.otf?fileID=12800000&amp;guid=0656c9b2ed8dff7499350d915788ca10&amp;type=3#VegurBold-rYOp&apos;); font-size: 12px; justify-content: flex-start; align-items: auto; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; width: 141px; -unity-font-style: normal; text-shadow: 0 0 0 rgba(0, 0, 0, 0); border-bottom-width: 1px; border-bottom-color: rgb(0, 114, 202); color: rgb(0, 165, 255);" />
+    </ui:Button>
+    <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1" style="flex-grow: 1; flex-direction: column; justify-content: flex-start; align-self: stretch; align-items: auto; height: 50%; min-width: auto; min-height: auto;">
+        <ui:VisualElement style="flex-grow: 1; flex-direction: row; align-self: stretch; justify-content: flex-start; align-items: auto;">
+            <ui:VisualElement name="LeftSide" style="flex-grow: 1; flex-shrink: 1; flex-direction: column; align-self: flex-start;">
+                <ui:Foldout text="Engine Part &#10;Types Management" value="false" class="statsBlock Foldout" style="width: 300px; max-width: 300px; min-height: auto; margin-bottom: 10px; font-size: 20px; margin-top: 10px; flex-grow: 0; flex-shrink: 1;">
+                    <ui:Label tabindex="-1" text="TYPE CREATION" parse-escape-sequences="true" display-tooltip-when-elided="true" class="inputField" style="margin-top: 10px; border-bottom-width: 0; border-bottom-color: rgba(0, 0, 0, 0.49); font-size: 18px; -unity-font-style: bold;" />
+                    <ui:TextField picking-mode="Ignore" label="New Part Type Name" value="MyEnginePartType" name="NewEnginePartTypeName" class="inputField" style="margin-top: 5px;" />
+                    <ui:Button text="Create New Engine Part Type" parse-escape-sequences="true" display-tooltip-when-elided="true" name="CreateNewEnginePartTypeButton" class="saveButton" style="margin-top: 7px;" />
+                    <ui:VisualElement style="flex-grow: 1; border-bottom-width: 5px; border-bottom-color: rgba(0, 0, 0, 0.56); margin-top: 10px; margin-bottom: 5px;" />
+                    <ui:Label tabindex="-1" text="TYPE DELETION" parse-escape-sequences="true" display-tooltip-when-elided="true" class="inputField" style="-unity-font-style: bold; font-size: 18px;" />
+                    <ui:DropdownField label="Part Type" index="-1" choices="System.Collections.Generic.List`1[System.String]" name="DeletePartTypeDropdown" class="inputField" />
+                    <ui:Button text="Delete Selected Part Type" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DeleteEnginePartTypeButton" class="saveButton" style="margin-top: 7px;" />
+                </ui:Foldout>
+                <ui:Foldout text="Engine Part Settings" value="false" class="statsBlock Foldout" style="font-size: 20px; flex-shrink: 1; flex-grow: 0; max-width: 300px; margin-top: 10px; margin-bottom: 10px; align-self: flex-start; flex-direction: column;">
+                    <ui:DropdownField label="Engine Part Type" index="-1" choices="System.Collections.Generic.List`1[System.String]" name="EnginePartTypeField" class="inputField" />
+                    <ui:VisualElement name="PartSettingsHolder" style="flex-grow: 1;">
+                        <uie:ObjectField label="Engine Part SO" name="EnginePartField" class="inputField" />
+                        <uie:IntegerField label="Torque Increase" value="0" name="TorqueIncreaseField" class="inputField" />
+                        <ui:Toggle label="Non-linear boost" name="NonLinearBoostBoolField" class="inputField" />
+                        <uie:CurveField label="Effect Curve" name="EffectCurveField" class="inputField" />
+                        <ui:Toggle label="Change Working RPM" name="ChangeRPMField" class="inputField" />
+                        <uie:IntegerField label="IdleRPMChange" value="0" name="IdleRPMChangeField" class="inputField" />
+                        <uie:IntegerField label="MaxRPMChange" value="0" name="MaxRPMChange" class="inputField" />
+                        <ui:TextField picking-mode="Ignore" label="New Asset Name" name="NewAssetTextField" class="inputField" style="margin-top: 15px;" />
+                        <ui:Button text="Create New Asset" parse-escape-sequences="true" display-tooltip-when-elided="true" name="CreateNewAssetButton" class="saveButton" />
+                    </ui:VisualElement>
+                </ui:Foldout>
+            </ui:VisualElement>
+            <ui:VisualElement name="RightSide" style="flex-grow: 0; flex-direction: column; align-self: flex-start; align-items: auto; justify-content: flex-start; overflow: visible; flex-shrink: 100; margin-top: 0;">
+                <ui:VisualElement style="flex-grow: 0; flex-shrink: 1; width: 250px; height: 150px; align-self: flex-end; -unity-text-outline-width: 0; border-left-color: rgb(92, 190, 5); border-right-color: rgb(92, 190, 5); border-top-color: rgb(92, 190, 5); border-bottom-color: rgb(92, 190, 5); border-bottom-width: 3px; border-left-width: 3px; background-color: rgba(0, 0, 0, 0.26); max-width: 250px; max-height: 150px; min-width: 0; min-height: 0; overflow: hidden; border-top-width: 3px;">
+                    <ui:VisualElement name="Img" style="flex-grow: 0; background-image: url(&apos;project://database/Assets/CustomVehicleController/Editor/Images/NewEnginePartsImage.png?fileID=21300000&amp;guid=a2830a3ca8a05804c8dc4f67e6cd4ffe&amp;type=3#NewEnginePartsImage&apos;); -unity-background-scale-mode: scale-to-fit; flex-shrink: 1; width: 150px; height: 130px; align-self: center; margin-right: 0; justify-content: center; align-items: center; max-width: 150px; max-height: 130px; min-width: 0; min-height: 0;" />
+                </ui:VisualElement>
+                <ui:Foldout text="Engine Part Types In Project" name="PartTypesInProject" value="false" class="Foldout statsBlock" style="font-size: 15px; margin-top: 10px; margin-bottom: 10px; margin-left: 0; margin-right: 10px; flex-direction: column; background-color: rgba(0, 0, 0, 0); border-top-width: 0; border-left-width: 0; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); flex-shrink: 1; flex-grow: 0; align-self: flex-end; width: auto; text-overflow: ellipsis; overflow: hidden;">
+                    <ui:ListView focusable="false" name="EnginePartsIsProjectList" show-foldout-header="false" selection-type="None" virtualization-method="FixedHeight" fixed-item-height="25" show-bound-collection-size="true" reorder-mode="Simple" show-add-remove-footer="false" class="statsBlock" style="background-color: rgba(39, 39, 39, 0.61); font-size: 12px; color: rgb(143, 255, 123); -unity-text-align: middle-left; width: 200px; max-width: 200px; max-height: none; min-height: auto; padding-top: 3px; padding-right: 3px; padding-bottom: 3px; padding-left: 3px; -unity-text-outline-color: rgb(0, 0, 0); -unity-paragraph-spacing: 0; letter-spacing: 5px; margin-bottom: 0; -unity-font-style: bold; border-left-width: 2px; border-left-color: rgba(0, 0, 0, 0.51); border-right-color: rgba(0, 0, 0, 0.51); border-top-color: rgba(0, 0, 0, 0.51); border-bottom-color: rgba(0, 0, 0, 0.51);" />
+                </ui:Foldout>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:ScrollView>
+    <ui:VisualElement style="flex-grow: 1; width: 100%; height: 10px; border-bottom-width: 3px; border-top-width: 3px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); background-color: rgb(13, 190, 22);" />
+    <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1" style="flex-grow: 1; min-width: auto; min-height: auto; height: 50%;">
+        <ui:Foldout text="Engine Parts Container" value="true" class="Foldout" style="width: auto; max-width: none; margin-top: 10px; margin-bottom: 10px; margin-left: 10px; font-size: 20px; flex-grow: 1; flex-direction: column; height: auto; flex-shrink: 1;">
+            <ui:VisualElement style="flex-grow: 1;">
+                <ui:Label tabindex="-1" text="Selected Vehicle Controller:" parse-escape-sequences="true" display-tooltip-when-elided="true" style="font-size: 14px; margin-top: 5px; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;" />
+                <ui:Label tabindex="-1" text="None" parse-escape-sequences="true" display-tooltip-when-elided="true" name="VehicleControllerLable" style="font-size: 16px; color: rgb(255, 0, 0); margin-top: 2px; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;" />
+                <ui:VisualElement name="PartsHolder" style="flex-grow: 1;">
+                    <ui:VisualElement style="flex-grow: 1; border-bottom-width: 5px; border-bottom-color: rgba(0, 0, 0, 0.56); margin-top: 10px; margin-bottom: 5px; margin-right: 3%;" />
+                    <ui:ListView focusable="true" name="EnginePartsContainerListView" show-add-remove-footer="true" fixed-item-height="30" show-border="false" reorderable="true" style="margin-right: 3%; max-height: none; min-height: auto; flex-grow: 1;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:Foldout>
+    </ui:ScrollView>
+    <ui:VisualElement name="ConfirmScreen" focusable="true" style="flex-grow: 1; position: absolute; left: auto; top: auto; background-color: rgba(0, 0, 0, 0.59); width: 100%; height: 50%; color: rgb(255, 0, 0); overflow: visible; justify-content: center; align-items: auto; align-self: auto; display: none;">
+        <ui:VisualElement name="MainWindow" style="flex-grow: 0; width: 400px; height: 200px; position: relative; left: auto; align-self: center; background-color: rgb(64, 64, 64); justify-content: center; align-items: center; top: auto; border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; flex-direction: column;">
+            <ui:Label tabindex="-1" text="ACTION CONFIRMATION" parse-escape-sequences="true" display-tooltip-when-elided="true" style="-unity-font-style: bold; font-size: 16px; color: rgb(255, 94, 94); margin-top: 6px;" />
+            <ui:VisualElement name="ContentWindow" style="flex-grow: 1; width: 90%; height: 70%; flex-shrink: 1; align-self: center; justify-content: center; align-items: auto; flex-direction: row;">
+                <ui:VisualElement style="flex-grow: 0; background-image: url(&apos;project://database/Assets/CustomVehicleController/Editor/Images/warningSign.png?fileID=21300000&amp;guid=791543a4d218a4e4bb980b0569489597&amp;type=3#warningSign&apos;); width: 50px; height: 50px; -unity-background-scale-mode: scale-to-fit; align-self: center; left: auto; flex-shrink: 0;" />
+                <ui:VisualElement style="flex-grow: 1; flex-shrink: 1; align-self: center;">
+                    <ui:Label tabindex="-1" text="You are about to delete EnginePartType at location:" parse-escape-sequences="true" display-tooltip-when-elided="true" name="TypeNameLabel" style="white-space: normal; margin-left: 20px; color: rgb(197, 197, 197); font-size: 13px;" />
+                    <ui:Label tabindex="-1" text="&quot;Assets/CustomVehicleController/VehicleController/VehicleParts/EngineParts/EnginePart&quot;" parse-escape-sequences="true" display-tooltip-when-elided="true" name="FolderPathLabel" style="white-space: normal; margin-left: 20px; font-size: 11px; -unity-font-style: normal; color: rgb(255, 123, 123); margin-top: 10px; margin-bottom: 10px;" />
+                    <ui:Label tabindex="-1" text="This will delete the folder, the part class and all the ScriptableObjects created from it. Continue?" parse-escape-sequences="true" display-tooltip-when-elided="true" style="white-space: normal; margin-left: 20px; color: rgb(197, 197, 197); font-size: 13px;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement style="flex-grow: 1; width: 100%; flex-direction: row; height: 27px;">
+                <ui:VisualElement style="flex-grow: 1; flex-direction: row; align-self: center; justify-content: flex-start; align-items: flex-end;">
+                    <ui:Label tabindex="-1" text="Don&apos;t ask again" parse-escape-sequences="true" display-tooltip-when-elided="true" style="color: rgb(197, 197, 195); font-size: 10px; align-self: center; margin-right: 4px; margin-left: 15px; white-space: nowrap; -unity-text-align: middle-center;" />
+                    <ui:Toggle name="DontAskToggle" style="font-size: 5px; width: 15px; height: 15px; align-self: center; flex-direction: column;" />
+                </ui:VisualElement>
+                <ui:VisualElement style="flex-grow: 1; flex-direction: row; align-self: center; justify-content: flex-end;">
+                    <ui:Button text="Yes" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ConfirmDeleteButton" style="width: 25px; height: 15px; font-size: 10px; color: rgb(41, 188, 0); background-color: rgb(57, 57, 57); -unity-font-style: bold;" />
+                    <ui:Button text="No" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DenyDeleteButton" style="width: 25px; height: 15px; font-size: 10px; color: rgb(188, 101, 0); background-color: rgb(57, 57, 56); -unity-font-style: bold;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
