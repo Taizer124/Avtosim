@@ -10,7 +10,6 @@ public class SceneStarterVR : MonoBehaviour
 {
     [Header("VR Settings")]
     [SerializeField] private string playerTag = "Player";
-    [SerializeField] private float activationDistance = 2f;
 
     [Header("UI References")]
     [SerializeField] private GameObject instructionPanel;
@@ -24,7 +23,6 @@ public class SceneStarterVR : MonoBehaviour
     [SerializeField] private float minLoadTime = 3f;
 
     private bool playerInRange = false;
-    private Transform playerTransform;
     private bool isLoading = false;
 
     // Input System действия
@@ -36,14 +34,18 @@ public class SceneStarterVR : MonoBehaviour
         if (instructionPanel != null) instructionPanel.SetActive(false);
         if (loadingScreen != null) loadingScreen.SetActive(false);
 
-        // Находим игрока по тегу
-        GameObject player = GameObject.FindGameObjectWithTag(playerTag);
-        if (player != null)
-        {
-            playerTransform = player.transform;
-        }
-
         SetupInputActions();
+
+        // Проверяем наличие коллайдера
+        Collider collider = GetComponent<Collider>();
+        if (collider == null)
+        {
+            Debug.LogError("SceneStarterVR: No collider found on this GameObject!");
+        }
+        else if (!collider.isTrigger)
+        {
+            Debug.LogWarning("SceneStarterVR: Collider is not set as trigger! Please enable 'Is Trigger' in the collider component.");
+        }
     }
 
     private void SetupInputActions()
@@ -106,9 +108,7 @@ public class SceneStarterVR : MonoBehaviour
     {
         if (isLoading) return;
 
-        CheckPlayerDistance();
-
-        // Также проверяем клавиатуру для тестирования в редакторе
+        // Проверяем клавиатуру для тестирования в редакторе
         if (playerInRange && (Keyboard.current.spaceKey.wasPressedThisFrame ||
                              Keyboard.current.enterKey.wasPressedThisFrame))
         {
@@ -116,17 +116,25 @@ public class SceneStarterVR : MonoBehaviour
         }
     }
 
-    private void CheckPlayerDistance()
+    // Обработка входа в триггер
+    private void OnTriggerEnter(Collider other)
     {
-        if (playerTransform == null) return;
-
-        float distance = Vector3.Distance(transform.position, playerTransform.position);
-        bool nowInRange = distance <= activationDistance;
-
-        if (nowInRange != playerInRange)
+        if (other.CompareTag(playerTag))
         {
-            playerInRange = nowInRange;
+            playerInRange = true;
             UpdateInstructionUI();
+            Debug.Log("Player entered trigger zone");
+        }
+    }
+
+    // Обработка выхода из триггера
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag(playerTag))
+        {
+            playerInRange = false;
+            UpdateInstructionUI();
+            Debug.Log("Player exited trigger zone");
         }
     }
 
@@ -137,9 +145,9 @@ public class SceneStarterVR : MonoBehaviour
             instructionPanel.SetActive(playerInRange);
         }
 
-        if (instructionText != null && playerInRange)
+        if (instructionText != null)
         {
-            instructionText.text = "Нажми любую кнопку, чтобы начать";
+            instructionText.text = playerInRange ? "Нажми любую кнопку, чтобы начать" : "";
         }
     }
 
@@ -177,7 +185,7 @@ public class SceneStarterVR : MonoBehaviour
                 loadingProgressBar.value = progress;
 
             if (loadingText != null)
-                loadingText.text = $"Loading... {Mathf.RoundToInt(progress * 100)}%";
+                loadingText.text = $"Загрузка... {Mathf.RoundToInt(progress * 100)}%";
 
             // Когда загрузка почти завершена и прошло минимальное время
             if (asyncLoad.progress >= 0.9f && timer >= minLoadTime)
@@ -189,11 +197,42 @@ public class SceneStarterVR : MonoBehaviour
         }
     }
 
-    // Визуализация зоны активации в редакторе
-    private void OnDrawGizmosSelected()
+    // Визуализация триггерной зоны в редакторе
+    private void OnDrawGizmos()
     {
-        Gizmos.color = playerInRange ? Color.green : Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, activationDistance);
+        Collider collider = GetComponent<Collider>();
+        if (collider != null)
+        {
+            Gizmos.color = playerInRange ? new Color(0, 1, 0, 0.3f) : new Color(1, 1, 0, 0.3f);
+
+            if (collider is CapsuleCollider capsuleCollider)
+            {
+                // Рисуем капсулу
+                Vector3 center = transform.TransformPoint(capsuleCollider.center);
+                float radius = capsuleCollider.radius * Mathf.Max(
+                    transform.lossyScale.x,
+                    transform.lossyScale.y,
+                    transform.lossyScale.z
+                );
+                float height = capsuleCollider.height * transform.lossyScale.y;
+
+                // Упрощенная визуализация капсулы как сферы
+                Gizmos.DrawWireSphere(center, radius);
+
+                // Подпись
+                GUIStyle style = new GUIStyle();
+                style.normal.textColor = playerInRange ? Color.green : Color.yellow;
+#if UNITY_EDITOR
+                UnityEditor.Handles.Label(center, "Trigger Zone", style);
+#endif
+            }
+            else
+            {
+                // Для других типов коллайдеров
+                Gizmos.matrix = transform.localToWorldMatrix;
+                Gizmos.DrawCube(Vector3.zero, Vector3.one);
+            }
+        }
     }
 
     // Для отладки - выводим информацию о доступных устройствах

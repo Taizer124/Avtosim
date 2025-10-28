@@ -45,5 +45,4 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  ForcedInductionSO: {fileID: 11400000, guid: 34d5b0c7e22c196499a2957645df5309, type: 2}
-  MaxSpeed: 290
+  MaxSpeed: 320

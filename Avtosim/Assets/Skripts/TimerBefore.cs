@@ -1,12 +1,12 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 public class RaceStartCountdown : MonoBehaviour
 {
     [SerializeField]
     private RaceStartZone _raceStartZone;
     [SerializeField]
-    private Text _countdownText;
+    private TextMeshProUGUI _countdownText;
 
     private void Start()
     {

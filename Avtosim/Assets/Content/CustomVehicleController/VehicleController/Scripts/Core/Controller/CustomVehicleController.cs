@@ -1,12 +1,26 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Reflection;
 
 namespace Assets.VehicleController
 {
+    // Добавляем новый интерфейс для input providers, которые поддерживают механическую коробку
+    public interface IManualTransmissionInputProvider
+    {
+        bool IsManualTransmission();
+        int GetCurrentGear();
+    }
+
+    // Новый интерфейс для установки типа трансмиссии
+    public interface ITransmissionTypeSettable
+    {
+        void SetTransmissionType(bool useSequential);
+    }
+
     [RequireComponent(typeof(CarVisualsEssentials)),
     RequireComponent(typeof(Rigidbody)), DisallowMultipleComponent, AddComponentMenu("CustomVehicleController/Core/Custom Vehicle Controller"),
-    HelpURL("https://distubredone322.gitbook.io/custom-vehicle-controller/")]
+    HelpURL("https://distubredone.io/custom-vehicle-controller/")]
     public class CustomVehicleController : MonoBehaviour
     {
         public bool UsePreset = true;
@@ -17,6 +31,15 @@ namespace Assets.VehicleController
 
         [SerializeField, Separator]
         private EnginePartsContainer _enginePartsContainer;
+
+        // Новое поле для отслеживания типа коробки передач
+        [Header("Transmission Settings")]
+        [SerializeField] private bool _useSequentialShifting = false;
+        public bool UseSequentialShifting
+        {
+            get => _useSequentialShifting;
+            set => _useSequentialShifting = value;
+        }
 
         public EnginePartsContainer GetEnginePartsContainer() => _enginePartsContainer;
 
@@ -141,6 +164,10 @@ namespace Assets.VehicleController
         //or use the input scripts that come with this package
         private IVehicleControllerInputProvider _inputProvider;
 
+        // Кэш для метода SetGear в _partsManager
+        private MethodInfo _setGearMethod;
+        private int _currentManualGear = 0;
+
         private void Awake()
         {
             Initialize();
@@ -181,6 +208,9 @@ namespace Assets.VehicleController
             VehicleControllerInitializer initializer = new();
             (_statsManager, _partsManager) = initializer.InitializeVehicleControllers(_frontAxles, _rearAxles,
                 _steerAxles, _rigidbody, transform, VehiclePartsSetWrapper, _enginePartsContainer.EnginePartsList, _centerOfMass, CurrentCarStats);
+
+            // Пытаемся найти метод SetGear в _partsManager
+            _setGearMethod = _partsManager.GetType().GetMethod("SetGear");
         }
 
         private void Update()
@@ -192,10 +222,59 @@ namespace Assets.VehicleController
 
             _statsManager.ManageStats(_inputProvider.GetGasInput(), _inputProvider.GetBrakeInput(), _inputProvider.GetHandbrakeInput(),
                             _sidewaysSlippingThreshold, _forwardSlippingThreshold, DrivetrainType);
-            _partsManager.ManageTransmissionUpShift(_inputProvider.GetGearUpInput());
-            _partsManager.ManageTransmissionDownShift(_inputProvider.GetGearDownInput());
+
+            // Обрабатываем переключение передач в зависимости от типа коробки
+            if (_inputProvider is IManualTransmissionInputProvider manualInput && manualInput.IsManualTransmission())
+            {
+                int targetGear = manualInput.GetCurrentGear();
+                if (_setGearMethod != null)
+                {
+                    _setGearMethod.Invoke(_partsManager, new object[] { targetGear });
+                    _currentManualGear = targetGear;
+                }
+                else
+                {
+                    // Если метод SetGear не найден, используем альтернативный подход
+                    HandleManualTransmissionFallback(targetGear);
+                }
+            }
+            else
+            {
+                _partsManager.ManageTransmissionUpShift(_inputProvider.GetGearUpInput());
+                _partsManager.ManageTransmissionDownShift(_inputProvider.GetGearDownInput());
+            }
 
             _carVisualsEssentials.HandleWheelVisuals(_inputProvider.GetHorizontalInput(), _steerAxles[0].LeftHalfShaft.WheelController.SteerAngle, _steerAngle, _steerSpeed);
+        }
+
+        private void HandleManualTransmissionFallback(int targetGear)
+        {
+            // Альтернативная реализация для механической коробки, если SetGear недоступен
+            if (targetGear != _currentManualGear)
+            {
+                // Эмулируем переключение через существующие методы
+                if (targetGear > _currentManualGear)
+                {
+                    for (int i = _currentManualGear; i < targetGear; i++)
+                    {
+                        _partsManager.ManageTransmissionUpShift(true);
+                        // Сбрасываем флаг после имитации нажатия
+                        if (i == targetGear - 1)
+                            _partsManager.ManageTransmissionUpShift(false);
+                    }
+                }
+                else if (targetGear < _currentManualGear)
+                {
+                    for (int i = _currentManualGear; i > targetGear; i--)
+                    {
+                        _partsManager.ManageTransmissionDownShift(true);
+                        // Сбрасываем флаг после имитации нажатия
+                        if (i == targetGear + 1)
+                            _partsManager.ManageTransmissionDownShift(false);
+                    }
+                }
+                _currentManualGear = targetGear;
+            }
         }
 
         private void FixedUpdate()
@@ -211,6 +290,69 @@ namespace Assets.VehicleController
         public Transform GetCenterOfMass() => _centerOfMass;
         public CurrentCarStats GetCurrentCarStats() => CurrentCarStats;
         public Rigidbody GetRigidbody() => _rigidbody;
+
+        // Новый метод для получения информации о типе трансмиссии
+        public string GetTransmissionTypeInfo()
+        {
+            if (_inputProvider is IManualTransmissionInputProvider manualInput)
+            {
+                if (manualInput.IsManualTransmission())
+                {
+                    return "Mechanical (H-pattern)";
+                }
+                else
+                {
+                    return "Sequential";
+                }
+            }
+            else
+            {
+                switch (TransmissionType)
+                {
+                    case TransmissionType.Automatic:
+                        return "Automatic";
+                    case TransmissionType.Manual:
+                        return "Manual";
+                    case TransmissionType.Sequential:
+                        return "Sequential";
+                    default:
+                        return TransmissionType.ToString();
+                }
+            }
+        }
+
+        // Новый метод для получения текущей передачи (работает для обоих типов коробок)
+        public int GetCurrentGear()
+        {
+            if (_inputProvider is IManualTransmissionInputProvider manualInput && manualInput.IsManualTransmission())
+            {
+                return manualInput.GetCurrentGear();
+            }
+            else
+            {
+                // Возвращаем текущую передачу из CurrentCarStats или _partsManager
+                return _currentManualGear; // Заглушка - нужно заменить на реальное получение передачи
+            }
+        }
+
+        // Новый метод для проверки типа коробки передач
+        public bool IsManualTransmission()
+        {
+            return _inputProvider is IManualTransmissionInputProvider manualInput &&
+                   manualInput.IsManualTransmission();
+        }
+
+        // Новый метод для смены типа коробки передач
+        public void SetTransmissionType(bool useSequential)
+        {
+            _useSequentialShifting = useSequential;
+
+            // Используем интерфейс вместо конкретного класса
+            if (_inputProvider is ITransmissionTypeSettable transmissionSettable)
+            {
+                transmissionSettable.SetTransmissionType(useSequential);
+            }
+        }
 
         public void SetVehiclePresetSO(VehiclePartsPresetSO newPreset)
         {
@@ -275,7 +417,7 @@ namespace Assets.VehicleController
 
         public void UpdateWheelsRadiusFromMeshes()
         {
-            for(int i = 0; i < _frontAxles.Length; i++)
+            for (int i = 0; i < _frontAxles.Length; i++)
             {
                 _frontAxles[i].LeftHalfShaft.WheelController.UpdateWheelRadiusFromMesh();
                 _frontAxles[i].RightHalfShaft.WheelController.UpdateWheelRadiusFromMesh();
@@ -289,7 +431,7 @@ namespace Assets.VehicleController
 
         public void SetNewEnginePart(CustomEnginePart newPart)
         {
-            for(int i = 0; i < _enginePartsContainer.EnginePartsList.Count; i++)
+            for (int i = 0; i < _enginePartsContainer.EnginePartsList.Count; i++)
             {
                 //if part of the same type is already in the list, swap it
                 if (_enginePartsContainer.EnginePartsList[i].GetType().Name == newPart.GetType().Name)
@@ -300,7 +442,7 @@ namespace Assets.VehicleController
             }
 
             //if the new part is of an unexisting type in the list, add it to the list
-            _enginePartsContainer.EnginePartsList.Add(newPart); 
+            _enginePartsContainer.EnginePartsList.Add(newPart);
         }
 
         public void AddNitroCharge(float amount) => _partsManager.AddNitro(amount);
@@ -362,4 +504,3 @@ namespace Assets.VehicleController
         public VehicleBodySO Body;
     }
 }
-

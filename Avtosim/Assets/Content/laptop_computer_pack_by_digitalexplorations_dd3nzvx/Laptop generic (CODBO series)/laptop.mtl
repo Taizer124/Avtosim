@@ -1,0 +1,6 @@
+newmtl Model001_Material001
+map_Kd omc008-00_BMout.png
+
+newmtl Model001_Material002
+map_Kd monitorface.png
+

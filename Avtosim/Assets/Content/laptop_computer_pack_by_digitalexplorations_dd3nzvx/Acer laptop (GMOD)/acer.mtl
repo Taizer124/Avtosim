@@ -1,0 +1,7 @@
+newmtl Model001_Material001
+map_Kd laptop.png
+map_bump laptop_normal.png
+
+newmtl Model001_Material002
+map_Kd screen.png
+

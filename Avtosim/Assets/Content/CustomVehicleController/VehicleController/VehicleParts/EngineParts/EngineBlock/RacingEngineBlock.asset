@@ -13,16 +13,16 @@ MonoBehaviour:
   m_Name: RacingEngineBlock
   m_EditorClassIdentifier: 
   Name: NewBlock
-  Torque: 250
+  Torque: 350
   NonLinearBoost: 1
   EffectCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 0.0012790388
-      value: 1.3305882
-      inSlope: 0
-      outSlope: 0
+      time: -0.0083351135
+      value: 0.34197998
+      inSlope: 2
+      outSlope: 2
       tangentMode: 0
       weightedMode: 0
       inWeight: 0

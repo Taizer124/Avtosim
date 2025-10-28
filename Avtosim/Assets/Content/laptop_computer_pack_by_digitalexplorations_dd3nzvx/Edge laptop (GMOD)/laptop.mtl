@@ -1,0 +1,9 @@
+newmtl Model001_Material001
+map_Kd basetext.png
+
+newmtl Model001_Material002
+map_Kd lcd.png
+
+newmtl Model001_Material003
+map_Kd screen.png
+

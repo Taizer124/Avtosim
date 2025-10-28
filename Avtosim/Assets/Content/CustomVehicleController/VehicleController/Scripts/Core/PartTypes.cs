@@ -11,7 +11,8 @@ namespace Assets.VehicleController
     public enum TransmissionType
     {
         Automatic = 0,
-        Manual = 1
+        Manual = 1,
+        Sequential = 2
     }
 
     public enum ForcedInductionType

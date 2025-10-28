@@ -7,8 +7,14 @@ namespace Assets.VehicleController
 {
     public class DemoManager : MonoBehaviour
     {
+        [Header("Wheel Input")]
         [SerializeField]
         private CustomVehicleController _vehicleController;
+
+        [Header("Wheel Input Provider")]
+        [SerializeField]
+        private MonoBehaviour _wheelInputProvider; // Универсальная ссылка на любой input provider
+
         private VehicleEngineSoundManager _engineSoundManager;
 
         [SerializeField]
@@ -40,7 +46,6 @@ namespace Assets.VehicleController
         [SerializeField]
         private GameObject _currentPartsDynamicMenu;
 
-
         [SerializeField, Space]
         private Text _currentEngine;
         [SerializeField]
@@ -57,7 +62,6 @@ namespace Assets.VehicleController
         private Text _currentBody;
         [SerializeField]
         private Text _currentFI;
-
 
         [SerializeField, Space]
         private Text _transmissionType;
@@ -98,6 +102,19 @@ namespace Assets.VehicleController
 
         private int[] _partsIdArray;
 
+        // Флаги для отслеживания нажатий кнопок руля через рефлексию
+        private bool _returnButtonPressed = false;
+        private bool _northButtonPressed = false;
+        private bool _southButtonPressed = false;
+        private bool _eastButtonPressed = false;
+
+        // Кэш для методов рефлексии
+        private System.Type _wheelInputType;
+        private System.Reflection.PropertyInfo _returnButtonProp;
+        private System.Reflection.PropertyInfo _northButtonProp;
+        private System.Reflection.PropertyInfo _southButtonProp;
+        private System.Reflection.PropertyInfo _eastButtonProp;
+
         private void Start()
         {
             _engineSoundManager = _vehicleController.GetComponent<VehicleEngineSoundManager>();
@@ -107,9 +124,7 @@ namespace Assets.VehicleController
             _cameraNameArray[1] = "Hood";
             _cameraNameArray[2] = "Top down";
 
-
             _partsIdArray = new int[8];
-
 
             _currentPresetId = -1;
             _vehicleController.UsePreset = false;
@@ -126,10 +141,61 @@ namespace Assets.VehicleController
             UpdatePartsMenu();
 
             _audioMixer.SetFloat("AudioVolume", Mathf.Log(_currentVolume) * 20);
+
+            // Инициализация рефлексии для работы с wheel input
+            InitializeWheelInputReflection();
         }
+
         private void OnDestroy()
         {
             VehiclePartsSetWrapper.OnAnyPresetChanged -= VehiclePartsSetWrapper_OnAnyPresetChanged;
+        }
+
+        private void InitializeWheelInputReflection()
+        {
+            if (_wheelInputProvider == null)
+            {
+                Debug.LogWarning("Wheel Input Provider not assigned in DemoManager");
+                return;
+            }
+
+            _wheelInputType = _wheelInputProvider.GetType();
+
+            // Пытаемся найти свойства кнопок через рефлексию
+            _returnButtonProp = _wheelInputType.GetProperty("Return");
+            _northButtonProp = _wheelInputType.GetProperty("NorthButton");
+            _southButtonProp = _wheelInputType.GetProperty("SouthButton");
+            _eastButtonProp = _wheelInputType.GetProperty("EastButton");
+
+            if (_returnButtonProp == null)
+            {
+                Debug.LogWarning("Return property not found in wheel input provider");
+            }
+        }
+
+        private void UpdateWheelButtonStates()
+        {
+            if (_wheelInputProvider == null) return;
+
+            // Используем рефлексию для получения состояний кнопок
+            try
+            {
+                if (_returnButtonProp != null)
+                    _returnButtonPressed = (bool)_returnButtonProp.GetValue(_wheelInputProvider);
+
+                if (_northButtonProp != null)
+                    _northButtonPressed = (bool)_northButtonProp.GetValue(_wheelInputProvider);
+
+                if (_southButtonProp != null)
+                    _southButtonPressed = (bool)_southButtonProp.GetValue(_wheelInputProvider);
+
+                if (_eastButtonProp != null)
+                    _eastButtonPressed = (bool)_eastButtonProp.GetValue(_wheelInputProvider);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"Error reading wheel button states: {e.Message}");
+            }
         }
 
         private void VehiclePartsSetWrapper_OnAnyPresetChanged()
@@ -184,29 +250,37 @@ namespace Assets.VehicleController
             ChangeEnginePart();
             ChangeFI();
 
-            if (Input.GetKeyDown(KeyCode.R))
+            // Обновляем состояния кнопок руля
+            UpdateWheelButtonStates();
+
+            // ИСПРАВЛЕННЫЕ УСЛОВИЯ - правильное соответствие кнопок:
+            if (Input.GetKeyDown(KeyCode.R) || _returnButtonPressed)
             {
-                SceneManager.LoadScene("CustomVehicleControllerDemoScene");
+                SceneManager.LoadScene("mcp_day");
+                _returnButtonPressed = false; // Сброс флага после использования
             }
 
-            if (Input.GetKeyDown(KeyCode.T))
+            if (Input.GetKeyDown(KeyCode.T) || _northButtonPressed)
             {
                 SwapTransmissionType();
+                _northButtonPressed = false; // Сброс флага после использования
             }
 
-            if (Input.GetKeyDown(KeyCode.Y))
+            if (Input.GetKeyDown(KeyCode.Y) || _southButtonPressed)
             {
                 SwapPreset();
+                _southButtonPressed = false; // Сброс флага после использования
+            }
+
+            if (Input.GetKeyDown(KeyCode.U) || _eastButtonPressed)
+            {
+                SwapDrivetrainType();
+                _eastButtonPressed = false; // Сброс флага после использования
             }
 
             if (Input.GetKeyDown(KeyCode.V))
             {
                 ChangeCamera();
-            }
-
-            if (Input.GetKeyDown(KeyCode.U))
-            {
-                SwapDrivetrainType();
             }
 
             OpenCloseMenus(_vehicleControlsMenu, KeyCode.F1, _demoControlsMenu);
@@ -219,7 +293,7 @@ namespace Assets.VehicleController
             OpenCloseMenus(_dynamicUIParent, KeyCode.F9);
             HandlePartsMenu();
 
-            if(Input.GetKeyDown(KeyCode.Escape))
+            if (Input.GetKeyDown(KeyCode.Escape))
             {
                 Application.Quit();
             }
