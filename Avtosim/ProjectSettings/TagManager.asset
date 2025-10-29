@@ -10,6 +10,7 @@ TagManager:
   - DrivetrainType
   - PresetType
   - RacerProgress
+  - FinishTimer
   layers:
   - Default
   - TransparentFX

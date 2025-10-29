@@ -1732,10 +1732,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sourceText: {fileID: 0}
   targetTMP: {fileID: 8261188787818569774}
+  targetTM: {fileID: 0}
   sourceTextTag: DrivetrainType
   targetTMPTag: 
+  targetTMTag: 
   updateContinuously: 1
   updateInterval: 0.2
+  updateBothTargets: 1
 --- !u!1 &980334879762075743
 GameObject:
   m_ObjectHideFlags: 0
@@ -3037,14 +3040,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8458572907880854701}
-  - component: {fileID: 986436641201031029}
   m_Layer: 0
   m_Name: UI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &8458572907880854701
 Transform:
   m_ObjectHideFlags: 0
@@ -3062,20 +3064,6 @@ Transform:
   - {fileID: 8025738358308326634}
   m_Father: {fileID: 8618631643456075300}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &986436641201031029
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2045520134617119271}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0dc4f1af8d526d948921f88bedd77044, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _raceStartZone: {fileID: 0}
-  _countdownText: {fileID: 4484404403369270961}
 --- !u!1 &2171498270612118484
 GameObject:
   m_ObjectHideFlags: 0
@@ -3717,7 +3705,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &8732781598587504873
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4431,10 +4419,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sourceText: {fileID: 0}
   targetTMP: {fileID: 4423037642022004171}
+  targetTM: {fileID: 0}
   sourceTextTag: PresetType
   targetTMPTag: 
+  targetTMTag: 
   updateContinuously: 1
   updateInterval: 0.2
+  updateBothTargets: 1
 --- !u!1 &3102725151887333478
 GameObject:
   m_ObjectHideFlags: 0
@@ -6232,7 +6223,7 @@ GameObject:
   - component: {fileID: 4484404403369270961}
   m_Layer: 5
   m_Name: Text (TMP)
-  m_TagString: Untagged
+  m_TagString: FinishTimer
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -12340,10 +12331,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sourceText: {fileID: 0}
   targetTMP: {fileID: 6976332538279987196}
+  targetTM: {fileID: 0}
   sourceTextTag: TransType
   targetTMPTag: 
+  targetTMTag: 
   updateContinuously: 1
   updateInterval: 0.2
+  updateBothTargets: 1
 --- !u!1 &7376107589821940550
 GameObject:
   m_ObjectHideFlags: 0

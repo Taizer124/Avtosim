@@ -184,7 +184,7 @@ public class CarTelemetryHandler : MonoBehaviour
             UpdateAngles();
             UpdateVelocity();
 
-            Debug.Log(_telemetryDataData.ToString());
+            //Debug.Log(_telemetryDataData.ToString());
 
             yield return new WaitForSeconds(WAIT_TIME);
         }
