@@ -133,6 +133,7 @@ GameObject:
   m_IsActive: 1
 --- !u!114 &323282591
 MonoBehaviour:
+  m_SerializedVersion: 1
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
