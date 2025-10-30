@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Audio;
+using static UnityEngine.XR.Interaction.Toolkit.Inputs.Haptics.HapticsUtility;
 
 public class MenuToggle : MonoBehaviour
 {
@@ -8,6 +9,8 @@ public class MenuToggle : MonoBehaviour
     [SerializeField] private bool startHidden = true; // Скрыть меню при старте
     [SerializeField] private MenuController1 MenuController;
     [SerializeField] private MenuController1 Gamemanager;
+    [SerializeField] private GameObject controller1;
+    [SerializeField] private GameObject controller2;
     //[SerializeField] private FirstPersonLook firstPersonLook;
 
     [Header("Audio Settings")]
@@ -39,7 +42,7 @@ public class MenuToggle : MonoBehaviour
     private void Update()
     {
         // Проверяем нажатие Esc, но только если окно проигрыша не активно
-        if (Input.GetKeyDown(KeyCode.Escape) && !IsLoseWindowActive())
+        if (Input.GetKeyDown(KeyCode.Escape) /*&& !IsLoseWindowActive()*/)
         {
             ToggleMenu();
         }
@@ -130,15 +133,15 @@ public class MenuToggle : MonoBehaviour
     // Разблокировать курсор (для меню)
     private void UnlockCursor()
     {
-        Cursor.lockState = CursorLockMode.None; // Курсор свободен
-        Cursor.visible = true; // Курсор виден
+        controller1.SetActive(true);
+        controller2.SetActive(true);
     }
 
     // Заблокировать курсор (для игры)
     private void LockCursor()
     {
-        Cursor.lockState = CursorLockMode.Locked; // Курсор заблокирован в центре
-        Cursor.visible = false; // Курсор не виден
+        controller1.SetActive(false);
+        controller2.SetActive(false);
     }
 
     // Метод для принудительной паузы аудио (можно вызвать из других скриптов)
@@ -165,11 +168,6 @@ public class MenuToggle : MonoBehaviour
         return savedMasterVolume;
     }
 
-    // Метод для принудительной блокировки курсора (например, из UI кнопки)
-    public void ForceLockCursor()
-    {
-        LockCursor();
-    }
 
     private void OnDestroy()
     {
@@ -181,17 +179,17 @@ public class MenuToggle : MonoBehaviour
     }
 
     // Метод для проверки активности окна проигрыша
-    private bool IsLoseWindowActive()
-    {
-        // Ищем GameObject с тегом "LoseWindow"
-        GameObject loseWindow = GameObject.FindGameObjectWithTag("LoseWindow");
+    //private bool IsLoseWindowActive()
+    //{
+    //    // Ищем GameObject с тегом "LoseWindow"
+    //    GameObject loseWindow = GameObject.FindGameObjectWithTag("LoseWindow");
 
-        if (loseWindow != null)
-        {
-            // Проверяем активен ли GameObject в иерархии
-            return loseWindow.activeInHierarchy;
-        }
+    //    if (loseWindow != null)
+    //    {
+    //        // Проверяем активен ли GameObject в иерархии
+    //        return loseWindow.activeInHierarchy;
+    //    }
 
-        return false;
-    }
+    //    return false;
+    //}
 }

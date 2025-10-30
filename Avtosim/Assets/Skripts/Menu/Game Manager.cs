@@ -16,18 +16,9 @@ public class MenuController1 : MonoBehaviour
     public void PlayEasyGame()
     {
         Time.timeScale = 1;
-        SceneManager.LoadScene("PlayableLocation");
+        SceneManager.LoadScene("mcp_day");
     }
-    public void PlayNormalGame()
-    {
-        Time.timeScale = 1;
-        SceneManager.LoadScene("PlayableNormalScene");
-    }
-    public void PlayHardGame()
-    {
-        Time.timeScale = 1;
-        SceneManager.LoadScene("PlayableHardScene");
-    }
+    
     public void OpenMainMenu()
     {
         Time.timeScale = 1;

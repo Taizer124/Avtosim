@@ -1,20 +1,27 @@
+using Assets.VehicleController;
 using System.Collections;
-using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.Events;
 using TMPro;
+using UnityEngine;
+using UnityEngine.Events;
 
 public class RaceFinishZone : MonoBehaviour
 {
     [Header("Timer Settings")]
     [Min(0)]
-    public float TimerDuration = 10f;
+    public float TimerDuration = 5f;
     private float _currentTimerTime;
     private TextMeshProUGUI _timerText;
+    private GameObject _timerObject;
 
     [Header("Objects to Manage")]
     public List<GameObject> objectsToEnable = new List<GameObject>();
     public List<GameObject> objectsToDisable = new List<GameObject>();
+    [SerializeField] private RaceSpawner _raceSpawner;
+
+    [Header("Old Vehicle Settings")]
+    [SerializeField] private GameObject _oldVehicle; // Ссылка на старую машину
+    [SerializeField] private bool _enableOldVehicleOnFinish = true;
 
     [Header("Zone Settings")]
     public bool requirePlayerTag = true;
@@ -36,23 +43,39 @@ public class RaceFinishZone : MonoBehaviour
     {
         // Автоматически находим таймер по тегу
         FindTimerByTag();
+
+        // Автоматически находим RaceSpawner если не назначен
+        if (_raceSpawner == null)
+        {
+            _raceSpawner = FindAnyObjectByType<RaceSpawner>();
+        }
+
+        // Автоматически находим старую машину по тегу если не назначена
+        if (_oldVehicle == null)
+        {
+            GameObject oldVehicleObj = GameObject.FindGameObjectWithTag("OldVehicle");
+            if (oldVehicleObj != null)
+            {
+                _oldVehicle = oldVehicleObj;
+            }
+        }
     }
 
     private void FindTimerByTag()
     {
-        GameObject timerObject = GameObject.FindGameObjectWithTag("FinishTimer");
-        if (timerObject != null)
+        _timerObject = GameObject.FindGameObjectWithTag("FinishTimer");
+        if (_timerObject != null)
         {
-            _timerText = timerObject.GetComponent<TextMeshProUGUI>();
+            _timerText = _timerObject.GetComponent<TextMeshProUGUI>();
             if (_timerText != null)
             {
-                Debug.Log($"Timer found by tag 'FinishTimer': {timerObject.name}");
-                // Скрываем таймер до старта
-                _timerText.gameObject.SetActive(false);
+                Debug.Log($"Timer found by tag 'FinishTimer': {_timerObject.name}");
+                // Отключаем компонент TMPro до старта
+                _timerText.enabled = false;
             }
             else
             {
-                Debug.LogWarning($"Object with tag 'FinishTimer' found but no TextMeshProUGUI component: {timerObject.name}");
+                Debug.LogWarning($"Object with tag 'FinishTimer' found but no TextMeshProUGUI component: {_timerObject.name}");
             }
         }
         else
@@ -95,10 +118,10 @@ public class RaceFinishZone : MonoBehaviour
         }
         _isTimerRunning = false;
 
-        // Скрываем таймер
+        // Отключаем компонент TMPro
         if (_timerText != null)
         {
-            _timerText.gameObject.SetActive(false);
+            _timerText.enabled = false;
         }
     }
 
@@ -107,10 +130,10 @@ public class RaceFinishZone : MonoBehaviour
         _isTimerRunning = true;
         _currentTimerTime = TimerDuration;
 
-        // Показываем UI таймер
+        // Включаем компонент TMPro
         if (_timerText != null)
         {
-            _timerText.gameObject.SetActive(true);
+            _timerText.enabled = true;
         }
 
         // Запуск событий
@@ -135,10 +158,10 @@ public class RaceFinishZone : MonoBehaviour
         _isTimerRunning = false;
         _timerCoroutine = null;
 
-        // Скрываем таймер после завершения
+        // Отключаем компонент TMPro после завершения
         if (_timerText != null)
         {
-            _timerText.gameObject.SetActive(false);
+            _timerText.enabled = false;
         }
     }
 
@@ -146,17 +169,31 @@ public class RaceFinishZone : MonoBehaviour
     {
         if (_timerText != null)
         {
-            // Форматируем время: 00:00
-            int minutes = Mathf.FloorToInt(_currentTimerTime / 60f);
-            int seconds = Mathf.FloorToInt(_currentTimerTime % 60f);
-            _timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+            // Обратный отсчет одной цифрой (5, 4, 3, 2, 1)
+            int displayNumber = Mathf.CeilToInt(_currentTimerTime);
 
-            // Меняем цвет при малом времени (опционально)
-            if (_currentTimerTime <= 5f)
+            // Показываем только целые числа от 1 до TimerDuration
+            if (displayNumber >= 1 && displayNumber <= TimerDuration)
+            {
+                _timerText.text = displayNumber.ToString();
+            }
+            else if (_currentTimerTime > 0 && _currentTimerTime < 1)
+            {
+                // Последняя секунда - показываем 1
+                _timerText.text = "1";
+            }
+            else
+            {
+                // Время вышло или еще не начался обратный отсчет
+                _timerText.text = "";
+            }
+
+            // Меняем цвет при малом времени
+            if (_currentTimerTime <= 3f)
             {
                 _timerText.color = Color.red;
             }
-            else if (_currentTimerTime <= 10f)
+            else if (_currentTimerTime <= 5f)
             {
                 _timerText.color = Color.yellow;
             }
@@ -164,11 +201,39 @@ public class RaceFinishZone : MonoBehaviour
             {
                 _timerText.color = Color.white;
             }
+
+            // Добавляем анимацию для последних секунд (опционально)
+            if (_currentTimerTime <= 3f)
+            {
+                // Можно добавить пульсацию или другую анимацию
+                float scale = 1f + Mathf.PingPong(Time.time * 2f, 0.3f);
+                _timerText.transform.localScale = Vector3.one * scale;
+            }
+            else
+            {
+                _timerText.transform.localScale = Vector3.one;
+            }
         }
     }
 
     private void ManageObjects()
     {
+        // Удаляем транспортные средства при завершении таймера
+        if (_raceSpawner != null)
+        {
+            // Удаляем всех ботов
+            //_raceSpawner.DestroyBotVehicles();
+
+            // Или удаляем всех включая игрока
+            _raceSpawner.DestroyAllVehicles();
+        }
+
+        // Включаем старую машину
+        if (_enableOldVehicleOnFinish)
+        {
+            EnableOldVehicle();
+        }
+
         // Включаем необходимые объекты
         foreach (GameObject obj in objectsToEnable)
         {
@@ -187,11 +252,74 @@ public class RaceFinishZone : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    // МЕТОД ДЛЯ ВКЛЮЧЕНИЯ СТАРОЙ МАШИНЫ
+    public void EnableOldVehicle()
+    {
+        if (_oldVehicle != null)
+        {
+            // Включаем GameObject
+            _oldVehicle.SetActive(true);
+
+            // Реинициализируем систему ввода
+            AllInOneInputProvider inputProvider = _oldVehicle.GetComponent<AllInOneInputProvider>();
+            if (inputProvider != null)
+            {
+                inputProvider.ReinitializeInputSystem();
+                inputProvider.EnableInput(true); // Включаем ввод
+                Debug.Log("Old vehicle input system reinitialized and enabled");
+            }
+            else
+            {
+                Debug.LogWarning("No AllInOneInputProvider found on old vehicle");
+            }
+
+            Debug.Log("Old vehicle enabled: " + _oldVehicle.name);
+        }
+        else
+        {
+            Debug.LogWarning("Old vehicle reference is null");
+        }
+    }
+
+    // Метод для принудительного включения старой машины из других скриптов
+    public void ForceEnableOldVehicle()
+    {
+        EnableOldVehicle();
+    }
+
+    // Метод для установки ссылки на старую машину
+    public void SetOldVehicle(GameObject oldVehicle)
+    {
+        _oldVehicle = oldVehicle;
+    }
+
+    // Метод для поиска старой машины по тегу
+    [ContextMenu("Find Old Vehicle by Tag")]
+    public void FindOldVehicleByTag()
+    {
+        GameObject oldVehicleObj = GameObject.FindGameObjectWithTag("OldVehicle");
+        if (oldVehicleObj != null)
+        {
+            _oldVehicle = oldVehicleObj;
+            Debug.Log($"Found old vehicle by tag 'OldVehicle': {_oldVehicle.name}");
+        }
+        else
+        {
+            Debug.LogWarning("No object found with tag 'OldVehicle'");
+        }
+    }
+
     public void ResetTimer()
     {
         StopTimer();
         _currentTimerTime = TimerDuration;
         _hasPlayerEntered = false;
+
+        // Сбрасываем масштаб текста
+        if (_timerText != null)
+        {
+            _timerText.transform.localScale = Vector3.one;
+        }
 
         // Включаем зону обратно если она была выключена
         gameObject.SetActive(true);
@@ -219,6 +347,33 @@ public class RaceFinishZone : MonoBehaviour
     public void FindTimerManually()
     {
         FindTimerByTag();
+    }
+
+    // Метод для принудительного включения/отключения таймера
+    public void EnableTimerDisplay(bool enable)
+    {
+        if (_timerText != null)
+        {
+            _timerText.enabled = enable;
+        }
+    }
+
+    // Метод для удаления только ботов
+    public void RemoveBotsOnly()
+    {
+        if (_raceSpawner != null)
+        {
+            _raceSpawner.DestroyBotVehicles();
+        }
+    }
+
+    // Метод для удаления всех транспортных средств
+    public void RemoveAllVehicles()
+    {
+        if (_raceSpawner != null)
+        {
+            _raceSpawner.DestroyAllVehicles();
+        }
     }
 
     private void OnValidate()

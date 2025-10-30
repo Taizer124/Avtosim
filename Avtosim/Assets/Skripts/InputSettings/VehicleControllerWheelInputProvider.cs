@@ -101,13 +101,13 @@ namespace Assets.VehicleController
             // Обрабатываем переключения передач в зависимости от режима
             ProcessGearChanges();
 
-            // Для отладки - выводим значения каждую секунду
-            if (Time.frameCount % 60 == 0)
-            {
-                Debug.Log($"Wheel Input - Gas: {_gasInput}, Brake: {_brakeInput}, Steering: {_steeringInput}, " +
-                         $"GearUp: {_gearUpInput}, GearDown: {_gearDownInput}, Nitro: {_nitroInput}, " +
-                         $"Current Gear: {_currentGear}");
-            }
+            //// Для отладки - выводим значения каждую секунду
+            //if (Time.frameCount % 60 == 0)
+            //{
+            //    Debug.Log($"Wheel Input - Gas: {_gasInput}, Brake: {_brakeInput}, Steering: {_steeringInput}, " +
+            //             $"GearUp: {_gearUpInput}, GearDown: {_gearDownInput}, Nitro: {_nitroInput}, " +
+            //             $"Current Gear: {_currentGear}");
+            //}
         }
 
         private void ProcessGearChanges()

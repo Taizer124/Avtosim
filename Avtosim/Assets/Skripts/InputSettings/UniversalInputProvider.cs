@@ -24,6 +24,7 @@ namespace Assets.VehicleController
         [SerializeField] private bool _forceGasInputDuringNitrous = false;
 
         private PlayerVehicleInputActions _inputActions;
+        private bool _isInitialized = false;
 
         // Общие переменные ввода
         private float _gasInput;
@@ -42,12 +43,17 @@ namespace Assets.VehicleController
 
         private void Awake()
         {
-            _inputActions = new PlayerVehicleInputActions();
-            _inputActions.Enable();
+            InitializeInputSystem();
         }
 
         private void OnEnable()
         {
+            // Если система не инициализирована, инициализируем
+            if (!_isInitialized)
+            {
+                InitializeInputSystem();
+            }
+
             if (_wheelInput != null)
             {
                 SubscribeToWheelEvents();
@@ -60,7 +66,46 @@ namespace Assets.VehicleController
             {
                 UnsubscribeFromWheelEvents();
             }
+
+            // НЕ отключаем InputSystem полностью, только если объект уничтожается
+            if (!gameObject.activeInHierarchy)
+            {
+                _inputActions?.Disable();
+            }
+        }
+
+        private void OnDestroy()
+        {
+            // Полностью отключаем InputSystem только при уничтожении объекта
             _inputActions?.Disable();
+            _inputActions = null;
+            _isInitialized = false;
+        }
+
+        // Публичный метод для принудительной реинициализации из других скриптов
+        public void ReinitializeInputSystem()
+        {
+            // Отключаем старую систему
+            _inputActions?.Disable();
+            _inputActions = null;
+            _isInitialized = false;
+
+            // Инициализируем заново
+            InitializeInputSystem();
+
+            Debug.Log("Input system reinitialized for: " + gameObject.name);
+        }
+
+        // Основной метод инициализации
+        private void InitializeInputSystem()
+        {
+            if (_isInitialized) return;
+
+            _inputActions = new PlayerVehicleInputActions();
+            _inputActions.Enable();
+            _isInitialized = true;
+
+            Debug.Log("Input system initialized for: " + gameObject.name);
         }
 
         private void Update()
@@ -91,6 +136,8 @@ namespace Assets.VehicleController
         #region --- Input Updates ---
         private void UpdateInputSystem()
         {
+            if (!_isInitialized || _inputActions == null) return;
+
             _gasInput = _inputActions.Vehicle.GasInput.ReadValue<float>();
             _brakeInput = _inputActions.Vehicle.BrakeInput.ReadValue<float>();
             _steeringInput = _inputActions.Vehicle.HorizontalInput.ReadValue<float>();
@@ -115,6 +162,8 @@ namespace Assets.VehicleController
         #region --- Wheel Event Subscriptions ---
         private void SubscribeToWheelEvents()
         {
+            if (_wheelInput == null) return;
+
             _wheelInput.ThrottleCallback += OnThrottle;
             _wheelInput.BrakeCallback += OnBrake;
             _wheelInput.SteeringCallback += OnSteering;
@@ -135,6 +184,8 @@ namespace Assets.VehicleController
 
         private void UnsubscribeFromWheelEvents()
         {
+            if (_wheelInput == null) return;
+
             _wheelInput.ThrottleCallback -= OnThrottle;
             _wheelInput.BrakeCallback -= OnBrake;
             _wheelInput.SteeringCallback -= OnSteering;
@@ -272,6 +323,16 @@ namespace Assets.VehicleController
 
         public void SetInputMode(InputMode mode) => _currentMode = mode;
         public InputMode GetCurrentInputMode() => _currentMode;
+
+        // Новый метод для проверки инициализации
+        public bool IsInputSystemInitialized() => _isInitialized;
         #endregion
+
+        // Контекстное меню для тестирования
+        [ContextMenu("Reinitialize Input System")]
+        private void ReinitializeFromContextMenu()
+        {
+            ReinitializeInputSystem();
+        }
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.VehicleController
@@ -207,6 +208,74 @@ namespace Assets.VehicleController
         {
             OnAwake,
             AfterExternalCall,
+        }
+        // В классе RaceSpawner добавьте эти методы:
+
+        // Получить все созданные транспортные средства
+        public GameObject[] GetSpawnedVehicles()
+        {
+            return _spawnedVehicles;
+        }
+
+        // Получить только игрока
+        public GameObject GetPlayerVehicle()
+        {
+            if (_spawnedVehicles != null && SpawnPlayer && _playerStartIndex < _spawnedVehicles.Length)
+            {
+                return _spawnedVehicles[_playerStartIndex];
+            }
+            return null;
+        }
+
+        // Получить только ботов
+        public GameObject[] GetBotVehicles()
+        {
+            if (_spawnedVehicles == null) return new GameObject[0];
+
+            List<GameObject> bots = new List<GameObject>();
+            for (int i = 0; i < _spawnedVehicles.Length; i++)
+            {
+                if (SpawnPlayer && i == _playerStartIndex) continue;
+                if (_spawnedVehicles[i] != null)
+                    bots.Add(_spawnedVehicles[i]);
+            }
+            return bots.ToArray();
+        }
+
+        // Удалить все созданные транспортные средства
+        public void DestroyAllVehicles()
+        {
+            if (_spawnedVehicles == null) return;
+
+            foreach (GameObject vehicle in _spawnedVehicles)
+            {
+                if (vehicle != null)
+                    Destroy(vehicle);
+            }
+            _spawnedVehicles = null;
+        }
+
+        // Удалить только ботов
+        public void DestroyBotVehicles()
+        {
+            if (_spawnedVehicles == null) return;
+
+            for (int i = 0; i < _spawnedVehicles.Length; i++)
+            {
+                if (SpawnPlayer && i == _playerStartIndex) continue;
+                if (_spawnedVehicles[i] != null)
+                    Destroy(_spawnedVehicles[i]);
+            }
+        }
+
+        // Удалить только игрока
+        public void DestroyPlayerVehicle()
+        {
+            if (_spawnedVehicles != null && SpawnPlayer && _playerStartIndex < _spawnedVehicles.Length)
+            {
+                if (_spawnedVehicles[_playerStartIndex] != null)
+                    Destroy(_spawnedVehicles[_playerStartIndex]);
+            }
         }
     }
 }

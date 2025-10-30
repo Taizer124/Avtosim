@@ -29,7 +29,6 @@ public class SimpleSpeedDisplay : MonoBehaviour
     [SerializeField] private float _maxSpeed = 200f;
 
     [Header("Display Settings")]
-    [SerializeField] private bool _showKMH = true;
     [SerializeField] private bool _roundToInteger = true;
     [SerializeField] private bool _showGear = true;
     [SerializeField] private bool _showRPM = true;

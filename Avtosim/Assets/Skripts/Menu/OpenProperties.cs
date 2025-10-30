@@ -7,22 +7,12 @@ public class MenuManager : MonoBehaviour
     [Header("Panels")]
     [SerializeField] private GameObject mainMenuPanel = null;
     [SerializeField] private GameObject settingsPanel = null;
-    [SerializeField] private GameObject soundPanel = null;
-    [SerializeField] private GameObject DifficultyPanel = null;
-    [SerializeField] private GameObject SensetivetyPanel = null;
 
     [Header("Buttons")]
-    [SerializeField] private Button playButton = null;
     [SerializeField] private Button settingsButton = null;
-    [SerializeField] private Button soundButton = null;
-
-    [SerializeField] private Button SensetivetyButton = null;
 
     [Header("Back Buttons")]
     [SerializeField] private Button backButtonSettings = null;
-    [SerializeField] private Button backButtonsound = null;
-    [SerializeField] private Button backButtondifficulty = null;
-    [SerializeField] private Button backButtonSensetivety = null;
 
     private Stack<GameObject> panelHistory = new Stack<GameObject>();
 
@@ -31,57 +21,52 @@ public class MenuManager : MonoBehaviour
         // Главное меню всегда активно изначально
         mainMenuPanel.SetActive(true);
         settingsPanel.SetActive(false);
-        soundPanel.SetActive(false);
-        SensetivetyPanel.SetActive(false);
-        DifficultyPanel.SetActive(false);
 
-        // Назначаем переходы на кнопки
+        // Назначаем переходы на кнопки главного меню
         settingsButton.onClick.AddListener(() => OpenPanel(settingsPanel));
-        soundButton.onClick.AddListener(() => OpenPanel(soundPanel));
-        SensetivetyButton.onClick.AddListener(() => OpenPanel(SensetivetyPanel));
-        playButton.onClick.AddListener(() => OpenPanel(DifficultyPanel));
 
         // Назначаем обработчики на backButton
         backButtonSettings.onClick.AddListener(GoBack);
-        backButtonsound.onClick.AddListener(GoBack);
-        backButtonSensetivety.onClick.AddListener(GoBack);
+
+        // Добавляем главное меню в историю как начальную точку
+        panelHistory.Push(mainMenuPanel);
     }
 
     private void OpenPanel(GameObject targetPanel)
     {
-        // Добавляем текущую активную панель в историю (кроме главного меню)
-        if (GetActivePanel() != mainMenuPanel)
-        {
-            panelHistory.Push(GetActivePanel());
-        }
+        // Добавляем текущую активную панель в историю
+        panelHistory.Push(GetActivePanel());
 
         // Показываем целевую панель и скрываем остальные
         ShowOnlyPanel(targetPanel);
+    }
 
-    }
-    
-    public void GoToMain()
-    {
-        mainMenuPanel.SetActive(true);
-        settingsPanel.SetActive(false);
-        soundPanel.SetActive(false);
-        SensetivetyPanel.SetActive(false);
-        DifficultyPanel.SetActive(false);
-    }
     private void GoBack()
     {
-        if (panelHistory.Count > 0)
+        if (panelHistory.Count > 1) // Больше 1, потому что главное меню всегда там
         {
+            // Убираем текущую панель из истории
+            panelHistory.Pop();
+
             // Возвращаемся к предыдущей панели
-            GameObject previousPanel = panelHistory.Pop();
+            GameObject previousPanel = panelHistory.Peek();
             ShowOnlyPanel(previousPanel);
         }
         else
         {
-            // Если история пуста, возвращаемся в главное меню
+            // Если в истории только главное меню, показываем его
             ShowOnlyPanel(mainMenuPanel);
-            Debug.Log("Returned to main menu");
         }
+    }
+
+    // Метод для принудительного возврата в главное меню
+    public void GoToMainMenu()
+    {
+        // Очищаем историю и добавляем главное меню
+        panelHistory.Clear();
+        panelHistory.Push(mainMenuPanel);
+
+        ShowOnlyPanel(mainMenuPanel);
     }
 
     private void ShowOnlyPanel(GameObject panelToShow)
@@ -89,8 +74,6 @@ public class MenuManager : MonoBehaviour
         // Скрываем все панели
         mainMenuPanel.SetActive(false);
         settingsPanel.SetActive(false);
-        soundPanel.SetActive(false);
-        SensetivetyPanel.SetActive(false);
 
         // Показываем только нужную панель
         panelToShow.SetActive(true);
@@ -99,8 +82,32 @@ public class MenuManager : MonoBehaviour
     private GameObject GetActivePanel()
     {
         if (settingsPanel.activeSelf) return settingsPanel;
-        if (soundPanel.activeSelf) return soundPanel;
-        if (SensetivetyPanel.activeSelf) return SensetivetyPanel;
         return mainMenuPanel;
+    }
+
+    // Метод для получения текущей активной панели
+    public GameObject GetCurrentPanel()
+    {
+        return GetActivePanel();
+    }
+
+    // Метод для проверки, активна ли главная панель
+    public bool IsMainMenuActive()
+    {
+        return mainMenuPanel.activeSelf;
+    }
+
+    // Метод для принудительного открытия панели настроек
+    public void OpenSettingsPanel()
+    {
+        OpenPanel(settingsPanel);
+    }
+
+    // Метод для принудительного закрытия всех панелей (кроме главной)
+    public void CloseAllPanels()
+    {
+        ShowOnlyPanel(mainMenuPanel);
+        panelHistory.Clear();
+        panelHistory.Push(mainMenuPanel);
     }
 }

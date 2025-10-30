@@ -19,7 +19,6 @@ public class TextToTMPConverter : MonoBehaviour
     [Header("Update Settings")]
     [SerializeField] private bool updateContinuously = false;
     [SerializeField] private float updateInterval = 0.1f;
-    [SerializeField] private bool updateBothTargets = true;
 
     private string lastText = "";
     private float timer = 0f;
