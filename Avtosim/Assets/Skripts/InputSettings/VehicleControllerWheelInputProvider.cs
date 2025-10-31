@@ -21,6 +21,12 @@ namespace Assets.VehicleController
         private bool _gearDownInput;
         private bool _nitroInput;
 
+        // ДОБАВЛЕНО: Свойства для DemoManager
+        public bool Return => false; // Пока не реализовано
+        public bool NorthButton => _gearUpInput;
+        public bool SouthButton => _gearDownInput;
+        public bool EastButton => _nitroInput;
+
         // Для механической коробки передач
         private bool[] _gearInputs = new bool[8]; // 0-N, 1-7 передачи
         private int _currentGear = 0; // 0 - нейтраль, 1-7 - передачи

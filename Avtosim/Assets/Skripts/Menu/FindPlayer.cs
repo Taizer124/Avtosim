@@ -17,7 +17,8 @@ public class VRDeviceChecker : MonoBehaviour
             if (device.description.interfaceName == "XRInput" ||
                 device.name.Contains("XR") ||
                 device.name.Contains("Oculus") ||
-                device.name.Contains("OpenXR"))
+                device.name.Contains("OpenXR") ||
+                device.name.Contains("XR Origin"))
             {
                 vrDeviceCount++;
                 Debug.Log($"VR Device: {device.name}");

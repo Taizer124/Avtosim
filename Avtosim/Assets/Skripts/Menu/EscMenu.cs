@@ -133,14 +133,14 @@ public class MenuToggle : MonoBehaviour
     // Разблокировать курсор (для меню)
     private void UnlockCursor()
     {
-        controller1.SetActive(true);
+        controller1.SetActive(false);
         controller2.SetActive(true);
     }
 
     // Заблокировать курсор (для игры)
     private void LockCursor()
     {
-        controller1.SetActive(false);
+        controller1.SetActive(true);
         controller2.SetActive(false);
     }
 

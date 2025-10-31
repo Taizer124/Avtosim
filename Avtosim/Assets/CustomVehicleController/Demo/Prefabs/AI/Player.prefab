@@ -1738,7 +1738,6 @@ MonoBehaviour:
   targetTMTag: 
   updateContinuously: 1
   updateInterval: 0.2
-  updateBothTargets: 1
 --- !u!1 &980334879762075743
 GameObject:
   m_ObjectHideFlags: 0
@@ -4425,7 +4424,6 @@ MonoBehaviour:
   targetTMTag: 
   updateContinuously: 1
   updateInterval: 0.2
-  updateBothTargets: 1
 --- !u!1 &3102725151887333478
 GameObject:
   m_ObjectHideFlags: 0
@@ -12336,7 +12334,6 @@ MonoBehaviour:
   targetTMTag: 
   updateContinuously: 1
   updateInterval: 0.2
-  updateBothTargets: 1
 --- !u!1 &7376107589821940550
 GameObject:
   m_ObjectHideFlags: 0
@@ -16111,6 +16108,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   vehicleTransform: {fileID: 8618631643456075300}
   rigidbody: {fileID: 2588857075816838971}
+  maxTiltAngle: 3
+  tiltResponseSpeed: 1
+  accelerationThreshold: 1
+  deadZone: 0
+  centerOfMassOffset: {x: 0, y: 0.05, z: 0}
 --- !u!114 &4150093521002999170
 MonoBehaviour:
   m_ObjectHideFlags: 0

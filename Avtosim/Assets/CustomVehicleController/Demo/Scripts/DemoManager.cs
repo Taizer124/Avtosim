@@ -15,6 +15,9 @@ namespace Assets.VehicleController
         [SerializeField]
         private MonoBehaviour _wheelInputProvider; // Универсальная ссылка на любой input provider
 
+        // Убираем прямую зависимость от конкретного типа
+        private IVehicleControllerInputProvider _inputProvider;
+
         private VehicleEngineSoundManager _engineSoundManager;
 
         [SerializeField]
@@ -102,13 +105,13 @@ namespace Assets.VehicleController
 
         private int[] _partsIdArray;
 
-        // Флаги для отслеживания нажатий кнопок руля через рефлексию
+        // Флаги для отслеживания нажатий кнопок руля
         private bool _returnButtonPressed = false;
         private bool _northButtonPressed = false;
         private bool _southButtonPressed = false;
         private bool _eastButtonPressed = false;
 
-        // Кэш для методов рефлексии
+        // Для рефлексии (универсальный подход)
         private System.Type _wheelInputType;
         private System.Reflection.PropertyInfo _returnButtonProp;
         private System.Reflection.PropertyInfo _northButtonProp;
@@ -142,8 +145,8 @@ namespace Assets.VehicleController
 
             _audioMixer.SetFloat("AudioVolume", Mathf.Log(_currentVolume) * 20);
 
-            // Инициализация рефлексии для работы с wheel input
-            InitializeWheelInputReflection();
+            // Инициализация input provider
+            InitializeInputProvider();
         }
 
         private void OnDestroy()
@@ -151,7 +154,7 @@ namespace Assets.VehicleController
             VehiclePartsSetWrapper.OnAnyPresetChanged -= VehiclePartsSetWrapper_OnAnyPresetChanged;
         }
 
-        private void InitializeWheelInputReflection()
+        private void InitializeInputProvider()
         {
             if (_wheelInputProvider == null)
             {
@@ -159,6 +162,15 @@ namespace Assets.VehicleController
                 return;
             }
 
+            // Пробуем получить интерфейс
+            _inputProvider = _wheelInputProvider as IVehicleControllerInputProvider;
+            if (_inputProvider != null)
+            {
+                Debug.Log("Input provider initialized via interface");
+                return;
+            }
+
+            // Если интерфейс не работает, используем рефлексию как запасной вариант
             _wheelInputType = _wheelInputProvider.GetType();
 
             // Пытаемся найти свойства кнопок через рефлексию
@@ -171,13 +183,32 @@ namespace Assets.VehicleController
             {
                 Debug.LogWarning("Return property not found in wheel input provider");
             }
+            else
+            {
+                Debug.Log("Input provider initialized via reflection");
+            }
         }
 
         private void UpdateWheelButtonStates()
         {
             if (_wheelInputProvider == null) return;
 
-            // Используем рефлексию для получения состояний кнопок
+            // Сначала пробуем через интерфейс
+            if (_inputProvider != null)
+            {
+                // Используем методы интерфейса для получения состояний кнопок
+                // Предполагаем соответствие:
+                // - NorthButton = GearUp
+                // - SouthButton = GearDown  
+                // - EastButton = Nitro
+                _northButtonPressed = _inputProvider.GetGearUpInput();
+                _southButtonPressed = _inputProvider.GetGearDownInput();
+                _eastButtonPressed = _inputProvider.GetNitroBoostInput();
+                _returnButtonPressed = false; // Пока не реализовано в интерфейсе
+                return;
+            }
+
+            // Запасной вариант через рефлексию
             try
             {
                 if (_returnButtonProp != null)
@@ -253,29 +284,29 @@ namespace Assets.VehicleController
             // Обновляем состояния кнопок руля
             UpdateWheelButtonStates();
 
-            // ИСПРАВЛЕННЫЕ УСЛОВИЯ - правильное соответствие кнопок:
+            // Управление через клавиатуру и кнопки руля
             if (Input.GetKeyDown(KeyCode.R) || _returnButtonPressed)
             {
                 SceneManager.LoadScene("mcp_day");
-                _returnButtonPressed = false; // Сброс флага после использования
+                _returnButtonPressed = false;
             }
 
             if (Input.GetKeyDown(KeyCode.T) || _northButtonPressed)
             {
                 SwapTransmissionType();
-                _northButtonPressed = false; // Сброс флага после использования
+                _northButtonPressed = false;
             }
 
             if (Input.GetKeyDown(KeyCode.Y) || _southButtonPressed)
             {
                 SwapPreset();
-                _southButtonPressed = false; // Сброс флага после использования
+                _southButtonPressed = false;
             }
 
             if (Input.GetKeyDown(KeyCode.U) || _eastButtonPressed)
             {
                 SwapDrivetrainType();
-                _eastButtonPressed = false; // Сброс флага после использования
+                _eastButtonPressed = false;
             }
 
             if (Input.GetKeyDown(KeyCode.V))
@@ -299,6 +330,7 @@ namespace Assets.VehicleController
             }
         }
 
+        // Остальные методы без изменений...
         private void HandleAudio()
         {
             if (Input.GetKeyDown(KeyCode.Minus))
@@ -404,6 +436,7 @@ namespace Assets.VehicleController
                 _vehicleController.SetNewPartToCustomizableSet(_nitrousArray[_partsIdArray[1]]);
             }
         }
+
         private void ChangeTransmission()
         {
             if (!Input.GetKeyDown(KeyCode.Alpha3))
@@ -418,6 +451,7 @@ namespace Assets.VehicleController
                 _vehicleController.SetNewPartToCustomizableSet(_transmissionArray[_partsIdArray[2]]);
             }
         }
+
         private void ChangeTires()
         {
             if (!Input.GetKeyDown(KeyCode.Alpha4))
@@ -433,6 +467,7 @@ namespace Assets.VehicleController
                 _vehicleController.SetNewPartToCustomizableSet(_tireArray[_partsIdArray[3]], false);
             }
         }
+
         private void ChangeSuspension()
         {
             if (!Input.GetKeyDown(KeyCode.Alpha5))
@@ -448,6 +483,7 @@ namespace Assets.VehicleController
                 _vehicleController.SetNewPartToCustomizableSet(_suspensionArray[_partsIdArray[4]], false);
             }
         }
+
         private void ChangeBrakes()
         {
             if (!Input.GetKeyDown(KeyCode.Alpha6))
@@ -462,6 +498,7 @@ namespace Assets.VehicleController
                 _vehicleController.SetNewPartToCustomizableSet(_brakesArray[_partsIdArray[5]]);
             }
         }
+
         private void ChangeBody()
         {
             if (!Input.GetKeyDown(KeyCode.Alpha7))
@@ -470,7 +507,7 @@ namespace Assets.VehicleController
             if (!_vehicleController.UsePreset)
             {
                 _partsIdArray[6]++;
-                if (_partsIdArray[6] >= _tireArray.Length)
+                if (_partsIdArray[6] >= _vehicleBodyArray.Length) // Исправлено: было _tireArray
                     _partsIdArray[6] = 0;
 
                 _vehicleController.SetNewPartToCustomizableSet(_vehicleBodyArray[_partsIdArray[6]]);
@@ -520,6 +557,7 @@ namespace Assets.VehicleController
             OpenCloseMenus(_currentPartsDynamicMenu, KeyCode.F3);
             OpenCloseMenus(_currentPartsDynamicMenu, KeyCode.C);
         }
+
         private void UpdatePartsMenu()
         {
             VehiclePartsCustomizableSet _partsCustomizableSet = _vehicleController.GetCustomizableSet();
@@ -532,8 +570,8 @@ namespace Assets.VehicleController
             _currentBody.text = _partsCustomizableSet.Body.name;
 
             _currentFI.text = _partsCustomizableSet.ForcedInduction == null ? "None" : _partsCustomizableSet.ForcedInduction.name;
-
         }
+
         private void ChangeCamera()
         {
             _cameraArray[_currentCameraID].gameObject.SetActive(false);
