@@ -21,60 +21,70 @@ namespace Assets.VehicleController
         private bool _gearDownInput;
         private bool _nitroInput;
 
-        // ДОБАВЛЕНО: Свойства для DemoManager
-        public bool Return => false; // Пока не реализовано
+        // Свойства для DemoManager
+        public bool Return => false;
         public bool NorthButton => _gearUpInput;
         public bool SouthButton => _gearDownInput;
         public bool EastButton => _nitroInput;
 
         // Для механической коробки передач
-        private bool[] _gearInputs = new bool[8]; // 0-N, 1-7 передачи
-        private int _currentGear = 0; // 0 - нейтраль, 1-7 - передачи
+        private bool[] _gearInputs = new bool[8];
+        private int _currentGear = 0;
         private bool _clutchInput = false;
-
         private bool _enabled = true;
+
+        // ДЛЯ ОТЛАДКИ
+        public bool IsWheelAssigned => _wheelInput != null;
+        public float DebugThrottle => _wheelInput != null ? _wheelInput.Throttle : -1f;
+        public float DebugSteering => _wheelInput != null ? _wheelInput.Steering : -1f;
 
         private void OnEnable()
         {
             if (_wheelInput == null)
             {
-                Debug.LogError("Wheel Input not assigned!");
+                Debug.LogError("Wheel Input not assigned in VehicleControllerWheelInputProvider!");
                 return;
             }
 
-            // ПРАВИЛЬНЫЕ названия событий (с "On" в начале)
-            _wheelInput.ThrottleCallback += OnThrottle;
-            _wheelInput.BrakeCallback += OnBrake;
-            _wheelInput.SteeringCallback += OnSteering;
-            _wheelInput.HandbrakeCallback += OnHandbrake;
-            _wheelInput.OnRightShiftCallback += OnGearUp;        // С "On"
-            _wheelInput.OnLeftShiftCallback += OnGearDown;       // С "On"  
-            _wheelInput.OnEastButtonCallback += OnNitro;         // С "On"
+            Debug.Log("VehicleControllerWheelInputProvider: Subscribing to wheel events");
 
-            // Подписываемся на события механической коробки
-            SubscribeToManualGearEvents();
+            SubscribeToWheelEvents();
         }
 
         private void OnDisable()
         {
             if (_wheelInput == null) return;
+            UnsubscribeFromWheelEvents();
+        }
 
-            // Отписываемся от событий
+        private void SubscribeToWheelEvents()
+        {
+            _wheelInput.ThrottleCallback += OnThrottle;
+            _wheelInput.BrakeCallback += OnBrake;
+            _wheelInput.SteeringCallback += OnSteering;
+            _wheelInput.HandbrakeCallback += OnHandbrake;
+            _wheelInput.OnRightShiftCallback += OnGearUp;
+            _wheelInput.OnLeftShiftCallback += OnGearDown;
+            _wheelInput.OnEastButtonCallback += OnNitro;
+
+            SubscribeToManualGearEvents();
+        }
+
+        private void UnsubscribeFromWheelEvents()
+        {
             _wheelInput.ThrottleCallback -= OnThrottle;
             _wheelInput.BrakeCallback -= OnBrake;
             _wheelInput.SteeringCallback -= OnSteering;
             _wheelInput.HandbrakeCallback -= OnHandbrake;
-            _wheelInput.OnRightShiftCallback -= OnGearUp;        // С "On"
-            _wheelInput.OnLeftShiftCallback -= OnGearDown;       // С "On"
-            _wheelInput.OnEastButtonCallback -= OnNitro;         // С "On"
+            _wheelInput.OnRightShiftCallback -= OnGearUp;
+            _wheelInput.OnLeftShiftCallback -= OnGearDown;
+            _wheelInput.OnEastButtonCallback -= OnNitro;
 
-            // Отписываемся от событий механической коробки
             UnsubscribeFromManualGearEvents();
         }
 
         private void SubscribeToManualGearEvents()
         {
-            // Подписываемся на события передач механической коробки
             _wheelInput.Shifter1Callback += OnShifter1;
             _wheelInput.Shifter2Callback += OnShifter2;
             _wheelInput.Shifter3Callback += OnShifter3;
@@ -86,7 +96,6 @@ namespace Assets.VehicleController
 
         private void UnsubscribeFromManualGearEvents()
         {
-            // Отписываемся от событий передач механической коробки
             _wheelInput.Shifter1Callback -= OnShifter1;
             _wheelInput.Shifter2Callback -= OnShifter2;
             _wheelInput.Shifter3Callback -= OnShifter3;
@@ -104,55 +113,36 @@ namespace Assets.VehicleController
                 return;
             }
 
-            // Обрабатываем переключения передач в зависимости от режима
-            ProcessGearChanges();
+            // Для отладки - выводим значения периодически
+            if (Time.frameCount % 120 == 0)
+            {
+                Debug.Log($"Wheel Input - Gas: {_gasInput:F2}, Brake: {_brakeInput:F2}, Steering: {_steeringInput:F2}, " +
+                         $"GearUp: {_gearUpInput}, GearDown: {_gearDownInput}, Nitro: {_nitroInput}");
+            }
 
-            //// Для отладки - выводим значения каждую секунду
-            //if (Time.frameCount % 60 == 0)
-            //{
-            //    Debug.Log($"Wheel Input - Gas: {_gasInput}, Brake: {_brakeInput}, Steering: {_steeringInput}, " +
-            //             $"GearUp: {_gearUpInput}, GearDown: {_gearDownInput}, Nitro: {_nitroInput}, " +
-            //             $"Current Gear: {_currentGear}");
-            //}
+            ProcessGearChanges();
         }
 
         private void ProcessGearChanges()
         {
             if (_useSequentialShifting)
             {
-                // Секвентальное переключение - старая логика
                 ProcessSequentialShifting();
             }
             else
             {
-                // Механическая коробка - новая логика
                 ProcessManualShifting();
             }
         }
 
         private void ProcessSequentialShifting()
         {
-            // Существующая логика секвентального переключения
-            if (_gearUpInput)
-            {
-                // Логика переключения вверх
-                Debug.Log("Sequential Gear Up");
-                _gearUpInput = false;
-            }
-
-            if (_gearDownInput)
-            {
-                // Логика переключения вниз
-                Debug.Log("Sequential Gear Down");
-                _gearDownInput = false;
-            }
+            // Логика обрабатывается в GetGearUpInput/GetGearDownInput через сброс флагов
         }
 
         private void ProcessManualShifting()
         {
-            // Проверяем, какая передача нажата в механической коробке
             int selectedGear = -1;
-
             for (int i = 0; i < _gearInputs.Length; i++)
             {
                 if (_gearInputs[i])
@@ -162,28 +152,18 @@ namespace Assets.VehicleController
                 }
             }
 
-            // Если нажата какая-то передача и она отличается от текущей
             if (selectedGear != -1 && selectedGear != _currentGear)
             {
-                // Эмулируем выжим сцепления для переключения
                 if (!_clutchInput)
                 {
                     Debug.Log($"Manual gear change: {_currentGear} -> {selectedGear}");
-
-                    // Здесь можно добавить логику выжима сцепления
-                    // _clutchInput = true;
-                    // StartCoroutine(ClutchAndChangeGear(selectedGear));
-
-                    // Прямое переключение (упрощенное)
                     _currentGear = selectedGear;
                 }
             }
 
-            // Если не нажата ни одна передача - устанавливаем нейтраль
             if (selectedGear == -1 && _currentGear != 0)
             {
                 _currentGear = 0;
-                Debug.Log("Gear set to Neutral");
             }
         }
 
@@ -213,6 +193,7 @@ namespace Assets.VehicleController
             if (_useSequentialShifting)
             {
                 _gearUpInput = pressed;
+                if (pressed) Debug.Log("GearUp pressed");
             }
         }
 
@@ -221,57 +202,25 @@ namespace Assets.VehicleController
             if (_useSequentialShifting)
             {
                 _gearDownInput = pressed;
+                if (pressed) Debug.Log("GearDown pressed");
             }
         }
 
         private void OnNitro(bool pressed)
         {
             _nitroInput = pressed;
+            if (pressed) Debug.Log("Nitro pressed");
         }
         #endregion
 
         #region Manual Gear Handlers
-        private void OnShifter1(bool pressed)
-        {
-            _gearInputs[1] = pressed;
-            Debug.Log($"Shifter 1: {pressed}");
-        }
-
-        private void OnShifter2(bool pressed)
-        {
-            _gearInputs[2] = pressed;
-            Debug.Log($"Shifter 2: {pressed}");
-        }
-
-        private void OnShifter3(bool pressed)
-        {
-            _gearInputs[3] = pressed;
-            Debug.Log($"Shifter 3: {pressed}");
-        }
-
-        private void OnShifter4(bool pressed)
-        {
-            _gearInputs[4] = pressed;
-            Debug.Log($"Shifter 4: {pressed}");
-        }
-
-        private void OnShifter5(bool pressed)
-        {
-            _gearInputs[5] = pressed;
-            Debug.Log($"Shifter 5: {pressed}");
-        }
-
-        private void OnShifter6(bool pressed)
-        {
-            _gearInputs[6] = pressed;
-            Debug.Log($"Shifter 6: {pressed}");
-        }
-
-        private void OnShifter7(bool pressed)
-        {
-            _gearInputs[7] = pressed;
-            Debug.Log($"Shifter 7: {pressed}");
-        }
+        private void OnShifter1(bool pressed) { _gearInputs[1] = pressed; if (pressed) Debug.Log("Shifter 1"); }
+        private void OnShifter2(bool pressed) { _gearInputs[2] = pressed; if (pressed) Debug.Log("Shifter 2"); }
+        private void OnShifter3(bool pressed) { _gearInputs[3] = pressed; if (pressed) Debug.Log("Shifter 3"); }
+        private void OnShifter4(bool pressed) { _gearInputs[4] = pressed; if (pressed) Debug.Log("Shifter 4"); }
+        private void OnShifter5(bool pressed) { _gearInputs[5] = pressed; if (pressed) Debug.Log("Shifter 5"); }
+        private void OnShifter6(bool pressed) { _gearInputs[6] = pressed; if (pressed) Debug.Log("Shifter 6"); }
+        private void OnShifter7(bool pressed) { _gearInputs[7] = pressed; if (pressed) Debug.Log("Shifter 7"); }
         #endregion
 
         private void ResetInputs()
@@ -284,7 +233,6 @@ namespace Assets.VehicleController
             _gearDownInput = false;
             _nitroInput = false;
 
-            // Сбрасываем состояния передач механической коробки
             for (int i = 0; i < _gearInputs.Length; i++)
             {
                 _gearInputs[i] = false;
@@ -327,17 +275,8 @@ namespace Assets.VehicleController
             return false;
         }
 
-        // Новый метод для получения текущей передачи (для механической коробки)
-        public int GetCurrentGear()
-        {
-            return _currentGear;
-        }
-
-        // Новый метод для проверки, включена ли механическая коробка
-        public bool IsManualTransmission()
-        {
-            return !_useSequentialShifting;
-        }
+        public int GetCurrentGear() => _currentGear;
+        public bool IsManualTransmission() => !_useSequentialShifting;
 
         public float GetPitchInput() => 0f;
         public float GetYawInput() => 0f;
