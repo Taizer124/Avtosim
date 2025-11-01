@@ -11,7 +11,7 @@ namespace Assets.VehicleController
         [SerializeField] private CustomVehicleController _vehicleController;
 
         [Header("Input Provider")]
-        [SerializeField] private MonoBehaviour _wheelInputProvider; // универсальная ссылка (WheelInputProvider / AllInOneInputProvider)
+        [SerializeField] private MonoBehaviour _wheelInputProvider;
         private IVehicleControllerInputProvider _inputProvider;
 
         private VehicleEngineSoundManager _engineSoundManager;
@@ -68,18 +68,20 @@ namespace Assets.VehicleController
         private int _currentEnginePartID;
         private int[] _partsIdArray;
 
-        // состояния кнопок (заменили Return на West для перезапуска)
+        // состояния кнопок
         private bool _westButtonPressed;
         private bool _northButtonPressed;
         private bool _southButtonPressed;
         private bool _eastButtonPressed;
 
-        // reflection fallback
         private System.Type _wheelInputType;
         private System.Reflection.PropertyInfo _westButtonProp;
         private System.Reflection.PropertyInfo _northButtonProp;
         private System.Reflection.PropertyInfo _southButtonProp;
         private System.Reflection.PropertyInfo _eastButtonProp;
+
+        // Флаг паузы
+        public bool IsPaused { get; private set; }
 
         private void Start()
         {
@@ -89,7 +91,7 @@ namespace Assets.VehicleController
             _partsIdArray = new int[8];
             _vehicleController.UsePreset = false;
 
-            // начальные детали
+            // Начальные детали
             _vehicleController.SetNewPartToCustomizableSet(_engineArray[0]);
             _vehicleController.SetNewPartToCustomizableSet(_forcedInductionArray[0]);
             _vehicleController.SetNewPartToCustomizableSet(_nitrousArray[0]);
@@ -102,7 +104,7 @@ namespace Assets.VehicleController
             _vehicleController.SetNewPartToCustomizableSet(_vehicleBodyArray[0]);
 
             UpdatePartsMenu();
-            _audioMixer.SetFloat("AudioVolume", Mathf.Log(_currentVolume) * 20);
+            _audioMixer.SetFloat("MasterVolume", Mathf.Log(_currentVolume) * 20);
             InitializeInputProvider();
         }
 
@@ -123,7 +125,6 @@ namespace Assets.VehicleController
             if (_inputProvider == null)
             {
                 _wheelInputType = _wheelInputProvider.GetType();
-                // reflection properties: теперь берём West вместо Return
                 _westButtonProp = _wheelInputType.GetProperty("WestButton");
                 _northButtonProp = _wheelInputType.GetProperty("NorthButton");
                 _southButtonProp = _wheelInputType.GetProperty("SouthButton");
@@ -133,12 +134,15 @@ namespace Assets.VehicleController
 
         private void Update()
         {
+            //Полностью останавливаем обновление логики, если игра на паузе
+            if (IsPaused)
+                return;
+
             UpdateStatsMenu();
             HandleAudio();
             HandlePartsChanges();
             UpdateWheelButtonStates();
 
-            // Перезапуск сцены — через West (или клавиша R)
             if (Input.GetKeyDown(KeyCode.R) || _westButtonPressed)
             {
                 SceneManager.LoadScene("mcp_day");
@@ -163,7 +167,8 @@ namespace Assets.VehicleController
                 _eastButtonPressed = false;
             }
 
-            if (Input.GetKeyDown(KeyCode.V)) ChangeCamera();
+            if (Input.GetKeyDown(KeyCode.V))
+                ChangeCamera();
 
             OpenCloseMenus(_vehicleControlsMenu, KeyCode.F1, _demoControlsMenu);
             OpenCloseMenus(_demoControlsMenu, KeyCode.F2, _vehicleControlsMenu);
@@ -172,7 +177,56 @@ namespace Assets.VehicleController
             HandlePartsMenu();
         }
 
-        // === ЦИКЛИЧЕСКОЕ ПЕРЕКЛЮЧЕНИЕ 3 РЕЖИМОВ КОРОБКИ ===
+        // Метод для внешнего управления паузой из MenuToggle
+        public void SetPauseState(bool paused)
+        {
+            IsPaused = paused;
+        }
+
+        private void HandleAudio()
+        {
+            // Не изменяем громкость, если активна пауза
+            if (IsPaused)
+                return;
+
+            if (Input.GetKeyDown(KeyCode.Minus))
+                _currentVolume -= 0.1f;
+
+            if (Input.GetKeyDown(KeyCode.Equals))
+                _currentVolume += 0.1f;
+
+            _currentVolume = Mathf.Clamp(_currentVolume, 0.001f, 1);
+            _audioMixer.SetFloat("MasterVolume", Mathf.Log(_currentVolume) * 20);
+        }
+
+        private void UpdateWheelButtonStates()
+        {
+            if (_wheelInputProvider == null)
+                return;
+
+            if (_inputProvider != null)
+            {
+                _northButtonPressed = _inputProvider.GetGearUpInput();
+                _southButtonPressed = _inputProvider.GetGearDownInput();
+                _eastButtonPressed = _inputProvider.GetNitroBoostInput();
+                _westButtonPressed = false;
+                return;
+            }
+
+            try
+            {
+                if (_westButtonProp != null)
+                    _westButtonPressed = (bool)_westButtonProp.GetValue(_wheelInputProvider);
+                if (_northButtonProp != null)
+                    _northButtonPressed = (bool)_northButtonProp.GetValue(_wheelInputProvider);
+                if (_southButtonProp != null)
+                    _southButtonPressed = (bool)_southButtonProp.GetValue(_wheelInputProvider);
+                if (_eastButtonProp != null)
+                    _eastButtonPressed = (bool)_eastButtonProp.GetValue(_wheelInputProvider);
+            }
+            catch { }
+        }
+
         public void SwapTransmissionType()
         {
             switch (_vehicleController.TransmissionType)
@@ -188,77 +242,13 @@ namespace Assets.VehicleController
                     break;
             }
 
-            // синхронизация с провайдерами
-            if (_wheelInputProvider is VehicleControllerWheelInputProvider wheelProvider)
-            {
-                switch (_vehicleController.TransmissionType)
-                {
-                    case TransmissionType.Automatic:
-                        wheelProvider.SetTransmissionMode(VehicleControllerWheelInputProvider.TransmissionMode.Automatic);
-                        break;
-                    case TransmissionType.Sequential:
-                        wheelProvider.SetTransmissionMode(VehicleControllerWheelInputProvider.TransmissionMode.Sequential);
-                        break;
-                    case TransmissionType.Manual:
-                        wheelProvider.SetTransmissionMode(VehicleControllerWheelInputProvider.TransmissionMode.Manual);
-                        break;
-                }
-            }
-            else if (_wheelInputProvider is AllInOneInputProvider allInOne)
-            {
-                switch (_vehicleController.TransmissionType)
-                {
-                    case TransmissionType.Automatic:
-                        allInOne.SetTransmissionMode(AllInOneInputProvider.TransmissionMode.Automatic);
-                        break;
-                    case TransmissionType.Sequential:
-                        allInOne.SetTransmissionMode(AllInOneInputProvider.TransmissionMode.Sequential);
-                        break;
-                    case TransmissionType.Manual:
-                        allInOne.SetTransmissionMode(AllInOneInputProvider.TransmissionMode.Manual);
-                        break;
-                }
-            }
-
             Debug.Log($"Transmission switched to: {_vehicleController.TransmissionType}");
-        }
-
-        private void UpdateWheelButtonStates()
-        {
-            if (_wheelInputProvider == null) return;
-
-            if (_inputProvider != null)
-            {
-                // если используем интерфейс провайдера, он даёт только нужную функциональность:
-                _northButtonPressed = _inputProvider.GetGearUpInput();
-                _southButtonPressed = _inputProvider.GetGearDownInput();
-                _eastButtonPressed = _inputProvider.GetNitroBoostInput();
-                // нет стандартного GetWestInput в интерфейсе — используем false (reflection fallback покрывает большинство wheel readers)
-                _westButtonPressed = false;
-                return;
-            }
-
-            // fallback через reflection (для ScriptableObject InputControllerReader и т.п.)
-            try
-            {
-                if (_westButtonProp != null)
-                    _westButtonPressed = (bool)_westButtonProp.GetValue(_wheelInputProvider);
-                if (_northButtonProp != null)
-                    _northButtonPressed = (bool)_northButtonProp.GetValue(_wheelInputProvider);
-                if (_southButtonProp != null)
-                    _southButtonPressed = (bool)_southButtonProp.GetValue(_wheelInputProvider);
-                if (_eastButtonProp != null)
-                    _eastButtonPressed = (bool)_eastButtonProp.GetValue(_wheelInputProvider);
-            }
-            catch
-            {
-                // безопасно игнорируем ошибки reflection
-            }
         }
 
         private void SwapPreset()
         {
-            if (_vehiclePartsPressets.Length == 0) return;
+            if (_vehiclePartsPressets.Length == 0)
+                return;
 
             _currentPresetId++;
             if (_currentPresetId >= _vehiclePartsPressets.Length)
@@ -290,14 +280,6 @@ namespace Assets.VehicleController
             };
         }
 
-        private void HandleAudio()
-        {
-            if (Input.GetKeyDown(KeyCode.Minus)) _currentVolume -= 0.1f;
-            if (Input.GetKeyDown(KeyCode.Equals)) _currentVolume += 0.1f;
-            _currentVolume = Mathf.Clamp(_currentVolume, 0.001f, 1);
-            _audioMixer.SetFloat("AudioVolume", Mathf.Log(_currentVolume) * 20);
-        }
-
         private void HandlePartsChanges()
         {
             ChangeEngine();
@@ -321,8 +303,7 @@ namespace Assets.VehicleController
 
         private void ChangeEngine()
         {
-            if (!Input.GetKeyDown(KeyCode.Alpha1)) return;
-            if (_vehicleController.UsePreset) return;
+            if (!Input.GetKeyDown(KeyCode.Alpha1) || _vehicleController.UsePreset) return;
             _partsIdArray[0] = (_partsIdArray[0] + 1) % _engineArray.Length;
             _vehicleController.SetNewPartToCustomizableSet(_engineArray[_partsIdArray[0]]);
             UpdateEngineSoundFromPart();
@@ -330,24 +311,21 @@ namespace Assets.VehicleController
 
         private void ChangeNitrous()
         {
-            if (!Input.GetKeyDown(KeyCode.Alpha2)) return;
-            if (_vehicleController.UsePreset) return;
+            if (!Input.GetKeyDown(KeyCode.Alpha2) || _vehicleController.UsePreset) return;
             _partsIdArray[1] = (_partsIdArray[1] + 1) % _nitrousArray.Length;
             _vehicleController.SetNewPartToCustomizableSet(_nitrousArray[_partsIdArray[1]]);
         }
 
         private void ChangeTransmission()
         {
-            if (!Input.GetKeyDown(KeyCode.Alpha3)) return;
-            if (_vehicleController.UsePreset) return;
+            if (!Input.GetKeyDown(KeyCode.Alpha3) || _vehicleController.UsePreset) return;
             _partsIdArray[2] = (_partsIdArray[2] + 1) % _transmissionArray.Length;
             _vehicleController.SetNewPartToCustomizableSet(_transmissionArray[_partsIdArray[2]]);
         }
 
         private void ChangeTires()
         {
-            if (!Input.GetKeyDown(KeyCode.Alpha4)) return;
-            if (_vehicleController.UsePreset) return;
+            if (!Input.GetKeyDown(KeyCode.Alpha4) || _vehicleController.UsePreset) return;
             _partsIdArray[3] = (_partsIdArray[3] + 1) % _tireArray.Length;
             _vehicleController.SetNewPartToCustomizableSet(_tireArray[_partsIdArray[3]], true);
             _vehicleController.SetNewPartToCustomizableSet(_tireArray[_partsIdArray[3]], false);
@@ -355,8 +333,7 @@ namespace Assets.VehicleController
 
         private void ChangeSuspension()
         {
-            if (!Input.GetKeyDown(KeyCode.Alpha5)) return;
-            if (_vehicleController.UsePreset) return;
+            if (!Input.GetKeyDown(KeyCode.Alpha5) || _vehicleController.UsePreset) return;
             _partsIdArray[4] = (_partsIdArray[4] + 1) % _suspensionArray.Length;
             _vehicleController.SetNewPartToCustomizableSet(_suspensionArray[_partsIdArray[4]], true);
             _vehicleController.SetNewPartToCustomizableSet(_suspensionArray[_partsIdArray[4]], false);
@@ -364,24 +341,21 @@ namespace Assets.VehicleController
 
         private void ChangeBrakes()
         {
-            if (!Input.GetKeyDown(KeyCode.Alpha6)) return;
-            if (_vehicleController.UsePreset) return;
+            if (!Input.GetKeyDown(KeyCode.Alpha6) || _vehicleController.UsePreset) return;
             _partsIdArray[5] = (_partsIdArray[5] + 1) % _brakesArray.Length;
             _vehicleController.SetNewPartToCustomizableSet(_brakesArray[_partsIdArray[5]]);
         }
 
         private void ChangeBody()
         {
-            if (!Input.GetKeyDown(KeyCode.Alpha7)) return;
-            if (_vehicleController.UsePreset) return;
+            if (!Input.GetKeyDown(KeyCode.Alpha7) || _vehicleController.UsePreset) return;
             _partsIdArray[6] = (_partsIdArray[6] + 1) % _vehicleBodyArray.Length;
             _vehicleController.SetNewPartToCustomizableSet(_vehicleBodyArray[_partsIdArray[6]]);
         }
 
         private void ChangeFI()
         {
-            if (!Input.GetKeyDown(KeyCode.Alpha9)) return;
-            if (_vehicleController.UsePreset) return;
+            if (!Input.GetKeyDown(KeyCode.Alpha9) || _vehicleController.UsePreset) return;
             _partsIdArray[7] = (_partsIdArray[7] + 1) % _forcedInductionArray.Length;
             if (_forcedInductionArray[_partsIdArray[7]] != null)
                 _vehicleController.SetNewPartToCustomizableSet(_forcedInductionArray[_partsIdArray[7]]);
@@ -414,7 +388,9 @@ namespace Assets.VehicleController
         {
             if (Input.GetKeyDown(key))
             {
-                if (conflict != null && conflict.activeSelf) conflict.SetActive(false);
+                if (conflict != null && conflict.activeSelf)
+                    conflict.SetActive(false);
+
                 menu.SetActive(!menu.activeSelf);
             }
         }

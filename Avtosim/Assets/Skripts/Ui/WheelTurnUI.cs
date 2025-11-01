@@ -14,7 +14,8 @@ public class WheelUINavigation : MonoBehaviour
     [SerializeField] private Color _normalColor = Color.white;
 
     [Header("Slider Settings")]
-    [SerializeField] private float _sliderSpeed = 0.5f;
+    [SerializeField] private float _sliderSpeed = 30f; // оптимально дл€ 0Ц100
+    [SerializeField] private float _deadZone = 0.05f;
 
     private List<Selectable> _menuElements = new List<Selectable>();
     private int _currentIndex = 0;
@@ -50,8 +51,8 @@ public class WheelUINavigation : MonoBehaviour
 
     private void Update()
     {
-        // === Ёмул€ци€ через мышь (дл€ тестов в Unity без рул€) ===
 #if UNITY_EDITOR
+        // Ёмул€ци€ через колесико мыши
         if (Input.mouseScrollDelta.y > 0f) OnRightTurn(true);
         if (Input.mouseScrollDelta.y < 0f) OnLeftTurn(true);
         if (Input.GetMouseButtonDown(2)) OnReturn(true);
@@ -63,28 +64,21 @@ public class WheelUINavigation : MonoBehaviour
     {
         if (!pressed || _returnHeld || _menuElements.Count == 0) return;
 
-        if (_currentIndex > 0)
-        {
-            _currentIndex--;
-            HighlightSelected();
-        }
+        _currentIndex = Mathf.Max(0, _currentIndex - 1);
+        HighlightSelected();
     }
 
     private void OnRightTurn(bool pressed)
     {
         if (!pressed || _returnHeld || _menuElements.Count == 0) return;
 
-        if (_currentIndex < _menuElements.Count - 1)
-        {
-            _currentIndex++;
-            HighlightSelected();
-        }
+        _currentIndex = Mathf.Min(_menuElements.Count - 1, _currentIndex + 1);
+        HighlightSelected();
     }
 
     private void OnReturn(bool pressed)
     {
         _returnHeld = pressed;
-
         if (_menuElements.Count == 0) return;
 
         var current = _menuElements[_currentIndex];
@@ -116,16 +110,19 @@ public class WheelUINavigation : MonoBehaviour
         {
             float steer = 0f;
 
-            // если есть реальный руль
             if (_inputReader != null)
                 steer = _inputReader.Steering;
 #if UNITY_EDITOR
-            // в редакторе можно регулировать колЄсиком
             steer += Input.mouseScrollDelta.y;
 #endif
+            if (Mathf.Abs(steer) < _deadZone)
+                steer = 0f;
 
-            if (Mathf.Abs(steer) > 0.01f)
-                slider.value = Mathf.Clamp01(slider.value + steer * _sliderSpeed * Time.deltaTime);
+            if (steer != 0f)
+            {
+                float delta = steer * _sliderSpeed * Time.unscaledDeltaTime;
+                slider.value = Mathf.Clamp(slider.value + delta, slider.minValue, slider.maxValue);
+            }
 
             yield return null;
         }
@@ -135,12 +132,34 @@ public class WheelUINavigation : MonoBehaviour
     {
         for (int i = 0; i < _menuElements.Count; i++)
         {
-            var img = _menuElements[i].GetComponent<Image>();
+            var selectable = _menuElements[i];
+            if (selectable == null) continue;
+
+            // === ƒл€ Slider выдел€ем именно Handle ===
+            var slider = selectable.GetComponent<Slider>();
+            if (slider != null && slider.handleRect != null)
+            {
+                var handleImage = slider.handleRect.GetComponent<Image>();
+                if (handleImage != null)
+                    handleImage.color = (i == _currentIndex) ? _selectedColor : _normalColor;
+
+                // ƒополнительно сбрасываем цвет фона
+                var bgImage = slider.GetComponent<Image>();
+                if (bgImage != null)
+                    bgImage.color = _normalColor;
+
+                continue;
+            }
+
+            // === ƒл€ кнопок и других Selectable ===
+            var img = selectable.GetComponent<Image>();
+            if (img == null)
+                img = selectable.GetComponentInChildren<Image>();
+
             if (img != null)
-                img.color = i == _currentIndex ? _selectedColor : _normalColor;
+                img.color = (i == _currentIndex) ? _selectedColor : _normalColor;
         }
 
-        // ¬ыделение фокуса в Unity UI
         if (_menuElements.Count > 0)
             _menuElements[_currentIndex].Select();
     }

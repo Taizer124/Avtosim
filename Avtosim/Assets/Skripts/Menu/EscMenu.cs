@@ -12,6 +12,9 @@ public class MenuToggle : MonoBehaviour
     [SerializeField] private AudioMixer audioMixer;
     [SerializeField] private string masterVolumeParameter = "MasterVolume";
 
+    // ссылка на DemoManager дл€ синхронизации паузы
+    [SerializeField] private Assets.VehicleController.DemoManager demoManager;
+
     private float savedMasterVolume = 0f;
     private bool isAudioPaused = false;
 
@@ -28,7 +31,9 @@ public class MenuToggle : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        // ESC Ч стандартное открытие меню
+        // "Options" Ч кнопка на руле Logitech G29 (эмулируетс€ через KeyCode.JoystickButton9)
+        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.JoystickButton9))
             ToggleMenu();
     }
 
@@ -44,12 +49,18 @@ public class MenuToggle : MonoBehaviour
             PauseAudio();
             UnlockCursor();
             GameManager.Pause();
+
+            if (demoManager != null)
+                demoManager.SetPauseState(true);
         }
         else
         {
             ResumeAudio();
             LockCursor();
             GameManager.Resume();
+
+            if (demoManager != null)
+                demoManager.SetPauseState(false);
         }
     }
 

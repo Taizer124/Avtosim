@@ -1,6 +1,7 @@
+using Assets.VehicleController;
 using System.Collections;
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Events;
 
 public class RaceStartZone : MonoBehaviour
@@ -14,13 +15,17 @@ public class RaceStartZone : MonoBehaviour
     public List<GameObject> objectsToEnable = new List<GameObject>();
     public List<GameObject> objectsToDisable = new List<GameObject>();
 
+    [Header("Leaderboard Object")]
+    [Tooltip("Объект, на котором находится скрипт RaceLeaderboard")]
+    public GameObject leaderboardObject;
+
     [Header("Zone Settings")]
     public bool requirePlayerTag = true;
     public string playerTag = "Player";
 
     [Header("Events")]
-    public UnityEvent OnCountdownStarted = new UnityEvent();    // ДОБАВЛЕНО
-    public UnityEvent OnCountdownFinished = new UnityEvent();   // ДОБАВЛЕНО
+    public UnityEvent OnCountdownStarted = new UnityEvent();
+    public UnityEvent OnCountdownFinished = new UnityEvent();
 
     private bool _isCountdownRunning = false;
     private Coroutine _countdownCoroutine;
@@ -70,20 +75,15 @@ public class RaceStartZone : MonoBehaviour
         _isCountdownRunning = true;
         _currentCountdownTime = CountdownTime;
 
-        // Запуск UI таймера
         OnCountdownStarted?.Invoke();
 
-        // Основной цикл отсчета
         while (_currentCountdownTime >= 0)
         {
             _currentCountdownTime -= Time.deltaTime;
             yield return null;
         }
 
-        // Завершение таймера
         OnCountdownFinished?.Invoke();
-
-        // Управление объектами
         ManageObjects();
 
         _isCountdownRunning = false;
@@ -99,6 +99,18 @@ public class RaceStartZone : MonoBehaviour
                 obj.SetActive(true);
         }
 
+        // Активируем RaceLeaderboard, если он указан
+        if (leaderboardObject != null)
+        {
+            leaderboardObject.SetActive(true);
+
+            var leaderboard = leaderboardObject.GetComponent<RaceLeaderboard>();
+            if (leaderboard != null)
+                leaderboard.enabled = true;
+            else
+                Debug.LogWarning($"На объекте {leaderboardObject.name} не найден скрипт RaceLeaderboard!");
+        }
+
         // Выключаем указанные объекты
         foreach (GameObject obj in objectsToDisable)
         {
@@ -106,7 +118,7 @@ public class RaceStartZone : MonoBehaviour
                 obj.SetActive(false);
         }
 
-        // Выключаем саму зону
+        // Выключаем саму зону после старта
         gameObject.SetActive(false);
     }
 
