@@ -26,7 +26,7 @@ public class FinalLapIndicator : MonoBehaviour
         // Автоматически находим RaceManager если не назначен
         if (raceManager == null)
         {
-            raceManager = FindObjectOfType<RaceManager>();
+            raceManager = FindAnyObjectByType<RaceManager>();
         }
 
         // Отключаем объекты при старте

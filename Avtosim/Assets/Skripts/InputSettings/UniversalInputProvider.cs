@@ -4,82 +4,56 @@ using LogitechG29.Sample.Input;
 namespace Assets.VehicleController
 {
     [AddComponentMenu("CustomVehicleController/Input/All-in-One Input Provider")]
-    public class AllInOneInputProvider : MonoBehaviour,
-        IVehicleControllerInputProvider,
-        IManualTransmissionInputProvider,
-        ITransmissionTypeSettable
+    public class AllInOneInputProvider : MonoBehaviour, IVehicleControllerInputProvider
     {
-        public enum InputMode { InputSystem, Wheel, Auto }
+        public enum InputMode { Keyboard, Wheel, Auto }
+        public enum TransmissionMode { Automatic, Sequential, Manual }
 
-        [Header("Input Mode")]
-        [SerializeField] private InputMode _currentMode = InputMode.Auto;
-
-        [Header("Wheel Input")]
+        [Header("Settings")]
+        [SerializeField] private InputMode _inputMode = InputMode.Auto;
+        [SerializeField] private TransmissionMode _transmissionMode = TransmissionMode.Automatic;
         [SerializeField] private InputControllerReader _wheelInput;
 
-        [Header("Transmission Settings")]
-        [SerializeField] private bool _useSequentialShifting = false;
-
-        [Header("Input System Settings")]
-        [SerializeField] private bool _forceGasInputDuringNitrous = false;
-
-        [Header("Debug")]
-        [SerializeField] private bool _enableDebugLogs = true;
-
         private PlayerVehicleInputActions _inputActions;
-        private bool _isInitialized = false;
-
-        // Общие переменные ввода
-        private float _gasInput;
-        private float _brakeInput;
-        private float _steeringInput;
-        private bool _handbrakeInput;
-        private bool _gearUpInput;
-        private bool _gearDownInput;
-        private bool _nitroInput;
-
-        // Для механической коробки
-        private bool[] _gearInputs = new bool[8]; // 0-N, 1–7 передачи
-        private int _currentGear = 0;
-
+        private bool _initialized;
         private bool _enabled = true;
 
-        // Свойства для DemoManager
-        public bool Return => false;
-        public bool NorthButton => _gearUpInput;
-        public bool SouthButton => _gearDownInput;
-        public bool EastButton => _nitroInput;
+        private float _gas, _brake, _steer;
+        private bool _handbrake, _gearUp, _gearDown, _nitro;
+        private bool[] _manualGears = new bool[8];
+        private int _currentGear;
 
-        // Для отладки
-        public bool IsWheelAssigned => _wheelInput != null;
-        public float DebugThrottle => _wheelInput != null ? _wheelInput.Throttle : -1f;
-        public float DebugSteering => _wheelInput != null ? _wheelInput.Steering : -1f;
+        private float _lastWheelInputTime;
+        private const float _wheelActivityTimeout = 2f;
+        private bool _wasWheelConnected;
+
+        public bool Return => _wheelInput != null && _wheelInput.Return;
+        public bool NorthButton => _wheelInput != null && _wheelInput.NorthButton;
+        public bool SouthButton => _wheelInput != null && _wheelInput.SouthButton;
+        public bool EastButton => _wheelInput != null && _wheelInput.EastButton;
 
         private void Awake()
         {
-            InitializeInputSystem();
-        }
+            try
+            {
+                _inputActions = new PlayerVehicleInputActions();
+                _inputActions.Enable();
+                _initialized = true;
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"Input init failed: {e.Message}");
+            }
 
-        private void Start()
-        {
-            Debug.Log($"AllInOneInputProvider Started - Mode: {_currentMode}, Wheel Assigned: {_wheelInput != null}");
+            // При старте сразу выбираем клавиатуру
+            _inputMode = InputMode.Keyboard;
         }
 
         private void OnEnable()
         {
-            if (!_isInitialized)
-            {
-                InitializeInputSystem();
-            }
-
             if (_wheelInput != null)
             {
-                SubscribeToWheelEvents();
-                Debug.Log("AllInOneInputProvider: Subscribed to wheel events");
-            }
-            else
-            {
-                Debug.LogWarning("AllInOneInputProvider: Wheel input is not assigned!");
+                SubscribeWheel();
             }
         }
 
@@ -87,402 +61,220 @@ namespace Assets.VehicleController
         {
             if (_wheelInput != null)
             {
-                UnsubscribeFromWheelEvents();
-                Debug.Log("AllInOneInputProvider: Unsubscribed from wheel events");
-            }
-
-            if (!gameObject.activeInHierarchy)
-            {
-                _inputActions?.Disable();
-            }
-        }
-
-        private void OnDestroy()
-        {
-            _inputActions?.Disable();
-            _inputActions = null;
-            _isInitialized = false;
-        }
-
-        public void ReinitializeInputSystem()
-        {
-            _inputActions?.Disable();
-            _inputActions = null;
-            _isInitialized = false;
-
-            InitializeInputSystem();
-            Debug.Log("Input system reinitialized");
-        }
-
-        private void InitializeInputSystem()
-        {
-            if (_isInitialized) return;
-
-            try
-            {
-                _inputActions = new PlayerVehicleInputActions();
-                _inputActions.Enable();
-                _isInitialized = true;
-                Debug.Log("Input system initialized successfully");
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"Failed to initialize input system: {e.Message}");
+                UnsubscribeWheel();
             }
         }
 
         private void Update()
         {
-            if (!_enabled)
+            if (!_enabled) { ResetInputs(); return; }
+
+            if (_inputMode == InputMode.Auto)
             {
-                ResetInputs();
-                return;
+                DetectActiveInput();
             }
 
-            // Автоопределение режима
-            if (_currentMode == InputMode.Auto)
-            {
-                bool wheelConnected = IsWheelConnected();
-                InputMode previousMode = _currentMode;
-                _currentMode = wheelConnected ? InputMode.Wheel : InputMode.InputSystem;
+            if (_inputMode == InputMode.Keyboard)
+                UpdateKeyboard();
+            else if (_inputMode == InputMode.Wheel)
+                UpdateWheel();
 
-                if (previousMode != _currentMode && _enableDebugLogs)
+            if (_inputMode == InputMode.Wheel && _transmissionMode == TransmissionMode.Manual)
+                ProcessManualShifting();
+        }
+
+        private void DetectActiveInput()
+        {
+            bool wheelConnected = false;
+
+            if (_wheelInput != null)
+            {
+                // Проверка наличия объекта и факта подключения (если SDK это поддерживает)
+                try
                 {
-                    Debug.Log($"Auto mode switched to: {_currentMode}");
+                    var prop = _wheelInput.GetType().GetProperty("IsConnected");
+                    if (prop != null)
+                        wheelConnected = (bool)prop.GetValue(_wheelInput);
+                    else
+                        wheelConnected = true; // если такого свойства нет, считаем что подключен
+                }
+                catch
+                {
+                    wheelConnected = true;
                 }
             }
 
-            // Обновляем ввод в зависимости от режима
-            if (_currentMode == InputMode.InputSystem)
+            if (!wheelConnected)
             {
-                UpdateInputSystem();
-            }
-            else if (_currentMode == InputMode.Wheel)
-            {
-                UpdateWheelInput();
-            }
-
-            // Логика передач
-            ProcessGearChanges();
-
-            // Отладочная информация
-            if (_enableDebugLogs && Time.frameCount % 120 == 0)
-            {
-                Debug.Log($"Input - Mode: {_currentMode}, Gas: {_gasInput:F2}, Brake: {_brakeInput:F2}, Steering: {_steeringInput:F2}, " +
-                         $"GearUp: {_gearUpInput}, GearDown: {_gearDownInput}, Nitro: {_nitroInput}, CurrentGear: {_currentGear}");
-            }
-        }
-
-        #region --- Input Updates ---
-        private void UpdateInputSystem()
-        {
-            if (!_isInitialized || _inputActions == null)
-            {
-                if (_enableDebugLogs)
-                    Debug.LogWarning("Input system not initialized!");
+                _inputMode = InputMode.Keyboard;
+                _wasWheelConnected = false;
                 return;
             }
 
-            try
+            bool wheelActive = false;
+
+            if (_wheelInput != null)
             {
-                _gasInput = _inputActions.Vehicle.GasInput.ReadValue<float>();
-                _brakeInput = _inputActions.Vehicle.BrakeInput.ReadValue<float>();
-                _steeringInput = _inputActions.Vehicle.HorizontalInput.ReadValue<float>();
+                // Проверяем реальные движения или нажатия
+                if (Mathf.Abs(_wheelInput.Throttle) > 0.05f ||
+                    Mathf.Abs(_wheelInput.Brake) > 0.05f ||
+                    Mathf.Abs(_wheelInput.Steering) > 0.05f ||
+                    _wheelInput.NorthButton || _wheelInput.SouthButton || _wheelInput.EastButton)
+                {
+                    _lastWheelInputTime = Time.time;
+                    wheelActive = true;
+                    _wasWheelConnected = true;
+                }
 
-                _handbrakeInput = _inputActions.Vehicle.HandbrakeInput.ReadValue<float>() > 0.5f;
-                _nitroInput = _inputActions.Vehicle.NitroBoostInput.ReadValue<float>() > 0.5f;
-
-                if (_forceGasInputDuringNitrous && _nitroInput && _gasInput == 0)
-                    _gasInput = 1;
-
-                // Для клавиатуры используем только секвентальное переключение
-                _gearUpInput = _inputActions.Vehicle.GearUpInput.WasPerformedThisFrame();
-                _gearDownInput = _inputActions.Vehicle.GearDownInput.WasPerformedThisFrame();
+                // Если активность недавно — руль активен
+                if (Time.time - _lastWheelInputTime < _wheelActivityTimeout && _wasWheelConnected)
+                {
+                    _inputMode = InputMode.Wheel;
+                    return;
+                }
             }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"Error reading input system: {e.Message}");
-            }
-        }
 
-        private void UpdateWheelInput()
-        {
-            // Данные руля обновляются через события, но здесь можно добавить дополнительную логику
-            if (_wheelInput == null)
+            // Если руль неактивен слишком долго
+            if (Time.time - _lastWheelInputTime >= _wheelActivityTimeout)
             {
-                Debug.LogWarning("Wheel input is null in Wheel mode!");
-                return;
+                _inputMode = InputMode.Keyboard;
             }
         }
-        #endregion
 
-        #region --- Wheel Event Subscriptions ---
-        private void SubscribeToWheelEvents()
+        private void UpdateKeyboard()
         {
-            if (_wheelInput == null)
-            {
-                Debug.LogError("Cannot subscribe to wheel events - wheel input is null!");
-                return;
-            }
+            if (!_initialized) return;
 
-            _wheelInput.ThrottleCallback += OnThrottle;
-            _wheelInput.BrakeCallback += OnBrake;
-            _wheelInput.SteeringCallback += OnSteering;
-            _wheelInput.HandbrakeCallback += OnHandbrake;
-            _wheelInput.OnRightShiftCallback += OnGearUp;
-            _wheelInput.OnLeftShiftCallback += OnGearDown;
-            _wheelInput.OnEastButtonCallback += OnNitro;
+            _gas = _inputActions.Vehicle.GasInput.ReadValue<float>();
+            _brake = _inputActions.Vehicle.BrakeInput.ReadValue<float>();
+            _steer = _inputActions.Vehicle.HorizontalInput.ReadValue<float>();
+            _handbrake = _inputActions.Vehicle.HandbrakeInput.ReadValue<float>() > 0.5f;
+            _nitro = _inputActions.Vehicle.NitroBoostInput.ReadValue<float>() > 0.5f;
 
-            // Передачи механики
-            _wheelInput.Shifter1Callback += OnShifter1;
-            _wheelInput.Shifter2Callback += OnShifter2;
-            _wheelInput.Shifter3Callback += OnShifter3;
-            _wheelInput.Shifter4Callback += OnShifter4;
-            _wheelInput.Shifter5Callback += OnShifter5;
-            _wheelInput.Shifter6Callback += OnShifter6;
-            _wheelInput.Shifter7Callback += OnShifter7;
-
-            Debug.Log("Successfully subscribed to all wheel events");
+            _gearUp = _inputActions.Vehicle.GearUpInput.WasPerformedThisFrame();
+            _gearDown = _inputActions.Vehicle.GearDownInput.WasPerformedThisFrame();
         }
 
-        private void UnsubscribeFromWheelEvents()
+        private void UpdateWheel()
         {
-            if (_wheelInput == null) return;
-
-            _wheelInput.ThrottleCallback -= OnThrottle;
-            _wheelInput.BrakeCallback -= OnBrake;
-            _wheelInput.SteeringCallback -= OnSteering;
-            _wheelInput.HandbrakeCallback -= OnHandbrake;
-            _wheelInput.OnRightShiftCallback -= OnGearUp;
-            _wheelInput.OnLeftShiftCallback -= OnGearDown;
-            _wheelInput.OnEastButtonCallback -= OnNitro;
-
-            _wheelInput.Shifter1Callback -= OnShifter1;
-            _wheelInput.Shifter2Callback -= OnShifter2;
-            _wheelInput.Shifter3Callback -= OnShifter3;
-            _wheelInput.Shifter4Callback -= OnShifter4;
-            _wheelInput.Shifter5Callback -= OnShifter5;
-            _wheelInput.Shifter6Callback -= OnShifter6;
-            _wheelInput.Shifter7Callback -= OnShifter7;
+            // Руль обновляется через коллбеки
         }
-        #endregion
 
-        #region --- Gear Logic ---
-        private void ProcessGearChanges()
+        private void SubscribeWheel()
         {
-            if (_currentMode == InputMode.Wheel && !_useSequentialShifting)
-            {
-                ProcessManualShifting();
-            }
+            _wheelInput.ThrottleCallback += v => { _gas = v; _lastWheelInputTime = Time.time; };
+            _wheelInput.BrakeCallback += v => { _brake = v; _lastWheelInputTime = Time.time; };
+            _wheelInput.SteeringCallback += v => { _steer = v; _lastWheelInputTime = Time.time; };
+            _wheelInput.HandbrakeCallback += v => { _handbrake = v > 0.5f; _lastWheelInputTime = Time.time; };
+            _wheelInput.OnRightShiftCallback += p => { if (_transmissionMode == TransmissionMode.Sequential) _gearUp = p; };
+            _wheelInput.OnLeftShiftCallback += p => { if (_transmissionMode == TransmissionMode.Sequential) _gearDown = p; };
+            _wheelInput.OnEastButtonCallback += p => { _nitro = p; };
+
+            _wheelInput.Shifter1Callback += p => _manualGears[1] = p;
+            _wheelInput.Shifter2Callback += p => _manualGears[2] = p;
+            _wheelInput.Shifter3Callback += p => _manualGears[3] = p;
+            _wheelInput.Shifter4Callback += p => _manualGears[4] = p;
+            _wheelInput.Shifter5Callback += p => _manualGears[5] = p;
+            _wheelInput.Shifter6Callback += p => _manualGears[6] = p;
+            _wheelInput.Shifter7Callback += p => _manualGears[7] = p;
+        }
+
+        private void UnsubscribeWheel()
+        {
+            _wheelInput.ThrottleCallback -= v => _gas = v;
+            _wheelInput.BrakeCallback -= v => _brake = v;
+            _wheelInput.SteeringCallback -= v => _steer = v;
+            _wheelInput.HandbrakeCallback -= v => _handbrake = v > 0.5f;
+            _wheelInput.OnRightShiftCallback -= p => { if (_transmissionMode == TransmissionMode.Sequential) _gearUp = p; };
+            _wheelInput.OnLeftShiftCallback -= p => { if (_transmissionMode == TransmissionMode.Sequential) _gearDown = p; };
+            _wheelInput.OnEastButtonCallback -= p => _nitro = p;
         }
 
         private void ProcessManualShifting()
         {
-            int selectedGear = -1;
-
-            for (int i = 0; i < _gearInputs.Length; i++)
+            int selected = -1;
+            for (int i = 1; i < _manualGears.Length; i++)
             {
-                if (_gearInputs[i])
-                {
-                    selectedGear = i;
-                    break;
-                }
+                if (_manualGears[i]) { selected = i; break; }
             }
-
-            if (selectedGear != -1 && selectedGear != _currentGear)
-            {
-                _currentGear = selectedGear;
-                if (_enableDebugLogs)
-                    Debug.Log($"Manual gear change: {_currentGear}");
-            }
-
-            if (selectedGear == -1 && _currentGear != 0)
-            {
-                _currentGear = 0;
-                if (_enableDebugLogs)
-                    Debug.Log("Gear set to Neutral");
-            }
-        }
-        #endregion
-
-        #region --- Wheel Event Handlers ---
-        private void OnThrottle(float value)
-        {
-            _gasInput = value;
-            if (_enableDebugLogs && Time.frameCount % 60 == 0)
-                Debug.Log($"Throttle: {value:F2}");
-        }
-
-        private void OnBrake(float value)
-        {
-            _brakeInput = value;
-            if (_enableDebugLogs && Time.frameCount % 60 == 0)
-                Debug.Log($"Brake: {value:F2}");
-        }
-
-        private void OnSteering(float value)
-        {
-            _steeringInput = value;
-            if (_enableDebugLogs && Time.frameCount % 60 == 0)
-                Debug.Log($"Steering: {value:F2}");
-        }
-
-        private void OnHandbrake(float value)
-        {
-            _handbrakeInput = value > 0.5f;
-            if (_enableDebugLogs && value > 0.5f)
-                Debug.Log($"Handbrake: {value:F2}");
-        }
-
-        private void OnGearUp(bool pressed)
-        {
-            if (_useSequentialShifting)
-            {
-                _gearUpInput = pressed;
-                if (_enableDebugLogs && pressed)
-                    Debug.Log("GearUp pressed");
-            }
-        }
-
-        private void OnGearDown(bool pressed)
-        {
-            if (_useSequentialShifting)
-            {
-                _gearDownInput = pressed;
-                if (_enableDebugLogs && pressed)
-                    Debug.Log("GearDown pressed");
-            }
-        }
-
-        private void OnNitro(bool pressed)
-        {
-            _nitroInput = pressed;
-            if (_enableDebugLogs && pressed)
-                Debug.Log("Nitro pressed");
-        }
-
-        private void OnShifter1(bool pressed) { _gearInputs[1] = pressed; if (_enableDebugLogs && pressed) Debug.Log("Shifter 1"); }
-        private void OnShifter2(bool pressed) { _gearInputs[2] = pressed; if (_enableDebugLogs && pressed) Debug.Log("Shifter 2"); }
-        private void OnShifter3(bool pressed) { _gearInputs[3] = pressed; if (_enableDebugLogs && pressed) Debug.Log("Shifter 3"); }
-        private void OnShifter4(bool pressed) { _gearInputs[4] = pressed; if (_enableDebugLogs && pressed) Debug.Log("Shifter 4"); }
-        private void OnShifter5(bool pressed) { _gearInputs[5] = pressed; if (_enableDebugLogs && pressed) Debug.Log("Shifter 5"); }
-        private void OnShifter6(bool pressed) { _gearInputs[6] = pressed; if (_enableDebugLogs && pressed) Debug.Log("Shifter 6"); }
-        private void OnShifter7(bool pressed) { _gearInputs[7] = pressed; if (_enableDebugLogs && pressed) Debug.Log("Shifter 7"); }
-        #endregion
-
-        private bool IsWheelConnected()
-        {
-            if (_wheelInput == null)
-            {
-                return false;
-            }
-
-            // Более надежная проверка - считаем руль подключенным если он назначен в инспекторе
-            // и не проверяем значения осей (они могут быть нулевыми изначально)
-            bool isConnected = _wheelInput != null;
-
-            if (_enableDebugLogs && Time.frameCount % 120 == 0)
-            {
-                Debug.Log($"Wheel connected: {isConnected}, Throttle: {_wheelInput.Throttle:F2}, Steering: {_wheelInput.Steering:F2}");
-            }
-
-            return isConnected;
+            _currentGear = selected != -1 ? selected : 0;
         }
 
         private void ResetInputs()
         {
-            _gasInput = _brakeInput = _steeringInput = 0f;
-            _handbrakeInput = _gearUpInput = _gearDownInput = _nitroInput = false;
-            for (int i = 0; i < _gearInputs.Length; i++)
-                _gearInputs[i] = false;
+            _gas = _brake = _steer = 0;
+            _handbrake = _gearUp = _gearDown = _nitro = false;
+            for (int i = 0; i < _manualGears.Length; i++) _manualGears[i] = false;
             _currentGear = 0;
         }
 
-        #region --- Interface Implementations ---
+        #region Interface
         public void EnableInput(bool enable)
         {
             _enabled = enable;
             if (!enable) ResetInputs();
-
-            Debug.Log($"Input {(enable ? "enabled" : "disabled")}");
         }
 
-        public float GetGasInput() => _gasInput;
-        public float GetBrakeInput() => _brakeInput;
-        public bool GetNitroBoostInput() => _nitroInput;
-        public bool GetHandbrakeInput() => _handbrakeInput;
-        public float GetHorizontalInput() => _steeringInput;
+        public float GetGasInput() => _gas;
+        public float GetBrakeInput() => _brake;
+        public bool GetNitroBoostInput() => _nitro;
+        public bool GetHandbrakeInput() => _handbrake;
+        public float GetHorizontalInput() => _steer;
 
         public bool GetGearUpInput()
         {
-            if (_useSequentialShifting || _currentMode == InputMode.InputSystem)
+            if (_transmissionMode == TransmissionMode.Sequential || _inputMode == InputMode.Keyboard)
             {
-                bool result = _gearUpInput;
-                _gearUpInput = false; // Сбрасываем после чтения
-                return result;
+                bool res = _gearUp;
+                _gearUp = false;
+                return res;
             }
             return false;
         }
 
         public bool GetGearDownInput()
         {
-            if (_useSequentialShifting || _currentMode == InputMode.InputSystem)
+            if (_transmissionMode == TransmissionMode.Sequential || _inputMode == InputMode.Keyboard)
             {
-                bool result = _gearDownInput;
-                _gearDownInput = false; // Сбрасываем после чтения
-                return result;
+                bool res = _gearDown;
+                _gearDown = false;
+                return res;
             }
             return false;
         }
 
+        public void ReinitializeInputSystem()
+        {
+            if (_inputActions == null)
+                _inputActions = new PlayerVehicleInputActions();
+
+            try
+            {
+                _inputActions.Enable();
+                _initialized = true;
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"ReinitializeInputSystem failed: {e.Message}");
+                _initialized = false;
+            }
+
+            ResetInputs();
+            _inputMode = InputMode.Auto;
+        }
+
+        public int GetCurrentGear() => _currentGear;
+        public bool IsManualTransmission() => _inputMode == InputMode.Wheel && _transmissionMode == TransmissionMode.Manual;
+
         public float GetPitchInput() => 0f;
         public float GetYawInput() => 0f;
         public float GetRollInput() => 0f;
-
-        public int GetCurrentGear() => _currentGear;
-        public bool IsManualTransmission() => _currentMode == InputMode.Wheel && !_useSequentialShifting;
-
-        public void SetTransmissionType(bool useSequential)
-        {
-            _useSequentialShifting = useSequential;
-            if (useSequential)
-                _currentGear = 0;
-
-            Debug.Log($"Transmission type set to: {(useSequential ? "Sequential" : "Manual")}");
-        }
-
-        public void SetInputMode(InputMode mode)
-        {
-            _currentMode = mode;
-            Debug.Log($"Input mode set to: {mode}");
-        }
-
-        public InputMode GetCurrentInputMode() => _currentMode;
-
-        public bool IsInputSystemInitialized() => _isInitialized;
         #endregion
 
-        [ContextMenu("Reinitialize Input System")]
-        private void ReinitializeFromContextMenu()
-        {
-            ReinitializeInputSystem();
-        }
+        public void SetTransmissionMode(TransmissionMode mode) => _transmissionMode = mode;
+        public TransmissionMode GetTransmissionMode() => _transmissionMode;
 
-        [ContextMenu("Debug Input State")]
-        private void DebugInputState()
-        {
-            Debug.Log($"=== INPUT DEBUG ===\n" +
-                     $"Mode: {_currentMode}\n" +
-                     $"Wheel Assigned: {_wheelInput != null}\n" +
-                     $"Gas: {_gasInput:F2}\n" +
-                     $"Brake: {_brakeInput:F2}\n" +
-                     $"Steering: {_steeringInput:F2}\n" +
-                     $"Handbrake: {_handbrakeInput}\n" +
-                     $"Nitro: {_nitroInput}\n" +
-                     $"GearUp: {_gearUpInput}\n" +
-                     $"GearDown: {_gearDownInput}\n" +
-                     $"Current Gear: {_currentGear}\n" +
-                     $"Input System Initialized: {_isInitialized}");
-        }
+        public void SetInputMode(InputMode mode) => _inputMode = mode;
+        public InputMode GetCurrentInputMode() => _inputMode;
     }
 }

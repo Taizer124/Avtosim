@@ -22,6 +22,10 @@ namespace LogitechG29.Sample.Input
 
         private void OnEnable()
         {
+            // Не инициализируем систему ввода в редакторе при отсутствии Play Mode
+            if (!Application.isPlaying)
+                return;
+
             _input = new InputController();
             _input.Buttons.SetCallbacks(this);
             _input.Handbrake.SetCallbacks(this);
@@ -40,20 +44,31 @@ namespace LogitechG29.Sample.Input
 
         private void OnDisable()
         {
-            _input.Buttons.Disable();
-            _input.Handbrake.Disable();
-            _input.Pedals.Disable();
-            _input.Steeringwheel.Disable();
-            _input.Transmission.Disable();
+            // Если мы в редакторе и не в play mode — ничего не выключаем (не было включено)
+            if (!Application.isPlaying)
+                return;
 
-            _input.Buttons.SetCallbacks(null);
-            _input.Handbrake.SetCallbacks(null);
-            _input.Pedals.SetCallbacks(null);
-            _input.Steeringwheel.SetCallbacks(null);
-            _input.Transmission.SetCallbacks(null);
+            if (_input != null)
+            {
+                _input.Buttons.Disable();
+                _input.Handbrake.Disable();
+                _input.Pedals.Disable();
+                _input.Steeringwheel.Disable();
+                _input.Transmission.Disable();
 
-            UnRegisterDebugOnActions();
+                _input.Buttons.SetCallbacks(null);
+                _input.Handbrake.SetCallbacks(null);
+                _input.Pedals.SetCallbacks(null);
+                _input.Steeringwheel.SetCallbacks(null);
+                _input.Transmission.SetCallbacks(null);
+
+                UnRegisterDebugOnActions();
+
+                // при желании можно обнулить _input
+                _input = null;
+            }
         }
+
 
         #endregion
 

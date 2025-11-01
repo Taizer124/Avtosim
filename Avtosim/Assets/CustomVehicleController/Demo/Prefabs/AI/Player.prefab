@@ -15911,6 +15911,10 @@ PrefabInstance:
       propertyPath: m_Mass
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4402999331888719326, guid: daf48c77ec58b3546ac37ee625e2e1d0, type: 3}
+      propertyPath: m_Constraints
+      value: 16
+      objectReference: {fileID: 0}
     - target: {fileID: 5623537124478639897, guid: daf48c77ec58b3546ac37ee625e2e1d0, type: 3}
       propertyPath: _wheelRadius
       value: 0.38577974
@@ -16073,6 +16077,7 @@ MonoBehaviour:
   _wheelInput: {fileID: 11400000, guid: 8268bb9eff5a1954492cd4817fb37528, type: 2}
   _useSequentialShifting: 0
   _forceGasInputDuringNitrous: 0
+  _enableDebugLogs: 1
 --- !u!65 &370501732272814851
 BoxCollider:
   m_ObjectHideFlags: 0

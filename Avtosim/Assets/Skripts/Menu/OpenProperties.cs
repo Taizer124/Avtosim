@@ -14,68 +14,68 @@ public class MenuManager : MonoBehaviour
     [Header("Back Buttons")]
     [SerializeField] private Button backButtonSettings = null;
 
+    [Header("Navigation")]
+    [SerializeField] private WheelUINavigation wheelUINavigation;
+
     private Stack<GameObject> panelHistory = new Stack<GameObject>();
 
     private void Awake()
     {
-        // Главное меню всегда активно изначально
         mainMenuPanel.SetActive(true);
         settingsPanel.SetActive(false);
 
-        // Назначаем переходы на кнопки главного меню
         settingsButton.onClick.AddListener(() => OpenPanel(settingsPanel));
-
-        // Назначаем обработчики на backButton
         backButtonSettings.onClick.AddListener(GoBack);
 
-        // Добавляем главное меню в историю как начальную точку
         panelHistory.Push(mainMenuPanel);
+
+        if (wheelUINavigation != null)
+            wheelUINavigation.SetActivePanel(mainMenuPanel.transform);
     }
 
     private void OpenPanel(GameObject targetPanel)
     {
-        // Добавляем текущую активную панель в историю
         panelHistory.Push(GetActivePanel());
-
-        // Показываем целевую панель и скрываем остальные
         ShowOnlyPanel(targetPanel);
+
+        if (wheelUINavigation != null)
+            wheelUINavigation.SetActivePanel(targetPanel.transform);
     }
 
     private void GoBack()
     {
-        if (panelHistory.Count > 1) // Больше 1, потому что главное меню всегда там
+        if (panelHistory.Count > 1)
         {
-            // Убираем текущую панель из истории
             panelHistory.Pop();
-
-            // Возвращаемся к предыдущей панели
-            GameObject previousPanel = panelHistory.Peek();
+            var previousPanel = panelHistory.Peek();
             ShowOnlyPanel(previousPanel);
+
+            if (wheelUINavigation != null)
+                wheelUINavigation.SetActivePanel(previousPanel.transform);
         }
         else
         {
-            // Если в истории только главное меню, показываем его
             ShowOnlyPanel(mainMenuPanel);
+            if (wheelUINavigation != null)
+                wheelUINavigation.SetActivePanel(mainMenuPanel.transform);
         }
     }
 
-    // Метод для принудительного возврата в главное меню
     public void GoToMainMenu()
     {
-        // Очищаем историю и добавляем главное меню
         panelHistory.Clear();
         panelHistory.Push(mainMenuPanel);
-
         ShowOnlyPanel(mainMenuPanel);
+
+        if (wheelUINavigation != null)
+            wheelUINavigation.SetActivePanel(mainMenuPanel.transform);
     }
 
     private void ShowOnlyPanel(GameObject panelToShow)
     {
-        // Скрываем все панели
         mainMenuPanel.SetActive(false);
         settingsPanel.SetActive(false);
 
-        // Показываем только нужную панель
         panelToShow.SetActive(true);
     }
 
@@ -83,31 +83,5 @@ public class MenuManager : MonoBehaviour
     {
         if (settingsPanel.activeSelf) return settingsPanel;
         return mainMenuPanel;
-    }
-
-    // Метод для получения текущей активной панели
-    public GameObject GetCurrentPanel()
-    {
-        return GetActivePanel();
-    }
-
-    // Метод для проверки, активна ли главная панель
-    public bool IsMainMenuActive()
-    {
-        return mainMenuPanel.activeSelf;
-    }
-
-    // Метод для принудительного открытия панели настроек
-    public void OpenSettingsPanel()
-    {
-        OpenPanel(settingsPanel);
-    }
-
-    // Метод для принудительного закрытия всех панелей (кроме главной)
-    public void CloseAllPanels()
-    {
-        ShowOnlyPanel(mainMenuPanel);
-        panelHistory.Clear();
-        panelHistory.Push(mainMenuPanel);
     }
 }

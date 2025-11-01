@@ -18,11 +18,11 @@ public class LoseWindow : MonoBehaviour
             // Управляем аудио в зависимости от состояния меню
             if (isMenuOpening)
             {
-                menuToggle.ForcePauseAudio();
+                //menuToggle.ForcePauseAudio();
             }
             else
             {
-                menuToggle.ForceResumeAudio();
+                //menuToggle.ForceResumeAudio();
             }
             // Обновляем состояние курсора
             UpdateCursorState(isMenuOpening);
