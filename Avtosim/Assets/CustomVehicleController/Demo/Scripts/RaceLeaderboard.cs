@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro; // подключаем TextMeshPro
 
 namespace Assets.VehicleController
 {
@@ -7,43 +7,50 @@ namespace Assets.VehicleController
     {
         [SerializeField]
         private RaceManager _raceManager;
+
         [SerializeField]
-        private Text _lapsProgress;
-        private Text[] _racerProgressTextArray;
+        private TMP_Text _lapsProgress; // заменили Text TMP_Text
+
+        private TMP_Text[] _racerProgressTextArray; // заменили Text TMP_Text
+
         [SerializeField]
         private GameObject _parent;
+
         [SerializeField]
         private GameObject _racerInfoPrefab;
+
         [SerializeField]
         private float _distanceBetweenLines;
+
         [SerializeField]
-        private Text _countdownText;
-        [SerializeField]
-        private GameObject _countdownTMP;
+        private TMP_Text _countdownText; // заменили Text TMP_Text
+
         private void CreateLeaderboard()
         {
             if (_racerProgressTextArray != null && _racerProgressTextArray.Length > 0)
             {
                 for (int i = 0; i < _racerProgressTextArray.Length; i++)
                 {
-                    Destroy(_racerProgressTextArray[i]);
+                    Destroy(_racerProgressTextArray[i].gameObject);
                 }
             }
 
-            _racerProgressTextArray = new Text[_raceManager.GetLeaderboard().Count];
+            var leaderboard = _raceManager.GetLeaderboard();
+            _racerProgressTextArray = new TMP_Text[leaderboard.Count];
             float currentDist = 0;
-            for (int i = 0; i < _raceManager.GetLeaderboard().Count; i++)
+
+            for (int i = 0; i < leaderboard.Count; i++)
             {
-                GameObject racerProgressInfo = Instantiate(_racerInfoPrefab);
-                racerProgressInfo.transform.SetParent(_parent.transform, false);
+                GameObject racerProgressInfo = Instantiate(_racerInfoPrefab, _parent.transform);
                 racerProgressInfo.transform.localPosition -= new Vector3(0, currentDist, 0);
                 currentDist += _distanceBetweenLines;
-                _racerProgressTextArray[i] = racerProgressInfo.GetComponent<Text>();
+
+                // Получаем компонент TMP_Text (на объекте должен быть TextMeshProUGUI)
+                _racerProgressTextArray[i] = racerProgressInfo.GetComponent<TMP_Text>();
             }
         }
 
-        // Update is called once per frame
-        void Update()
+        private void Update()
         {
             int countdown = Mathf.CeilToInt(_raceManager.StartCountdownTimeLeft);
             if (countdown > 0)
@@ -53,13 +60,9 @@ namespace Assets.VehicleController
             else
             {
                 _countdownText.gameObject.SetActive(false);
-                _countdownTMP.SetActive(false);
             }
 
-
-
             RacerProgress playerProgress = null;
-
             var list = _raceManager.GetLeaderboard();
             int size = list.Count;
 
@@ -71,17 +74,16 @@ namespace Assets.VehicleController
             for (int i = 0; i < size; i++)
             {
                 var racerProgress = list[i];
-
                 if (racerProgress.IsPlayer)
                     playerProgress = racerProgress;
 
-                _racerProgressTextArray[i].text = (i + 1) + " - " + racerProgress.RacerName;
+                _racerProgressTextArray[i].text = $"{i + 1} - {racerProgress.RacerName}";
             }
 
             if (playerProgress == null)
                 return;
 
-            _lapsProgress.text = playerProgress.LapsPassed + "/" + _raceManager.LapCount;
+            _lapsProgress.text = $"{playerProgress.LapsPassed}/{_raceManager.LapCount}";
         }
     }
 }

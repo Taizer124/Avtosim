@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using _2DOF;
 using UnityEngine;
+using Bhaptics.SDK2; // Добавь, если используешь Bhaptics SDK
 
 public class CarTelemetryHandler : MonoBehaviour
 {
@@ -23,7 +24,6 @@ public class CarTelemetryHandler : MonoBehaviour
     private float _currentTiltAngle;
     private float _tiltVelocity; // Для SmoothDamp
 
-    // Добавляем смещение для центра масс если нужно
     [SerializeField] private Vector3 centerOfMassOffset = Vector3.zero;
 
     private void Awake()
@@ -33,7 +33,6 @@ public class CarTelemetryHandler : MonoBehaviour
         _previousVelocity = rigidbody.linearVelocity;
         _previousTime = Time.time;
 
-        // Устанавливаем центр масс если нужно
         if (centerOfMassOffset != Vector3.zero)
         {
             rigidbody.centerOfMass = centerOfMassOffset;
@@ -65,7 +64,7 @@ public class CarTelemetryHandler : MonoBehaviour
             UpdateAngles();
             UpdateVelocity();
             UpdatePlatformTilt();
-            Debug.Log(_telemetryDataData.ToString());
+            //Debug.Log(_telemetryDataData.ToString());
             yield return new WaitForSeconds(WAIT_TIME);
         }
     }
@@ -78,14 +77,9 @@ public class CarTelemetryHandler : MonoBehaviour
     private void UpdateAngles()
     {
         var euler = vehicleTransform.eulerAngles;
-
-        // Нормализуем углы в диапазон [-180, 180]
         euler.x = NormalizeAngle(euler.x);
         euler.y = NormalizeAngle(euler.y);
         euler.z = NormalizeAngle(euler.z);
-
-        // Меняем оси местами согласно вашим требованиям
-        // Unity X -> Platform Z, Unity Y -> Platform Y, Unity Z -> Platform X
         _telemetryDataData.Angles = new Vector3(euler.z, euler.y, euler.x);
     }
 
@@ -105,14 +99,51 @@ public class CarTelemetryHandler : MonoBehaviour
         if (deltaTime > 0)
         {
             Vector3 acceleration = (currentVelocity - _previousVelocity) / deltaTime;
-
-            // Получаем продольное ускорение (вперед/назад)
             float forwardAcceleration = Vector3.Dot(acceleration, vehicleTransform.forward);
+            float forwardSpeed = Vector3.Dot(currentVelocity, vehicleTransform.forward);
 
-            // Вычисляем целевой угол наклона
+            // Реалистичная g-сила
+            float gForce = forwardAcceleration / 9.81f; // 1g = ускорение свободного падения
+
             float targetTiltAngle = 0f;
 
-            // Добавляем зону нечувствительности
+            // Эффект ремня безопасности (резкое торможение)
+            if (forwardSpeed > 2f && gForce < -0.3f)
+            {
+                // Преобразуем силу торможения в интенсивность (3g = максимум)
+                float intensityValue = Mathf.Clamp01(Mathf.Abs(gForce) / 3f);
+
+                BhapticsLibrary.Play(
+                    eventId: "remen_bez",
+                    startMillis: 0,
+                    intensity: intensityValue,
+                    duration: 1,
+                    angleX: 0,
+                    offsetY: 0
+                );
+
+                Debug.Log("Haptic effect: remen_bez | Intensity: " + intensityValue.ToString("F2") + " | gForce: " + gForce.ToString("F2"));
+            }
+
+            // Эффект давления в спину (ускорение вперёд)
+            if (forwardSpeed > 1f && gForce > 0.3f)
+            {
+                // Чем сильнее ускорение, тем выше интенсивность (до 2g)
+                float intensityValue = Mathf.Clamp01(gForce / 2f);
+
+                BhapticsLibrary.Play(
+                    eventId: "davlenie_kovsha",
+                    startMillis: 0,
+                    intensity: intensityValue,
+                    duration: 1,
+                    angleX: 0,
+                    offsetY: 0
+                );
+
+                Debug.Log("Haptic effect: davlenie_kovsha | Intensity: " + intensityValue.ToString("F2") + " | gForce: " + gForce.ToString("F2"));
+            }
+
+            // Наклон платформы
             if (Mathf.Abs(forwardAcceleration) > accelerationThreshold)
             {
                 if (forwardAcceleration > accelerationThreshold)
@@ -125,16 +156,18 @@ public class CarTelemetryHandler : MonoBehaviour
                 }
             }
 
-            // Используем SmoothDamp для плавного изменения угла
-            _currentTiltAngle = Mathf.SmoothDamp(_currentTiltAngle, targetTiltAngle, ref _tiltVelocity, tiltResponseSpeed, Mathf.Infinity, deltaTime);
+            _currentTiltAngle = Mathf.SmoothDamp(
+                _currentTiltAngle,
+                targetTiltAngle,
+                ref _tiltVelocity,
+                tiltResponseSpeed,
+                Mathf.Infinity,
+                deltaTime
+            );
 
-            // Добавляем мертвую зону для устранения микроколебаний
             if (Mathf.Abs(_currentTiltAngle) < deadZone)
-            {
                 _currentTiltAngle = 0f;
-            }
 
-            // Применяем наклон через Rigidbody для совместимости с физикой
             ApplyTiltToRigidbody();
         }
 
@@ -144,38 +177,28 @@ public class CarTelemetryHandler : MonoBehaviour
 
     private void ApplyTiltToRigidbody()
     {
-        // Получаем текущее вращение
         Quaternion currentRotation = rigidbody.rotation;
-
-        // Создаем целевое вращение с наклоном по оси Z (в Unity это крен)
-        // В вашем случае: наклон вперед/назад - это вращение вокруг оси X в Unity
         Quaternion targetRotation = Quaternion.Euler(_currentTiltAngle, currentRotation.eulerAngles.y, currentRotation.eulerAngles.z);
-
-        // Применяем вращение через Rigidbody
         rigidbody.MoveRotation(targetRotation);
     }
 
-    // Метод для принудительной установки угла наклона
     public void SetTiltAngle(float angle)
     {
         _currentTiltAngle = Mathf.Clamp(angle, -maxTiltAngle, maxTiltAngle);
         ApplyTiltToRigidbody();
     }
 
-    // Метод для сброса наклона
     public void ResetTilt()
     {
         _currentTiltAngle = 0f;
         ApplyTiltToRigidbody();
     }
 
-    // Метод для получения текущего угла наклона
     public float GetCurrentTiltAngle()
     {
         return _currentTiltAngle;
     }
 
-    // Визуализация центра масс в редакторе
     private void OnDrawGizmosSelected()
     {
         if (rigidbody != null)
