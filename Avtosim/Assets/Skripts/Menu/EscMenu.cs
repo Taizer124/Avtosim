@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Audio;
+using LogitechG29.Sample.Input; // добавлено дл€ InputControllerReader
 
 public class MenuToggle : MonoBehaviour
 {
@@ -12,7 +13,9 @@ public class MenuToggle : MonoBehaviour
     [SerializeField] private AudioMixer audioMixer;
     [SerializeField] private string masterVolumeParameter = "MasterVolume";
 
-    // ссылка на DemoManager дл€ синхронизации паузы
+    [Header("Input Settings")]
+    [SerializeField] private InputControllerReader inputController; // добавлено поле дл€ Logitech G29
+
     [SerializeField] private Assets.VehicleController.DemoManager demoManager;
 
     private float savedMasterVolume = 0f;
@@ -20,21 +23,53 @@ public class MenuToggle : MonoBehaviour
 
     private void Start()
     {
+        if (GameManager == null)
+            GameManager = FindAnyObjectByType<MenuController1>();
+        if (demoManager == null)
+            demoManager = FindAnyObjectByType<Assets.VehicleController.DemoManager>();
         if (menuCanvas != null)
             menuCanvas.enabled = !startHidden;
-
         if (startHidden)
             LockCursor();
 
         SaveCurrentVolume();
     }
 
+    private void OnEnable()
+    {
+        // ѕодписываемс€ на событие кнопки Options на руле
+        if (inputController != null)
+        {
+            inputController.OnOptionsCallback += OnOptionsPressed;
+        }
+    }
+
+    private void OnDisable()
+    {
+        // ќтписываемс€, чтобы не было утечек
+        if (inputController != null)
+        {
+            inputController.OnOptionsCallback -= OnOptionsPressed;
+        }
+    }
+
     private void Update()
     {
-        // ESC Ч стандартное открытие меню
-        // "Options" Ч кнопка на руле Logitech G29 (эмулируетс€ через KeyCode.JoystickButton9)
-        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.JoystickButton9))
+        // ESC Ч стандартное открытие меню с клавиатуры
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
             ToggleMenu();
+        }
+    }
+
+    private void OnOptionsPressed(bool isPressed)
+    {
+        // —рабатывает при нажатии кнопки "Options" на руле
+        if (isPressed)
+        {
+            Debug.Log("MenuToggle: Options button pressed on Logitech G29");
+            ToggleMenu();
+        }
     }
 
     public void ToggleMenu()
@@ -62,6 +97,8 @@ public class MenuToggle : MonoBehaviour
             if (demoManager != null)
                 demoManager.SetPauseState(false);
         }
+
+        Debug.Log("MenuToggle: Menu state changed. Menu active = " + menuCanvas.enabled);
     }
 
     private void PauseAudio()
