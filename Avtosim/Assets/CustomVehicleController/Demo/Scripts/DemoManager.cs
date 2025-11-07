@@ -80,6 +80,10 @@ namespace Assets.VehicleController
         private System.Reflection.PropertyInfo _southButtonProp;
         private System.Reflection.PropertyInfo _eastButtonProp;
 
+        // cooldown дл€ кнопок
+        private float _buttonCooldown = 0.4f;
+        private float _lastButtonTime = 0f;
+
         // ‘лаг паузы
         public bool IsPaused { get; private set; }
 
@@ -134,7 +138,6 @@ namespace Assets.VehicleController
 
         private void Update()
         {
-            //ѕолностью останавливаем обновление логики, если игра на паузе
             if (IsPaused)
                 return;
 
@@ -143,27 +146,34 @@ namespace Assets.VehicleController
             HandlePartsChanges();
             UpdateWheelButtonStates();
 
-            if (Input.GetKeyDown(KeyCode.R) || _westButtonPressed)
+            // ограничение частоты нажатий
+            bool canPress = (Time.time - _lastButtonTime > _buttonCooldown);
+
+            if ((_westButtonPressed || Input.GetKeyDown(KeyCode.R)) && canPress)
             {
                 SceneManager.LoadScene("mcp_day");
+                _lastButtonTime = Time.time;
                 _westButtonPressed = false;
             }
 
-            if (Input.GetKeyDown(KeyCode.T) || _northButtonPressed)
+            if ((_northButtonPressed || Input.GetKeyDown(KeyCode.T)) && canPress)
             {
                 SwapTransmissionType();
+                _lastButtonTime = Time.time;
                 _northButtonPressed = false;
             }
 
-            if (Input.GetKeyDown(KeyCode.Y) || _southButtonPressed)
+            if ((_southButtonPressed || Input.GetKeyDown(KeyCode.Y)) && canPress)
             {
                 SwapPreset();
+                _lastButtonTime = Time.time;
                 _southButtonPressed = false;
             }
 
-            if (Input.GetKeyDown(KeyCode.U) || _eastButtonPressed)
+            if ((_eastButtonPressed || Input.GetKeyDown(KeyCode.U)) && canPress)
             {
                 SwapDrivetrainType();
+                _lastButtonTime = Time.time;
                 _eastButtonPressed = false;
             }
 
@@ -177,7 +187,6 @@ namespace Assets.VehicleController
             HandlePartsMenu();
         }
 
-        // ћетод дл€ внешнего управлени€ паузой из MenuToggle
         public void SetPauseState(bool paused)
         {
             IsPaused = paused;
@@ -185,7 +194,6 @@ namespace Assets.VehicleController
 
         private void HandleAudio()
         {
-            // Ќе измен€ем громкость, если активна пауза
             if (IsPaused)
                 return;
 
@@ -203,15 +211,6 @@ namespace Assets.VehicleController
         {
             if (_wheelInputProvider == null)
                 return;
-
-            if (_inputProvider != null)
-            {
-                _northButtonPressed = _inputProvider.GetGearUpInput();
-                _southButtonPressed = _inputProvider.GetGearDownInput();
-                _eastButtonPressed = _inputProvider.GetNitroBoostInput();
-                _westButtonPressed = false;
-                return;
-            }
 
             try
             {

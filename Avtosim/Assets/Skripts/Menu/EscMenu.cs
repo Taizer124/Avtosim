@@ -1,13 +1,14 @@
 using UnityEngine;
 using UnityEngine.Audio;
 using LogitechG29.Sample.Input; // добавлено для InputControllerReader
-
+using Assets.VehicleController;
 public class MenuToggle : MonoBehaviour
 {
     [Header("Menu Settings")]
     [SerializeField] private Canvas menuCanvas;
     [SerializeField] private bool startHidden = true;
     [SerializeField] private MenuController1 GameManager;
+    [SerializeField] private CustomVehicleController CustomVehicleController1;
 
     [Header("Audio Settings")]
     [SerializeField] private AudioMixer audioMixer;
@@ -29,8 +30,12 @@ public class MenuToggle : MonoBehaviour
             demoManager = FindAnyObjectByType<Assets.VehicleController.DemoManager>();
         if (menuCanvas != null)
             menuCanvas.enabled = !startHidden;
+        if (CustomVehicleController1 ==  null)
+        {
+            CustomVehicleController1 = FindAnyObjectByType<CustomVehicleController>();
+        }
         if (startHidden)
-            LockCursor();
+            //LockCursor();
 
         SaveCurrentVolume();
     }
@@ -82,7 +87,8 @@ public class MenuToggle : MonoBehaviour
         if (isMenuOpening)
         {
             PauseAudio();
-            UnlockCursor();
+            //UnlockCursor();
+            CustomVehicleController1.enabled = false;
             GameManager.Pause();
 
             if (demoManager != null)
@@ -91,7 +97,8 @@ public class MenuToggle : MonoBehaviour
         else
         {
             ResumeAudio();
-            LockCursor();
+            //LockCursor();
+            CustomVehicleController1.enabled = true;
             GameManager.Resume();
 
             if (demoManager != null)
@@ -128,17 +135,17 @@ public class MenuToggle : MonoBehaviour
             savedMasterVolume = 0f;
     }
 
-    private void UnlockCursor()
-    {
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
-    }
+    //private void UnlockCursor()
+    //{
+    //    Cursor.visible = true;
+    //    Cursor.lockState = CursorLockMode.None;
+    //}
 
-    private void LockCursor()
-    {
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
-    }
+    //private void LockCursor()
+    //{
+    //    Cursor.visible = false;
+    //    Cursor.lockState = CursorLockMode.Locked;
+    //}
 
     private void OnDestroy()
     {

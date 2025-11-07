@@ -24,12 +24,17 @@ namespace Assets.VehicleController
         private int _currentGear;
         private bool _clutchInput;
         private bool _enabled = true;
+        private float _buttonCooldown = 0.4f;
+        private float _lastButtonPressTime = 0f;
 
-        public bool Return => _wheelInput != null && _wheelInput.Return;
-        public bool NorthButton => _wheelInput != null && _wheelInput.NorthButton;
-        public bool SouthButton => _wheelInput != null && _wheelInput.SouthButton;
-        public bool EastButton => _wheelInput != null && _wheelInput.EastButton;
+        // события для кнопок (можно использовать в DemoManager)
+        public event System.Action OnEastPressed;
+        public event System.Action OnWestPressed;
+        public event System.Action OnNorthPressed;
+        public event System.Action OnSouthPressed;
 
+        // поля для хранения состояний кнопок
+        private bool _eastPressed, _westPressed, _northPressed, _southPressed;
         private void OnEnable()
         {
             if (_wheelInput == null)
@@ -51,10 +56,13 @@ namespace Assets.VehicleController
             _wheelInput.ThrottleCallback += OnThrottle;
             _wheelInput.BrakeCallback += OnBrake;
             _wheelInput.SteeringCallback += OnSteering;
-            _wheelInput.HandbrakeCallback += OnHandbrake;
             _wheelInput.OnRightShiftCallback += OnGearUp;
             _wheelInput.OnLeftShiftCallback += OnGearDown;
-            _wheelInput.OnEastButtonCallback += OnNitro;
+
+            _wheelInput.OnEastButtonCallback += OnEast;
+            _wheelInput.OnNorthButtonCallback += OnNorth;
+            _wheelInput.OnSouthButtonCallback += OnSouth;
+            _wheelInput.OnWestButtonCallback += OnWest;
 
             _wheelInput.Shifter1Callback += OnShifter1;
             _wheelInput.Shifter2Callback += OnShifter2;
@@ -70,10 +78,14 @@ namespace Assets.VehicleController
             _wheelInput.ThrottleCallback -= OnThrottle;
             _wheelInput.BrakeCallback -= OnBrake;
             _wheelInput.SteeringCallback -= OnSteering;
-            _wheelInput.HandbrakeCallback -= OnHandbrake;
+
             _wheelInput.OnRightShiftCallback -= OnGearUp;
             _wheelInput.OnLeftShiftCallback -= OnGearDown;
-            _wheelInput.OnEastButtonCallback -= OnNitro;
+
+            _wheelInput.OnEastButtonCallback -= OnEast;
+            _wheelInput.OnNorthButtonCallback -= OnNorth;
+            _wheelInput.OnSouthButtonCallback -= OnSouth;
+            _wheelInput.OnWestButtonCallback -= OnWest;
 
             _wheelInput.Shifter1Callback -= OnShifter1;
             _wheelInput.Shifter2Callback -= OnShifter2;
@@ -102,6 +114,8 @@ namespace Assets.VehicleController
                     break;
                 case TransmissionMode.Automatic:
                     _currentGear = 1; // basic drive
+                    // Здесь провайдер не должен напрямую управлять движком;
+                    // vehicle controller опрашивает GetGasInput(), поэтому просто оставляем _gasInput
                     break;
             }
         }
@@ -120,7 +134,7 @@ namespace Assets.VehicleController
         private void ResetInputs()
         {
             _gasInput = _brakeInput = _steeringInput = 0f;
-            _handbrakeInput = _gearUpInput = _gearDownInput = _nitroInput = false;
+            _gearUpInput = _gearDownInput = _nitroInput = false;
             for (int i = 0; i < _gearInputs.Length; i++) _gearInputs[i] = false;
             _currentGear = 0;
         }
@@ -129,10 +143,52 @@ namespace Assets.VehicleController
         private void OnThrottle(float v) => _gasInput = v;
         private void OnBrake(float v) => _brakeInput = v;
         private void OnSteering(float v) => _steeringInput = v;
-        private void OnHandbrake(float v) => _handbrakeInput = v > 0.5f;
         private void OnGearUp(bool p) { if (_transmissionMode == TransmissionMode.Sequential) _gearUpInput = p; }
         private void OnGearDown(bool p) { if (_transmissionMode == TransmissionMode.Sequential) _gearDownInput = p; }
-        private void OnNitro(bool p) => _nitroInput = p;
+        private void OnEast(bool isPressed)
+        {
+            if (isPressed && Time.time - _lastButtonPressTime > _buttonCooldown)
+            {
+                _lastButtonPressTime = Time.time;
+                _eastPressed = true;
+                Debug.Log("EAST button pressed — switching drivetrain type");
+                OnEastPressed?.Invoke();
+            }
+        }
+
+        private void OnWest(bool isPressed)
+        {
+            if (isPressed && Time.time - _lastButtonPressTime > _buttonCooldown)
+            {
+                _lastButtonPressTime = Time.time;
+                _westPressed = true;
+                Debug.Log("WEST button pressed");
+                OnWestPressed?.Invoke();
+            }
+        }
+
+        private void OnNorth(bool isPressed)
+        {
+            if (isPressed && Time.time - _lastButtonPressTime > _buttonCooldown)
+            {
+                _lastButtonPressTime = Time.time;
+                _northPressed = true;
+                Debug.Log("NORTH button pressed");
+                OnNorthPressed?.Invoke();
+            }
+        }
+
+        private void OnSouth(bool isPressed)
+        {
+            if (isPressed && Time.time - _lastButtonPressTime > _buttonCooldown)
+            {
+                _lastButtonPressTime = Time.time;
+                _southPressed = true;
+                Debug.Log("SOUTH button pressed");
+                OnSouthPressed?.Invoke();
+            }
+        }
+
         private void OnShifter1(bool p) => _gearInputs[1] = p;
         private void OnShifter2(bool p) => _gearInputs[2] = p;
         private void OnShifter3(bool p) => _gearInputs[3] = p;
@@ -152,8 +208,8 @@ namespace Assets.VehicleController
         public float GetGasInput() => _gasInput;
         public float GetBrakeInput() => _brakeInput;
         public bool GetNitroBoostInput() => _nitroInput;
-        public bool GetHandbrakeInput() => _handbrakeInput;
         public float GetHorizontalInput() => _steeringInput;
+        public bool GetHandbrakeInput() => _handbrakeInput; 
         public float GetPitchInput() => 0f;
         public float GetYawInput() => 0f;
         public float GetRollInput() => 0f;
