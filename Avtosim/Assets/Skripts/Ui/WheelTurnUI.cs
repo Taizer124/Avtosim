@@ -79,39 +79,49 @@ public class WheelUINavigation : MonoBehaviour
     private void OnReturn(bool pressed)
     {
         _returnHeld = pressed;
-        if (_menuElements.Count == 0) return;
+
+        if (!pressed || _menuElements.Count == 0)
+            return;
 
         var current = _menuElements[_currentIndex];
         if (current == null) return;
 
-        if (pressed)
+        // === Если это слайдер ===
+        var slider = current.GetComponent<Slider>();
+        if (slider != null)
         {
-            // === Если это слайдер ===
-            var slider = current.GetComponent<Slider>();
-            if (slider != null)
-            {
-                StartCoroutine(AdjustSlider(slider));
-                return;
-            }
+            StopAllCoroutines();
+            StartCoroutine(AdjustSlider(slider));
+            return;
+        }
 
-            // === Если это кнопка ===
-            var button = current.GetComponent<Button>();
-            if (button != null)
-            {
-                button.onClick?.Invoke();
-                return;
-            }
+        // === Если это кнопка ===
+        var button = current.GetComponent<Button>();
+        if (button != null)
+        {
+            button.onClick?.Invoke();
+            return;
         }
     }
 
+
     private IEnumerator AdjustSlider(Slider slider)
     {
-        while (_returnHeld)
+        while (true)
         {
-            float steer = 0f;
+            bool returnState = _returnHeld;
 
+            // Дополнительно проверяем напрямую InputReader.Return
+            if (_inputReader != null)
+                returnState |= _inputReader.Return;
+
+            if (!returnState)
+                break;
+
+            float steer = 0f;
             if (_inputReader != null)
                 steer = _inputReader.Steering;
+
 #if UNITY_EDITOR
             steer += Input.mouseScrollDelta.y;
 #endif
@@ -127,6 +137,7 @@ public class WheelUINavigation : MonoBehaviour
             yield return null;
         }
     }
+
 
     private void HighlightSelected()
     {

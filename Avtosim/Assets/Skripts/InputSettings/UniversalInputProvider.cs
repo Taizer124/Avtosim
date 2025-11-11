@@ -1,6 +1,7 @@
-using UnityEngine;
 using LogitechG29.Sample.Input;
 using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Assets.VehicleController
 {
@@ -17,11 +18,11 @@ namespace Assets.VehicleController
         [SerializeField] private InputControllerReader _wheelInput;
 
         [Header("Optional Controls")]
-        [SerializeField] private bool enableHandbrakeInput = true; // можно выключить ручник из инспектора
+        [SerializeField] private bool enableHandbrakeInput = true;
         [SerializeField, Range(0f, 1f)] private float handbrakeDeadzone = 0.3f;
 
         private PlayerVehicleInputActions _inputActions;
-        private bool _initialized;
+        private bool _initialized = true;
         private bool _enabled = true;
 
         private float _gas, _brake, _steer;
@@ -48,20 +49,6 @@ namespace Assets.VehicleController
         private float _buttonCooldown = 0.4f;
         private float _lastButtonPressTime = 0f;
 
-        private void Awake()
-        {
-            try
-            {
-                _inputActions = new PlayerVehicleInputActions();
-                _inputActions.Enable();
-                _initialized = true;
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"Input init failed: {e.Message}");
-            }
-        }
-
         private void OnEnable()
         {
             if (_wheelInput != null) SubscribeWheel();
@@ -79,7 +66,8 @@ namespace Assets.VehicleController
             if (_inputMode == InputMode.Auto)
             {
                 DetectActiveInput();
-                if (_textInputSys != null) _textInputSys.text = _inputMode.ToString();
+                if (_textInputSys != null)
+                    _textInputSys.text = _inputMode.ToString();
             }
 
             if (_inputMode == InputMode.Keyboard)
@@ -118,26 +106,26 @@ namespace Assets.VehicleController
                 _inputMode = InputMode.Keyboard;
         }
 
+        // === КЛАВИАТУРА ЧЕРЕЗ СТАРЫЙ INPUT MANAGER ===
         private void UpdateKeyboard()
         {
-            if (!_initialized) return;
+            _gas = Mathf.Clamp01(Input.GetAxis("Vertical"));
+            _brake = Mathf.Clamp01(-Input.GetAxis("Vertical"));
+            _steer = Input.GetAxis("Horizontal");
 
-            _gas = _inputActions.Vehicle.GasInput.ReadValue<float>();
-            _brake = _inputActions.Vehicle.BrakeInput.ReadValue<float>();
-            _steer = _inputActions.Vehicle.HorizontalInput.ReadValue<float>();
-            _handbrake = enableHandbrakeInput && _inputActions.Vehicle.HandbrakeInput.ReadValue<float>() > 0.5f;
-            _nitro = _inputActions.Vehicle.NitroBoostInput.ReadValue<float>() > 0.5f;
+            if (enableHandbrakeInput)
+                _handbrake = Input.GetKey(KeyCode.Space);
+            else
+                _handbrake = false;
 
-            _gearUp = _inputActions.Vehicle.GearUpInput.WasPerformedThisFrame();
-            _gearDown = _inputActions.Vehicle.GearDownInput.WasPerformedThisFrame();
+            _nitro = Input.GetKey(KeyCode.LeftShift);
+            _gearUp = Input.GetKeyDown(KeyCode.E);
+            _gearDown = Input.GetKeyDown(KeyCode.Q);
         }
 
-        private void UpdateWheel()
-        {
-            // значения обновляются через коллбеки
-        }
+        private void UpdateWheel() { }
 
-        // Подписки
+        // --- Подписки ---
         private void SubscribeWheel()
         {
             _wheelInput.ThrottleCallback += Wheel_OnThrottle;
@@ -168,7 +156,7 @@ namespace Assets.VehicleController
             _wheelInput.OnSouthButtonCallback -= Wheel_OnSouth;
         }
 
-        // Обработчики
+        // --- Wheel Input Callbacks ---
         private void Wheel_OnThrottle(float v) { _gas = v; _lastWheelInputTime = Time.time; }
         private void Wheel_OnBrake(float v) { _brake = v; _lastWheelInputTime = Time.time; }
         private void Wheel_OnSteering(float v) { _steer = v; _lastWheelInputTime = Time.time; }
@@ -263,6 +251,14 @@ namespace Assets.VehicleController
             _gearDown = false;
             return res;
         }
+
+        public int GetCurrentGear() => _currentGear;
+        public bool IsManualTransmission() => _transmissionMode == TransmissionMode.Manual;
+        public float GetPitchInput() => 0f;
+        public float GetYawInput() => 0f;
+        public float GetRollInput() => 0f;
+
+        // --- ВОССТАНОВЛЁННЫЙ МЕТОД ---
         public void ReinitializeInputSystem()
         {
             if (_inputActions == null)
@@ -282,18 +278,11 @@ namespace Assets.VehicleController
             ResetInputs();
             _inputMode = InputMode.Auto;
         }
-        public int GetCurrentGear() => _currentGear;
-        public bool IsManualTransmission() => _transmissionMode == TransmissionMode.Manual;
-
-        public float GetPitchInput() => 0f;
-        public float GetYawInput() => 0f;
-        public float GetRollInput() => 0f;
-        #endregion
 
         public void SetTransmissionMode(TransmissionMode mode) => _transmissionMode = mode;
         public TransmissionMode GetTransmissionMode() => _transmissionMode;
-
         public void SetInputMode(InputMode mode) => _inputMode = mode;
         public InputMode GetCurrentInputMode() => _inputMode;
+        #endregion
     }
 }

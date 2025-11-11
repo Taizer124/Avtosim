@@ -17,8 +17,14 @@ namespace Bhaptics.SDK2
     public class BhapticsEvent
     {
         
-        public const string REMEN_BEZ = "remen_bez";
+        public const string REMEN_BEZOBASNOSTI = "remen_bezobasnosti";
         
-        public const string DAVLENIE_KOVSHA = "davlenie_kovsha";
+        public const string DAVLENIE_KRESLA = "davlenie_kresla";
+        
+        public const string BRAKE_ATACK = "brake_atack";
+        
+        public const string LEFT_POVOROT = "left_povorot";
+        
+        public const string RIGHT_POVOROT = "right_povorot";
     }
 }

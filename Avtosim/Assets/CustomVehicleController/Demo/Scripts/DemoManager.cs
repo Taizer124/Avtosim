@@ -125,7 +125,7 @@ namespace Assets.VehicleController
                 return;
             }
 
-            _inputProvider = _wheelInputProvider as IVehicleControllerInputProvider;
+            _inputProvider = _wheelInputProvider as VehicleControllerWheelInputProvider;
             if (_inputProvider == null)
             {
                 _wheelInputType = _wheelInputProvider.GetType();
