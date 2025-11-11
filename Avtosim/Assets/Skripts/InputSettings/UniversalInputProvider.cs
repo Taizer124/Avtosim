@@ -41,6 +41,7 @@ namespace Assets.VehicleController
         public bool EastButton => _wheelInput != null && _wheelInput.EastButton;
         public bool WestButton => _wheelInput != null && _wheelInput.WestButton;
 
+        public event System.Action<float> OnBrakeChanged; // float Ч значение от 0 до 1
         public event System.Action OnEastPressed;
         public event System.Action OnWestPressed;
         public event System.Action OnNorthPressed;
@@ -158,7 +159,7 @@ namespace Assets.VehicleController
 
         // --- Wheel Input Callbacks ---
         private void Wheel_OnThrottle(float v) { _gas = v; _lastWheelInputTime = Time.time; }
-        private void Wheel_OnBrake(float v) { _brake = v; _lastWheelInputTime = Time.time; }
+        private void Wheel_OnBrake(float v) { _brake = v; OnBrakeChanged?.Invoke(v); _lastWheelInputTime = Time.time; }
         private void Wheel_OnSteering(float v) { _steer = v; _lastWheelInputTime = Time.time; }
         private void Wheel_OnHandbrake(float v)
         {

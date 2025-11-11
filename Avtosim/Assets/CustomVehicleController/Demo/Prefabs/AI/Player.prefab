@@ -678,7 +678,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &7569762285457816030
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3381,6 +3381,7 @@ MonoBehaviour:
   menuCanvas: {fileID: 5112081987663233909}
   startHidden: 1
   GameManager: {fileID: 0}
+  CustomVehicleController1: {fileID: 9172737152001594100}
   audioMixer: {fileID: 24100000, guid: 43f964548b1973d41bc54ae5454ec382, type: 2}
   masterVolumeParameter: MasterVolume
   inputController: {fileID: 11400000, guid: 8268bb9eff5a1954492cd4817fb37528, type: 2}
@@ -19715,7 +19716,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4402999331888719326, guid: daf48c77ec58b3546ac37ee625e2e1d0, type: 3}
       propertyPath: m_Constraints
-      value: 16
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5623537124478639897, guid: daf48c77ec58b3546ac37ee625e2e1d0, type: 3}
       propertyPath: _wheelRadius
@@ -19859,6 +19860,9 @@ PrefabInstance:
       addedObject: {fileID: 4957337745611676734}
     - targetCorrespondingSourceObject: {fileID: 343456418378352126, guid: daf48c77ec58b3546ac37ee625e2e1d0, type: 3}
       insertIndex: -1
+      addedObject: {fileID: 5512498647666699546}
+    - targetCorrespondingSourceObject: {fileID: 343456418378352126, guid: daf48c77ec58b3546ac37ee625e2e1d0, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 4150093521002999170}
   m_SourcePrefab: {fileID: 100100000, guid: daf48c77ec58b3546ac37ee625e2e1d0, type: 3}
 --- !u!1 &1888095187559175963 stripped
@@ -19879,8 +19883,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _inputMode: 2
+  _textInputSys: {fileID: 0}
   _transmissionMode: 0
   _wheelInput: {fileID: 11400000, guid: 8268bb9eff5a1954492cd4817fb37528, type: 2}
+  enableHandbrakeInput: 0
+  handbrakeDeadzone: 0.3
 --- !u!65 &370501732272814851
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -19909,7 +19916,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1888095187559175963}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2a98f823557ab284492611b81aefc361, type: 3}
   m_Name: 
@@ -19920,7 +19927,29 @@ MonoBehaviour:
   tiltResponseSpeed: 1
   accelerationThreshold: 1
   deadZone: 0
+  debugTilt: 0
   centerOfMassOffset: {x: 0, y: 0.05, z: 0}
+--- !u!114 &5512498647666699546
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1888095187559175963}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: daaf3eb724ef8da4f9289216da7e8ec2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vehicleTransform: {fileID: 8618631643456075300}
+  rb: {fileID: 2588857075816838971}
+  inputProvider: {fileID: 5303338815900727960}
+  enableHaptics: 1
+  debugHaptics: 0
+  accelThreshold: 4.5
+  brakeThreshold: -7.5
+  lateralThreshold: 2.5
+  collisionIntensityScale: 3.6
 --- !u!114 &4150093521002999170
 MonoBehaviour:
   m_ObjectHideFlags: 0

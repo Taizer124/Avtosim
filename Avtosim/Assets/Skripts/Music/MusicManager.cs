@@ -94,13 +94,13 @@ public class MusicManager : MonoBehaviour, IPointerClickHandler
             if (Input.GetKeyDown(KeyCode.Period))
             {
                 PlayNextTrack();
-                Debug.Log("Next track via keyboard (.)");
+                //Debug.Log("Next track via keyboard (.)");
                 lastSwitchTime = Time.time;
             }
             if (Input.GetKeyDown(KeyCode.Comma))
             {
                 PlayPreviousTrack();
-                Debug.Log("Previous track via keyboard (,)");
+                //Debug.Log("Previous track via keyboard (,)");
                 lastSwitchTime = Time.time;
             }
         }
@@ -253,7 +253,7 @@ public class MusicManager : MonoBehaviour, IPointerClickHandler
 
         // --- Обновляем UI и лог ---
         UpdateTrackNameUI(audioSource.clip.name);
-        Debug.Log("Now playing: " + audioSource.clip.name);
+        //Debug.Log("Now playing: " + audioSource.clip.name);
     }
 
     private void UpdateTrackNameUI(string trackName)
