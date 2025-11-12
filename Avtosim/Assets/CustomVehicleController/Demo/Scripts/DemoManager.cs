@@ -21,10 +21,6 @@ namespace Assets.VehicleController
         [SerializeField] private VehiclePartsPresetSO[] _vehiclePartsPressets;
         private int _currentPresetId = -1;
 
-        [Header("Cameras")]
-        [SerializeField] private Camera[] _cameraArray;
-        private int _currentCameraID = 0;
-        private string[] _cameraNameArray = { "Orbit", "Hood", "Top Down" };
 
         [Header("UI Groups")]
         [SerializeField] private GameObject _staticUIParent;
@@ -176,9 +172,6 @@ namespace Assets.VehicleController
                 _lastButtonTime = Time.time;
                 _eastButtonPressed = false;
             }
-
-            if (Input.GetKeyDown(KeyCode.V))
-                ChangeCamera();
 
             OpenCloseMenus(_vehicleControlsMenu, KeyCode.F1, _demoControlsMenu);
             OpenCloseMenus(_demoControlsMenu, KeyCode.F2, _vehicleControlsMenu);
@@ -380,7 +373,6 @@ namespace Assets.VehicleController
             _transmissionType.text = _vehicleController.TransmissionType.ToString();
             _presetType.text = _vehicleController.UsePreset ? _vehicleController.GetVehiclePreset().name : "Custom";
             _drivetrainType.text = _vehicleController.DrivetrainType.ToString();
-            _cameraTypeName.text = _cameraNameArray[_currentCameraID];
         }
 
         private void OpenCloseMenus(GameObject menu, KeyCode key, GameObject conflict = null)
@@ -419,13 +411,6 @@ namespace Assets.VehicleController
             _currentBrakes.text = parts.Brakes.name;
             _currentBody.text = parts.Body.name;
             _currentFI.text = parts.ForcedInduction == null ? "None" : parts.ForcedInduction.name;
-        }
-
-        private void ChangeCamera()
-        {
-            _cameraArray[_currentCameraID].gameObject.SetActive(false);
-            _currentCameraID = (_currentCameraID + 1) % _cameraArray.Length;
-            _cameraArray[_currentCameraID].gameObject.SetActive(true);
         }
     }
 }

@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 400000}
   - component: {fileID: 20500000}
+  - component: {fileID: 3828690241395070042}
   m_Layer: 0
   m_Name: mcp_street_light_pole_01_day_LOD
   m_TagString: Untagged
@@ -59,6 +60,20 @@ LODGroup:
     - renderer: {fileID: 2300002}
     - renderer: {fileID: 2300000}
   m_Enabled: 1
+--- !u!114 &3828690241395070042
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d022eef43857d042a5f52d21d373141, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  destroyDelay: 13
+  debugLog: 1
 --- !u!1 &100002
 GameObject:
   m_ObjectHideFlags: 0

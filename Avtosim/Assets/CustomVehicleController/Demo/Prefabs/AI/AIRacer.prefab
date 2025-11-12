@@ -2284,7 +2284,7 @@ MonoBehaviour:
   - {fileID: 6845346278840088107}
   _restrainWheelPosition: 1
   _alignSteerWheelsToVelocity: 1
-  _wheelsLockVisually: 0
+  _wheelsLockVisually: 1
 --- !u!54 &4771958571046800219
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2522,7 +2522,7 @@ MonoBehaviour:
   _spread: 0
   _volumeRolloff: 0
   _minDistance: 1
-  _maxDistance: 50
+  _maxDistance: 15
 --- !u!114 &2522385240615044167
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4511,7 +4511,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4572563764344700248, guid: 5757671a9750b1e4f87942ec664b9d6a, type: 3}
       propertyPath: Debug
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8423410754715024355, guid: 5757671a9750b1e4f87942ec664b9d6a, type: 3}
       propertyPath: m_Name

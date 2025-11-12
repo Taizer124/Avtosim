@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 5400000}
   - component: {fileID: 6500000}
   - component: {fileID: 20500000}
+  - component: {fileID: 6449010792237247705}
   m_Layer: 0
   m_Name: mcp_cardboard_box_01_LOD
   m_TagString: Untagged
@@ -156,3 +157,16 @@ LODGroup:
     renderers:
     - renderer: {fileID: 2300000}
   m_Enabled: 1
+--- !u!114 &6449010792237247705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d022eef43857d042a5f52d21d373141, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  destroyDelay: 13

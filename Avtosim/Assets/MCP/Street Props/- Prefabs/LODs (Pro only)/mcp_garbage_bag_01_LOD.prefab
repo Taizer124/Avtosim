@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 6400000}
   - component: {fileID: 8200000}
   - component: {fileID: 20500000}
+  - component: {fileID: 7706475822019638103}
   m_Layer: 0
   m_Name: mcp_garbage_bag_01_LOD
   m_TagString: Untagged
@@ -255,3 +256,16 @@ LODGroup:
     renderers:
     - renderer: {fileID: 2300000}
   m_Enabled: 1
+--- !u!114 &7706475822019638103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d022eef43857d042a5f52d21d373141, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  destroyDelay: 13
