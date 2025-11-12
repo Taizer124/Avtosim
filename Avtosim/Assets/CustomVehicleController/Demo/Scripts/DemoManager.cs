@@ -13,6 +13,8 @@ namespace Assets.VehicleController
         [Header("Input Provider")]
         [SerializeField] private MonoBehaviour _wheelInputProvider;
         private IVehicleControllerInputProvider _inputProvider;
+        private AllInOneInputProvider _allInOneProvider; // новая ссылка если используется AllInOneInputProvider
+
 
         private VehicleEngineSoundManager _engineSoundManager;
 
@@ -121,9 +123,15 @@ namespace Assets.VehicleController
                 return;
             }
 
-            _inputProvider = _wheelInputProvider as VehicleControllerWheelInputProvider;
+            // Правильный каст к интерфейсу (раньше пытались кастить к конкретному классу)
+            _inputProvider = _wheelInputProvider as IVehicleControllerInputProvider;
+
+            // Если это конкретно AllInOneInputProvider — сохраним ссылку, чтобы посылать режим трансмиссии
+            _allInOneProvider = _wheelInputProvider as AllInOneInputProvider;
+
             if (_inputProvider == null)
             {
+                // Если провайдер не реализует интерфейс — пытаемся получить кнопки рефлексией как запасной путь
                 _wheelInputType = _wheelInputProvider.GetType();
                 _westButtonProp = _wheelInputType.GetProperty("WestButton");
                 _northButtonProp = _wheelInputType.GetProperty("NorthButton");
@@ -219,6 +227,7 @@ namespace Assets.VehicleController
             catch { }
         }
 
+
         public void SwapTransmissionType()
         {
             switch (_vehicleController.TransmissionType)
@@ -235,6 +244,23 @@ namespace Assets.VehicleController
             }
 
             Debug.Log($"Transmission switched to: {_vehicleController.TransmissionType}");
+
+            // Если используется AllInOneInputProvider, синхронизируем режим трансмиссии в нём тоже
+            if (_allInOneProvider != null)
+            {
+                switch (_vehicleController.TransmissionType)
+                {
+                    case TransmissionType.Automatic:
+                        _allInOneProvider.SetTransmissionMode(AllInOneInputProvider.TransmissionMode.Automatic);
+                        break;
+                    case TransmissionType.Sequential:
+                        _allInOneProvider.SetTransmissionMode(AllInOneInputProvider.TransmissionMode.Sequential);
+                        break;
+                    case TransmissionType.Manual:
+                        _allInOneProvider.SetTransmissionMode(AllInOneInputProvider.TransmissionMode.Manual);
+                        break;
+                }
+            }
         }
 
         private void SwapPreset()

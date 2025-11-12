@@ -27,7 +27,7 @@
                     "name": "GearDownInput",
                     "type": "Button",
                     "id": "bf8c94f2-e802-4b15-8ccc-0bfb2d3fc01a",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -155,7 +155,7 @@
                 {
                     "name": "",
                     "id": "12c19068-d044-4068-a7d8-fba715289272",
-                    "path": "<Gamepad>/rightShoulder",
+                    "path": "<Logitech G29 Racing Wheel>/leftShiftButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -177,7 +177,7 @@
                 {
                     "name": "",
                     "id": "97cf1fcf-2ac0-46bf-8bd9-b574307e997c",
-                    "path": "<Gamepad>/leftShoulder",
+                    "path": "<Logitech G29 Racing Wheel>/rightShiftButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

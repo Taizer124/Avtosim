@@ -1,3 +1,6 @@
+// UniversalInputProvider.cs (All-in-One Input Provider)
+// Внесены изменения: инициализация PlayerVehicleInputActions и реализация UpdateKeyboard по примеру VehicleInputProviderDemo.
+
 using LogitechG29.Sample.Input;
 using TMPro;
 using UnityEngine;
@@ -22,7 +25,7 @@ namespace Assets.VehicleController
         [SerializeField, Range(0f, 1f)] private float handbrakeDeadzone = 0.3f;
 
         private PlayerVehicleInputActions _inputActions;
-        private bool _initialized = true;
+        private bool _initialized = false;
         private bool _enabled = true;
 
         private float _gas, _brake, _steer;
@@ -50,19 +53,43 @@ namespace Assets.VehicleController
         private float _buttonCooldown = 0.4f;
         private float _lastButtonPressTime = 0f;
 
+        private void Awake()
+        {
+            // подготовим InputActions, как в демо-провайдере
+            _inputActions = new PlayerVehicleInputActions();
+        }
+
         private void OnEnable()
         {
+            if (_inputActions == null) _inputActions = new PlayerVehicleInputActions();
+            try
+            {
+                _inputActions.Enable();
+                _initialized = true;
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"AllInOneInputProvider: failed to enable input actions: {e.Message}");
+                _initialized = false;
+            }
+
             if (_wheelInput != null) SubscribeWheel();
         }
 
         private void OnDisable()
         {
             if (_wheelInput != null) UnsubscribeWheel();
+            if (_inputActions != null) _inputActions.Disable();
+            _initialized = false;
         }
 
         private void Update()
         {
-            if (!_enabled) { ResetInputs(); return; }
+            if (!_enabled)
+            {
+                ResetInputs();
+                return;
+            }
 
             if (_inputMode == InputMode.Auto)
             {
@@ -107,24 +134,45 @@ namespace Assets.VehicleController
                 _inputMode = InputMode.Keyboard;
         }
 
-        // === КЛАВИАТУРА ЧЕРЕЗ СТАРЫЙ INPUT MANAGER ===
+        // === КЛАВИАТУРА ЧЕРЕЗ NEW INPUT SYSTEM ===
         private void UpdateKeyboard()
         {
-            _gas = Mathf.Clamp01(Input.GetAxis("Vertical"));
-            _brake = Mathf.Clamp01(-Input.GetAxis("Vertical"));
-            _steer = Input.GetAxis("Horizontal");
+            if (_inputActions == null)
+            {
+                // fallback — старый Input (на случай отсутствия Input System), но по умолчанию мы используем _inputActions
+                _gas = Mathf.Clamp01(Input.GetAxis("Vertical"));
+                _brake = Mathf.Clamp01(-Input.GetAxis("Vertical"));
+                _steer = Input.GetAxis("Horizontal");
+
+                if (enableHandbrakeInput)
+                    _handbrake = Input.GetKey(KeyCode.Space);
+                else
+                    _handbrake = false;
+
+                _nitro = Input.GetKey(KeyCode.LeftShift);
+                _gearUp = Input.GetKeyDown(KeyCode.E);
+                _gearDown = Input.GetKeyDown(KeyCode.Q);
+                return;
+            }
+
+            // Используем PlayerVehicleInputActions (как в VehicleInputProviderDemo)
+            _gas = _inputActions.Vehicle.GasInput.ReadValue<float>();
+            _brake = _inputActions.Vehicle.BrakeInput.ReadValue<float>();
+            _steer = _inputActions.Vehicle.HorizontalInput.ReadValue<float>();
 
             if (enableHandbrakeInput)
-                _handbrake = Input.GetKey(KeyCode.Space);
+                _handbrake = _inputActions.Vehicle.HandbrakeInput.ReadValue<float>() != 0;
             else
                 _handbrake = false;
 
-            _nitro = Input.GetKey(KeyCode.LeftShift);
-            _gearUp = Input.GetKeyDown(KeyCode.E);
-            _gearDown = Input.GetKeyDown(KeyCode.Q);
+            _nitro = _inputActions.Vehicle.NitroBoostInput.ReadValue<float>() != 0;
+
+            // действие "WasPerformedThisFrame" для шифтов
+            _gearUp = _inputActions.Vehicle.GearUpInput.WasPerformedThisFrame();
+            _gearDown = _inputActions.Vehicle.GearDownInput.WasPerformedThisFrame();
         }
 
-        private void UpdateWheel() { }
+        private void UpdateWheel() { /* значения обновляются через callbacks */ }
 
         // --- Подписки ---
         private void SubscribeWheel()
@@ -140,6 +188,13 @@ namespace Assets.VehicleController
             _wheelInput.OnWestButtonCallback += Wheel_OnWest;
             _wheelInput.OnNorthButtonCallback += Wheel_OnNorth;
             _wheelInput.OnSouthButtonCallback += Wheel_OnSouth;
+            _wheelInput.Shifter1Callback += Wheel_OnShifter1;
+            _wheelInput.Shifter2Callback += Wheel_OnShifter2;
+            _wheelInput.Shifter3Callback += Wheel_OnShifter3;
+            _wheelInput.Shifter4Callback += Wheel_OnShifter4;
+            _wheelInput.Shifter5Callback += Wheel_OnShifter5;
+            _wheelInput.Shifter6Callback += Wheel_OnShifter6;
+            _wheelInput.Shifter7Callback += Wheel_OnShifter7;
         }
 
         private void UnsubscribeWheel()
@@ -155,6 +210,13 @@ namespace Assets.VehicleController
             _wheelInput.OnWestButtonCallback -= Wheel_OnWest;
             _wheelInput.OnNorthButtonCallback -= Wheel_OnNorth;
             _wheelInput.OnSouthButtonCallback -= Wheel_OnSouth;
+            _wheelInput.Shifter1Callback -= Wheel_OnShifter1;
+            _wheelInput.Shifter2Callback -= Wheel_OnShifter2;
+            _wheelInput.Shifter3Callback -= Wheel_OnShifter3;
+            _wheelInput.Shifter4Callback -= Wheel_OnShifter4;
+            _wheelInput.Shifter5Callback -= Wheel_OnShifter5;
+            _wheelInput.Shifter6Callback -= Wheel_OnShifter6;
+            _wheelInput.Shifter7Callback -= Wheel_OnShifter7;
         }
 
         // --- Wheel Input Callbacks ---
@@ -175,40 +237,47 @@ namespace Assets.VehicleController
 
         private void Wheel_OnEast(bool p)
         {
-            if (p && Time.time - _lastButtonPressTime > _buttonCooldown)
-            {
-                _lastButtonPressTime = Time.time;
-                Debug.Log("EAST pressed — call drivetrain switch");
-                OnEastPressed?.Invoke();
-            }
+            if (!p) return; // реагировать только при нажатии
+            if (Time.time - _lastButtonPressTime < _buttonCooldown) return;
+            _lastButtonPressTime = Time.time;
+            Debug.Log("EAST pressed — call drivetrain switch");
+            OnEastPressed?.Invoke();
         }
 
         private void Wheel_OnWest(bool p)
         {
-            if (p && Time.time - _lastButtonPressTime > _buttonCooldown)
-            {
-                _lastButtonPressTime = Time.time;
-                OnWestPressed?.Invoke();
-            }
+            if (!p) return;
+            if (Time.time - _lastButtonPressTime < _buttonCooldown) return;
+            _lastButtonPressTime = Time.time;
+            Debug.Log("WEST pressed");
+            OnWestPressed?.Invoke();
         }
 
         private void Wheel_OnNorth(bool p)
         {
-            if (p && Time.time - _lastButtonPressTime > _buttonCooldown)
-            {
-                _lastButtonPressTime = Time.time;
-                OnNorthPressed?.Invoke();
-            }
+            if (!p) return;
+            if (Time.time - _lastButtonPressTime < _buttonCooldown) return;
+            _lastButtonPressTime = Time.time;
+            Debug.Log("NORTH pressed");
+            OnNorthPressed?.Invoke();
         }
 
         private void Wheel_OnSouth(bool p)
         {
-            if (p && Time.time - _lastButtonPressTime > _buttonCooldown)
-            {
-                _lastButtonPressTime = Time.time;
-                OnSouthPressed?.Invoke();
-            }
+            if (!p) return;
+            if (Time.time - _lastButtonPressTime < _buttonCooldown) return;
+            _lastButtonPressTime = Time.time;
+            Debug.Log("SOUTH pressed");
+            OnSouthPressed?.Invoke();
         }
+        private void Wheel_OnShifter1(bool pressed) => _manualGears[1] = pressed;
+        private void Wheel_OnShifter2(bool pressed) => _manualGears[2] = pressed;
+        private void Wheel_OnShifter3(bool pressed) => _manualGears[3] = pressed;
+        private void Wheel_OnShifter4(bool pressed) => _manualGears[4] = pressed;
+        private void Wheel_OnShifter5(bool pressed) => _manualGears[5] = pressed;
+        private void Wheel_OnShifter6(bool pressed) => _manualGears[6] = pressed;
+        private void Wheel_OnShifter7(bool pressed) => _manualGears[7] = pressed;
+
 
         private void ProcessManualShifting()
         {
@@ -259,7 +328,6 @@ namespace Assets.VehicleController
         public float GetYawInput() => 0f;
         public float GetRollInput() => 0f;
 
-        // --- ВОССТАНОВЛЁННЫЙ МЕТОД ---
         public void ReinitializeInputSystem()
         {
             if (_inputActions == null)
