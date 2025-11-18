@@ -5,14 +5,13 @@ using System.Reflection;
 
 namespace Assets.VehicleController
 {
-    // Добавляем новый интерфейс для input providers, которые поддерживают механическую коробку
     public interface IManualTransmissionInputProvider
     {
         bool IsManualTransmission();
         int GetCurrentGear();
     }
 
-    // Новый интерфейс для установки типа трансмиссии
+
     public interface ITransmissionTypeSettable
     {
         void SetTransmissionType(bool useSequential);

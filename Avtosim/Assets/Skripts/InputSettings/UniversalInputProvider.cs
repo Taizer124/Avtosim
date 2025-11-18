@@ -1,6 +1,3 @@
-// UniversalInputProvider.cs (All-in-One Input Provider)
-// Внесены изменения: инициализация PlayerVehicleInputActions и реализация UpdateKeyboard по примеру VehicleInputProviderDemo.
-
 using LogitechG29.Sample.Input;
 using TMPro;
 using UnityEngine;
