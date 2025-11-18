@@ -6,31 +6,30 @@ using UnityEngine;
 public class DestructibleInfrastructure : MonoBehaviour
 {
     [Header("Settings")]
-    [SerializeField] private float destroyDelay = 13f; // Время перед удалением
-    [SerializeField] private bool debugLog = false;     // Для отладки
-    [SerializeField] private float minImpactSpeed = 1f; // минимальная relativeVelocity для срабатывания
+    [SerializeField] private float destroyDelay = 13f;
+    [SerializeField] private bool debugLog = false;
+    [SerializeField] private float minImpactSpeed = 1f;
 
     private bool _isTriggered = false;
+    private bool _hasRootRb = false;
+    private Rigidbody _rootRb;
 
     private void Awake()
     {
-        // Пройдём по всем дочерним Rigidbody и при необходимости добавим прокси,
-        // который будет пересылать столкновения сюда.
+        // Проверяем, есть ли Rigidbody на корне
+        _hasRootRb = TryGetComponent<Rigidbody>(out _rootRb);
+
+        // Сканируем дочерние Rigidbody и добавляем Proxy
         var allRigidbodies = GetComponentsInChildren<Rigidbody>(true);
+
         foreach (var rb in allRigidbodies)
         {
             if (rb == null) continue;
+            if (rb.gameObject == this.gameObject) continue;
 
-            // Если Rigidbody стоит на том же GameObject, где висит скрипт — прокси не нужен.
-            if (rb.gameObject == this.gameObject)
-                continue;
-
-            // Если прокси уже есть, просто установим ссылку parent (на случай копирования/пересборки)
-            var existing = rb.gameObject.GetComponent<CollisionProxy>();
+            var existing = rb.GetComponent<CollisionProxy>();
             if (existing != null)
-            {
                 existing.Init(this);
-            }
             else
             {
                 var proxy = rb.gameObject.AddComponent<CollisionProxy>();
@@ -39,33 +38,31 @@ public class DestructibleInfrastructure : MonoBehaviour
         }
     }
 
+    // Обрабатываем столкновения, но безопасно
     private void OnCollisionEnter(Collision collision)
     {
-        // Обработка столкновения с Rigidbody на самом объекте (если он есть)
         if (_isTriggered) return;
 
-        if (TryGetComponent<Rigidbody>(out Rigidbody selfRb))
-        {
-            // если на корне есть Rigidbody — реагируем на столкновения с достаточной силой
-            if (collision.relativeVelocity.magnitude > minImpactSpeed)
-            {
-                StartDestruction();
-            }
-        }
-        // Если на корне Rigidbody нет — дочерние прокси вызовут NotifyCollision
+        // если нет Rigidbody игнорируем (Unity любит кидать ошибки)
+        if (!_hasRootRb || _rootRb == null) return;
+
+        if (collision?.relativeVelocity.magnitude > minImpactSpeed)
+            StartDestruction();
     }
 
-    // Этот метод вызывают прокси-компоненты на дочерних rigidbody
+    // Вызов от дочерних Proxy
     public void NotifyCollision(Collision collisionFromChild)
     {
         if (_isTriggered) return;
-
         if (collisionFromChild == null) return;
 
-        if (collisionFromChild.relativeVelocity.magnitude > minImpactSpeed)
+        float vel = collisionFromChild.relativeVelocity.magnitude;
+
+        if (vel > minImpactSpeed)
         {
             if (debugLog)
-                Debug.Log($"[Destructible] Collision detected on child '{collisionFromChild.gameObject.name}' with relVel {collisionFromChild.relativeVelocity.magnitude:F2}");
+                Debug.Log($"[Destructible] Child '{collisionFromChild.gameObject.name}' relVel={vel:F2}");
+
             StartDestruction();
         }
     }
@@ -77,7 +74,7 @@ public class DestructibleInfrastructure : MonoBehaviour
         _isTriggered = true;
 
         if (debugLog)
-            Debug.Log($"[Destructible] {name} будет удалён через {destroyDelay} секунд.");
+            Debug.Log($"[Destructible] {name} будет удалён через {destroyDelay} сек.");
 
         StartCoroutine(DestroyAfterDelay());
     }
@@ -92,22 +89,30 @@ public class DestructibleInfrastructure : MonoBehaviour
         Destroy(gameObject);
     }
 
-    // Вложенный прокси-компонент — очень лёгкий, только пересылает OnCollisionEnter сюда
+
+    [RequireComponent(typeof(Collider))]
     private class CollisionProxy : MonoBehaviour
     {
         private DestructibleInfrastructure _parent;
+        private bool _isQuitting = false;
 
-        // Инициализация/повторная инициализация
         public void Init(DestructibleInfrastructure parent)
         {
             _parent = parent;
         }
 
+        private void OnApplicationQuit()
+        {
+            _isQuitting = true;
+        }
+
         private void OnCollisionEnter(Collision collision)
         {
-            // Если родитель уже уничтожается либо не установлен — ничего не делаем
+            if (_isQuitting) return;
             if (_parent == null || _parent._isTriggered) return;
+            if (collision == null) return;
 
+            // Ошибок не будет, даже если Rigidbody не прикреплён
             _parent.NotifyCollision(collision);
         }
 

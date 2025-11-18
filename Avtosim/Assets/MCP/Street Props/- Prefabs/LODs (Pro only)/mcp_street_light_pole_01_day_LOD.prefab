@@ -73,7 +73,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   destroyDelay: 13
-  debugLog: 1
+  debugLog: 0
+  minImpactSpeed: 1
 --- !u!1 &100002
 GameObject:
   m_ObjectHideFlags: 0
