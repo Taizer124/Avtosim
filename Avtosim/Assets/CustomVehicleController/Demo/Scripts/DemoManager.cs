@@ -123,22 +123,19 @@ namespace Assets.VehicleController
                 return;
             }
 
-            // Правильный каст к интерфейсу (раньше пытались кастить к конкретному классу)
             _inputProvider = _wheelInputProvider as IVehicleControllerInputProvider;
-
-            // Если это конкретно AllInOneInputProvider — сохраним ссылку, чтобы посылать режим трансмиссии
             _allInOneProvider = _wheelInputProvider as AllInOneInputProvider;
 
-            if (_inputProvider == null)
-            {
-                // Если провайдер не реализует интерфейс — пытаемся получить кнопки рефлексией как запасной путь
-                _wheelInputType = _wheelInputProvider.GetType();
-                _westButtonProp = _wheelInputType.GetProperty("WestButton");
-                _northButtonProp = _wheelInputType.GetProperty("NorthButton");
-                _southButtonProp = _wheelInputType.GetProperty("SouthButton");
-                _eastButtonProp = _wheelInputType.GetProperty("EastButton");
-            }
+            //  ФИКС: УБРАЛИ if (_inputProvider == null) - ВСЕГДА инициализируем рефлексию
+            _wheelInputType = _wheelInputProvider.GetType();
+            _westButtonProp = _wheelInputType.GetProperty("WestButton");
+            _northButtonProp = _wheelInputType.GetProperty("NorthButton");
+            _southButtonProp = _wheelInputType.GetProperty("SouthButton");
+            _eastButtonProp = _wheelInputType.GetProperty("EastButton");
+
+            Debug.Log($" Рефлексия готова: West={_westButtonProp != null}");
         }
+
 
         private void Update()
         {

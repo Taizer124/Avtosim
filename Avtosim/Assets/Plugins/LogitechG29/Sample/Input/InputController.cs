@@ -12,6 +12,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
 
@@ -537,7 +538,7 @@ public partial class @InputController: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Clutch"",
+                    ""name"": ""с"",
                     ""type"": ""PassThrough"",
                     ""id"": ""72009cd4-f547-4845-bc9b-7a54c33e051a"",
                     ""expectedControlType"": ""Axis"",
@@ -574,7 +575,7 @@ public partial class @InputController: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Logitech G29"",
-                    ""action"": ""Clutch"",
+                    ""action"": ""с"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -810,7 +811,7 @@ public partial class @InputController: IInputActionCollection2, IDisposable
         // Pedals
         m_Pedals = asset.FindActionMap("Pedals", throwIfNotFound: true);
         m_Pedals_Throttle = m_Pedals.FindAction("Throttle", throwIfNotFound: true);
-        m_Pedals_Clutch = m_Pedals.FindAction("Clutch", throwIfNotFound: true);
+        m_Pedals_с = m_Pedals.FindAction("с", throwIfNotFound: true);
         m_Pedals_Brake = m_Pedals.FindAction("Brake", throwIfNotFound: true);
         // Transmission
         m_Transmission = asset.FindActionMap("Transmission", throwIfNotFound: true);
@@ -1310,7 +1311,7 @@ public partial class @InputController: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Pedals;
     private List<IPedalsActions> m_PedalsActionsCallbackInterfaces = new List<IPedalsActions>();
     private readonly InputAction m_Pedals_Throttle;
-    private readonly InputAction m_Pedals_Clutch;
+    private readonly InputAction m_Pedals_с;
     private readonly InputAction m_Pedals_Brake;
     /// <summary>
     /// Provides access to input actions defined in input action map "Pedals".
@@ -1328,9 +1329,9 @@ public partial class @InputController: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Throttle => m_Wrapper.m_Pedals_Throttle;
         /// <summary>
-        /// Provides access to the underlying input action "Pedals/Clutch".
+        /// Provides access to the underlying input action "Pedals/с".
         /// </summary>
-        public InputAction @Clutch => m_Wrapper.m_Pedals_Clutch;
+        public InputAction @с => m_Wrapper.m_Pedals_с;
         /// <summary>
         /// Provides access to the underlying input action "Pedals/Brake".
         /// </summary>
@@ -1364,9 +1365,9 @@ public partial class @InputController: IInputActionCollection2, IDisposable
             @Throttle.started += instance.OnThrottle;
             @Throttle.performed += instance.OnThrottle;
             @Throttle.canceled += instance.OnThrottle;
-            @Clutch.started += instance.OnClutch;
-            @Clutch.performed += instance.OnClutch;
-            @Clutch.canceled += instance.OnClutch;
+            @с.started += instance.OnClutch;
+            @с.performed += instance.OnClutch;
+            @с.canceled += instance.OnClutch;
             @Brake.started += instance.OnBrake;
             @Brake.performed += instance.OnBrake;
             @Brake.canceled += instance.OnBrake;
@@ -1384,9 +1385,9 @@ public partial class @InputController: IInputActionCollection2, IDisposable
             @Throttle.started -= instance.OnThrottle;
             @Throttle.performed -= instance.OnThrottle;
             @Throttle.canceled -= instance.OnThrottle;
-            @Clutch.started -= instance.OnClutch;
-            @Clutch.performed -= instance.OnClutch;
-            @Clutch.canceled -= instance.OnClutch;
+            @с.started -= instance.OnClutch;
+            @с.performed -= instance.OnClutch;
+            @с.canceled -= instance.OnClutch;
             @Brake.started -= instance.OnBrake;
             @Brake.performed -= instance.OnBrake;
             @Brake.canceled -= instance.OnBrake;
@@ -1872,7 +1873,7 @@ public partial class @InputController: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnThrottle(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "Clutch" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "с" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />

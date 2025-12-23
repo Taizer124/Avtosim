@@ -4,7 +4,6 @@ namespace Assets.VehicleController
     {
         public void EnableInput(bool enable);
         public float GetGasInput();
-
         public float GetBrakeInput();
 
         public bool GetNitroBoostInput();

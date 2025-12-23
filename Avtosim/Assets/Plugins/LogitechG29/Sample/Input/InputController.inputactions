@@ -451,7 +451,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Clutch",
+                    "name": "с",
                     "type": "PassThrough",
                     "id": "72009cd4-f547-4845-bc9b-7a54c33e051a",
                     "expectedControlType": "Axis",
@@ -488,7 +488,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Logitech G29",
-                    "action": "Clutch",
+                    "action": "с",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

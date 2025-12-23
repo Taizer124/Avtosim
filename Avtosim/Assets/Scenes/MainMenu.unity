@@ -8522,6 +8522,18 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3881310717999634338, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
+      propertyPath: _rigidbody
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3881310717999634338, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
+      propertyPath: _collisionHandler
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3881310717999634338, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
+      propertyPath: _carVisualsEssentials
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 4427757630220625179, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
@@ -8537,6 +8549,18 @@ PrefabInstance:
     - target: {fileID: 4968653360561009971, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 4972694660709946659, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
+      propertyPath: _collider
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4972694660709946659, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
+      propertyPath: _vehicleController
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5154116266296233214, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
+      propertyPath: _rigidbody
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 5207391795030939171, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -8557,6 +8581,10 @@ PrefabInstance:
     - target: {fileID: 5477907392245143086, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 5502972651821916400, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
+      propertyPath: rigidbody
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 5839673454029371667, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -8618,6 +8646,10 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7105412203170540077, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
+      propertyPath: _vehicleController
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 7173584243123305331, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
@@ -8653,6 +8685,10 @@ PrefabInstance:
     - target: {fileID: 7592113213115931987, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 7759862421057537399, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
+      propertyPath: _vehicleController
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7768221602906567341, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -8754,7 +8790,17 @@ PrefabInstance:
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 552318835825518717, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
+    - {fileID: 8212913771227801490, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
+    - {fileID: 3268291251592921693, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
+    - {fileID: 8813211958784061791, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
+    - {fileID: 7105412203170540077, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
+    - {fileID: 5785844403564289356, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
+    - {fileID: 5154116266296233214, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
+    - {fileID: 339911320001749012, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
+    - {fileID: 3881310717999634338, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
+    - {fileID: 7759862421057537399, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
     m_RemovedGameObjects:
     - {fileID: 698282221870478713, guid: 6fa65c3bd8c3bf348990f018822ad718, type: 3}
     m_AddedGameObjects: []
