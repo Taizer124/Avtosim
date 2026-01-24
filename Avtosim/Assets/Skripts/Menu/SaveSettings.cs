@@ -68,20 +68,6 @@ public class SettingsManager : MonoBehaviour
         if (musicObj != null) musicSlider = musicObj.GetComponent<Slider>();
         if (sfxObj != null) sfxSlider = sfxObj.GetComponent<Slider>();
 
-        //// ≈сли не нашли по имени, ищем по тегам
-        //if (musicSlider == null)
-        //{
-        //    GameObject musicByTag = GameObject.FindWithTag("MusicSlider");
-        //    if (musicByTag != null) musicSlider = musicByTag.GetComponent<Slider>();
-        //}
-
-        //if (sfxSlider == null)
-        //{
-        //    GameObject sfxByTag = GameObject.FindWithTag("SFXSlider");
-        //    if (sfxByTag != null) sfxSlider = sfxByTag.GetComponent<Slider>();
-        //}
-
-        // –езервный поиск через Canvas
         if (musicSlider == null || sfxSlider == null)
         {
             Canvas[] allCanvases = FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
@@ -273,28 +259,5 @@ public class SettingsManager : MonoBehaviour
         float normalizedVolume = volumePercent / 100f;
         float curvedVolume = Mathf.Pow(normalizedVolume, 0.5f);
         return Mathf.Lerp(MIN_VOLUME_DB, MAX_VOLUME_DB, curvedVolume);
-    }
-
-
-    // Public method дл€ принудительного обновлени€ слайдеров
-    public void RefreshSliders()
-    {
-        FindSlidersInScene();
-        SubscribeToSliders();
-        ApplyLoadedSettings();
-    }
-
-    private void OnApplicationQuit()
-    {
-        SaveSettings();
-    }
-
-    private void OnDestroy()
-    {
-        if (Instance == this)
-        {
-            SaveSettings();
-            SceneManager.sceneLoaded -= OnSceneLoaded;
-        }
     }
 }

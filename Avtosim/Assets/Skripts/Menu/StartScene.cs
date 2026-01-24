@@ -234,27 +234,4 @@ public class SceneStarterVR : MonoBehaviour
             }
         }
     }
-
-    // Для отладки - выводим информацию о доступных устройствах
-    [ContextMenu("Debug Input Devices")]
-    private void DebugInputDevices()
-    {
-        Debug.Log("Available Input Devices:");
-        foreach (var device in InputSystem.devices)
-        {
-            Debug.Log($"- {device.name} ({device.layout})");
-
-            // Выводим доступные контролы для VR устройств
-            if (device.name.Contains("XR") || device.name.Contains("Oculus"))
-            {
-                foreach (var control in device.allControls)
-                {
-                    if (control is ButtonControl)
-                    {
-                        Debug.Log($"  Button: {control.displayName} -> {control.path}");
-                    }
-                }
-            }
-        }
-    }
 }
