@@ -4,6 +4,7 @@ namespace Assets.VehicleController
     {
         public void Initialize(VehiclePartsSetWrapper partsPresetWrapper);
         public bool TryChangeGear(int i, float delay);
+        public void SetGear(int gearId);
         public bool InNeutralGear();
         public bool InReverseGear();
         public bool CheckIsClutchEngaged();

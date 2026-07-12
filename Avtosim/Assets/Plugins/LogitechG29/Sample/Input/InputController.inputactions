@@ -1,4 +1,5 @@
 {
+    "version": 1,
     "name": "InputController",
     "maps": [
         {
@@ -213,6 +214,17 @@
                 },
                 {
                     "name": "",
+                    "id": "a1b2c3d4-0008-4000-8000-000000000001",
+                    "path": "<Keyboard>/u",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "East",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "eb568b1f-28d1-48d6-8649-ece22a69b163",
                     "path": "<Logitech G29 Racing Wheel>/leftBumperButton",
                     "interactions": "",
@@ -229,6 +241,17 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Logitech G29",
+                    "action": "Left Shift",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a36be8f0-0f5d-4c26-bfb1-45947de28cac",
+                    "path": "<Keyboard>/leftCtrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard",
                     "action": "Left Shift",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -312,6 +335,17 @@
                 },
                 {
                     "name": "",
+                    "id": "a1b2c3d4-0008-4000-8000-000000000002",
+                    "path": "<Keyboard>/t",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "North",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "f038c92b-7e17-4452-820d-a8d70dd33f3b",
                     "path": "<Logitech G29 Racing Wheel>/optionsButton",
                     "interactions": "",
@@ -367,6 +401,17 @@
                 },
                 {
                     "name": "",
+                    "id": "a1b2c3d4-0008-4000-8000-000000000003",
+                    "path": "<Keyboard>/y",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "South",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "3e860e19-b41d-47ca-b76a-ee1bdb42bc69",
                     "path": "<Logitech G29 Racing Wheel>/westButton",
                     "interactions": "",
@@ -378,11 +423,33 @@
                 },
                 {
                     "name": "",
+                    "id": "a1b2c3d4-0008-4000-8000-000000000004",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "West",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "184eac69-20fc-4e1f-8089-25117bb1859e",
                     "path": "<Logitech G29 Racing Wheel>/rightShiftButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "Logitech G29",
+                    "action": "Right Shift",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "796c44aa-df5d-4d7a-9527-118749cb6d5b",
+                    "path": "<Keyboard>/leftShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
                     "action": "Right Shift",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -434,6 +501,50 @@
                     "action": "Steering_Stick",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a1b2c3d4-0006-4000-8000-000000000001",
+                    "path": "<HID::Gudsen MOZA R5 Base>/stick/x",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "MOZA",
+                    "action": "Steering_Stick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "1D Axis",
+                    "id": "a1b2c3d4-0002-4000-8000-000000000001",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Steering_Steering",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "a1b2c3d4-0002-4000-8000-000000000002",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Steering_Steering",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "a1b2c3d4-0002-4000-8000-000000000003",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Steering_Steering",
+                    "isComposite": false,
+                    "isPartOfComposite": true
                 }
             ]
         },
@@ -451,7 +562,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "с",
+                    "name": "Clutch",
                     "type": "PassThrough",
                     "id": "72009cd4-f547-4845-bc9b-7a54c33e051a",
                     "expectedControlType": "Axis",
@@ -483,12 +594,45 @@
                 },
                 {
                     "name": "",
+                    "id": "a1b2c3d4-0003-4000-8000-000000000001",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Throttle",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a1b2c3d4-0007-4000-8000-000000000001",
+                    "path": "<HID::Gudsen MOZA R5 Base>/z",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "MOZA",
+                    "action": "Throttle",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "23c462a6-d9b2-4140-ae65-03d64daa6a0d",
                     "path": "<Logitech G29 Racing Wheel>/clutchAxis",
                     "interactions": "",
                     "processors": "",
                     "groups": "Logitech G29",
-                    "action": "с",
+                    "action": "Clutch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a1b2c3d4-0003-4000-8000-000000000002",
+                    "path": "<Keyboard>/f",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Clutch",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -499,6 +643,28 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Logitech G29",
+                    "action": "Brake",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a1b2c3d4-0003-4000-8000-000000000003",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Brake",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a1b2c3d4-0007-4000-8000-000000000002",
+                    "path": "<HID::Gudsen MOZA R5 Base>/rz",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "MOZA",
                     "action": "Brake",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -650,6 +816,83 @@
                     "action": "Shifter 7",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a1b2c3d4-0004-4000-8000-000000000001",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Shifter 1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a1b2c3d4-0004-4000-8000-000000000002",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Shifter 2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a1b2c3d4-0004-4000-8000-000000000003",
+                    "path": "<Keyboard>/3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Shifter 3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a1b2c3d4-0004-4000-8000-000000000004",
+                    "path": "<Keyboard>/4",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Shifter 4",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a1b2c3d4-0004-4000-8000-000000000005",
+                    "path": "<Keyboard>/5",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Shifter 5",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a1b2c3d4-0004-4000-8000-000000000006",
+                    "path": "<Keyboard>/6",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Shifter 6",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a1b2c3d4-0004-4000-8000-000000000007",
+                    "path": "<Keyboard>/7",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Shifter 7",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -678,6 +921,17 @@
                     "action": "Handbrake",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a1b2c3d4-0005-4000-8000-000000000001",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Handbrake",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }
@@ -689,6 +943,28 @@
             "devices": [
                 {
                     "devicePath": "<Logitech G29 Racing Wheel>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        },
+        {
+            "name": "Keyboard",
+            "bindingGroup": "Keyboard",
+            "devices": [
+                {
+                    "devicePath": "<Keyboard>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        },
+        {
+            "name": "MOZA",
+            "bindingGroup": "MOZA",
+            "devices": [
+                {
+                    "devicePath": "<HID::Gudsen MOZA R5 Base>",
                     "isOptional": false,
                     "isOR": false
                 }

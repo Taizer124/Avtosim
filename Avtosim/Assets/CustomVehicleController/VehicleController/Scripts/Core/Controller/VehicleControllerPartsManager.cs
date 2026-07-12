@@ -89,6 +89,12 @@ namespace Assets.VehicleController
                 _transmission.ShiftDownManually();
         }
 
+        // Находится через рефлексию в CustomVehicleController.Initialize()
+        // (_setGearMethod = _partsManager.GetType().GetMethod("SetGear")).
+        // Даёт H-паттерн коробке мгновенную установку конкретной передачи
+        // вместо эмуляции через цикл ShiftUp/ShiftDown (см. HandleManualTransmissionFallback).
+        public void SetGear(int gearId) => _transmission.SetGear(gearId);
+
         private void ManageWheelsPhysics(int suspensionSimulationPrecision, LayerMask ignoreLayers, bool TCS)
         {
             float dist = GetDistanceToGroundFromCoG();

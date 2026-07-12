@@ -35,6 +35,18 @@ namespace Assets.VehicleController
 
         public void SetInNeutral() => _shifterState = ShifterStates.ShifterState.Neutral;
 
+        // Мгновенная установка передачи для H-паттерн (механика): в отличие от
+        // TryChangeGear (секвентальный +1/-1 с задержкой корутины, имитирующей
+        // время переключения паддла), здесь передача включается сразу — как
+        // физически происходит при вставке рычага в положение с зажатым
+        // сцеплением. Никакой задержки/кулдауна.
+        public void SetGear(int gearId)
+        {
+            int clamped = Mathf.Clamp(gearId, 0, _partsPresetWrapper.Transmission.GearRatiosList.Count - 1);
+            _currentGear = clamped;
+            _shifterState = ShifterStates.ShifterState.Drive;
+        }
+
         public bool TryChangeGear(int i, float delay)
         {
             (bool success, int nextGearID, ShifterStates.ShifterState nextShifterState) = WrapGear(_currentGear + i);

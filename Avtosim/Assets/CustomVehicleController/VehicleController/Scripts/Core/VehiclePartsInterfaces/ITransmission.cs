@@ -15,6 +15,7 @@ namespace Assets.VehicleController
         public bool InShiftingCooldown();
         public bool Redlining();
         public void ShiftGear(int i);
+        public void SetGear(int gearId);
         public float DetermineGasInput(float gasInput, float breakInput);
         public float DetermineBrakeInput(float gasInput, float breakInput);
 

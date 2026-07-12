@@ -1,14 +1,20 @@
-﻿using LogitechG29.Sample.Input;
+using LogitechG29.Sample.Input;
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Assets.VehicleController
 {
+    // Единственный источник ввода: InputControllerReader (_wheelInput) уже объединяет
+    // руль, клавиатуру и (в перспективе) MOZA на уровне InputController.inputactions —
+    // сюда прилетают события от любого подключённого устройства, и это единственное
+    // место, которое их читает. Второй, дублирующий источник (PlayerVehicleInputActions +
+    // отдельная ветка чтения клавиатуры) был удалён: он не пробрасывал сцепление и не
+    // участвовал в переключении передач, а также не позволял читать клавиатуру и руль
+    // одновременно.
     [AddComponentMenu("CustomVehicleController/Input/All-in-One Input Provider")]
-    public class AllInOneInputProvider : MonoBehaviour, IVehicleControllerInputProvider
+    public class AllInOneInputProvider : MonoBehaviour, IVehicleControllerInputProvider, IManualTransmissionInputProvider
     {
-        public enum InputMode { Keyboard, Wheel, Auto }
+        public enum InputMode { Keyboard, Wheel, Auto } // порядок сохранён — сериализован в существующих префабах
         public enum TransmissionMode { Automatic, Sequential, Manual }
 
         [Header("Settings")]
@@ -21,29 +27,19 @@ namespace Assets.VehicleController
         [SerializeField] private bool enableHandbrakeInput = true;
         [SerializeField, Range(0f, 1f)] private float handbrakeDeadzone = 0.3f;
 
-        private PlayerVehicleInputActions _inputActions;
-        private bool _initialized = false;
         private bool _enabled = true;
 
-        // ✅ СЦЕПЛЕНИЕ
         private float _clutchInput;
-
         private float _gas, _brake, _steer;
         private bool _handbrake, _gearUp, _gearDown, _nitro;
-        private bool[] _manualGears = new bool[8];
+        private readonly bool[] _manualGears = new bool[8];
         private int _currentGear;
 
-        private float _lastWheelInputTime;
-        private const float _wheelActivityTimeout = 2f;
-        private bool _wasWheelConnected;
-
-        // --- Локальное состояние кнопок (Кэш) ---
         private bool _northPressedRaw;
         private bool _southPressedRaw;
         private bool _eastPressedRaw;
         private bool _westPressedRaw;
 
-        // --- Исправленные свойства ---
         public bool Return => _wheelInput != null && _wheelInput.Return;
         public bool NorthButton => _northPressedRaw;
         public bool SouthButton => _southPressedRaw;
@@ -56,37 +52,22 @@ namespace Assets.VehicleController
         public event System.Action OnNorthPressed;
         public event System.Action OnSouthPressed;
 
-        // Кулдаун
-        private float _buttonCooldown = 0.4f;
-        private float _lastEastTime, _lastWestTime, _lastNorthTime, _lastSouthTime;
-
-        private void Awake()
-        {
-            _inputActions = new PlayerVehicleInputActions();
-        }
-
         private void OnEnable()
         {
-            if (_inputActions == null) _inputActions = new PlayerVehicleInputActions();
-            try
+            if (_wheelInput != null)
             {
-                _inputActions.Enable();
-                _initialized = true;
+                // ScriptableObject-ридер не может сам надёжно включить карты
+                // ввода (его OnEnable привязан к загрузке ассета, а не к Play
+                // Mode) — включаем явно отсюда, из жизненного цикла сцены.
+                _wheelInput.EnsureInitialized();
+                SubscribeWheel();
             }
-            catch (System.Exception e)
-            {
-                Debug.LogWarning($"AllInOneInputProvider: failed to enable input actions: {e.Message}");
-                _initialized = false;
-            }
-
-            if (_wheelInput != null) SubscribeWheel();
         }
 
         private void OnDisable()
         {
             if (_wheelInput != null) UnsubscribeWheel();
-            if (_inputActions != null) _inputActions.Disable();
-            _initialized = false;
+            ResetInputs();
         }
 
         private void Update()
@@ -97,81 +78,26 @@ namespace Assets.VehicleController
                 return;
             }
 
-            if (_inputMode == InputMode.Auto)
-            {
-                DetectActiveInput();
-                if (_textInputSys != null)
-                    _textInputSys.text = _inputMode.ToString();
-            }
+            // Самовосстановление: если карты ввода выключились (domain reload,
+            // повторная енумерация HID и т.п.) — включаем заново. Дешёвая
+            // проверка bool, лечит и историческое "руль отваливался".
+            if (_wheelInput != null && !_wheelInput.IsInitialized)
+                _wheelInput.EnsureInitialized();
 
-            if (_inputMode == InputMode.Keyboard)
-                UpdateKeyboard();
-            // ✅ Wheel + Manual с сцеплением
-            else if (_inputMode == InputMode.Wheel)
-            {
-                if (_transmissionMode == TransmissionMode.Manual)
-                    ProcessManualShifting();
-                else if (_transmissionMode == TransmissionMode.Sequential)
-                    ProcessSequentialShifting();
-            }
-        }
+            if (_textInputSys != null)
+                _textInputSys.text = _inputMode.ToString();
 
-        private void DetectActiveInput()
-        {
-            bool wheelConnected = _wheelInput != null;
-
-            if (!wheelConnected)
-            {
-                _inputMode = InputMode.Keyboard;
-                _wasWheelConnected = false;
-                return;
-            }
-
-            if (Mathf.Abs(_wheelInput.Throttle) > 0.05f ||
-                Mathf.Abs(_wheelInput.Brake) > 0.05f ||
-                Mathf.Abs(_wheelInput.Steering) > 0.05f ||
-                _northPressedRaw || _southPressedRaw ||
-                _eastPressedRaw || _westPressedRaw)
-            {
-                _lastWheelInputTime = Time.time;
-                _wasWheelConnected = true;
-                _inputMode = InputMode.Wheel;
-                return;
-            }
-
-            if (Time.time - _lastWheelInputTime >= _wheelActivityTimeout)
-                _inputMode = InputMode.Keyboard;
-        }
-
-        // === КЛАВИАТУРА ===
-        private void UpdateKeyboard()
-        {
-            if (_inputActions == null)
-            {
-                _gas = Mathf.Clamp01(Input.GetAxis("Vertical"));
-                _brake = Mathf.Clamp01(-Input.GetAxis("Vertical"));
-                _steer = Input.GetAxis("Horizontal");
-                _handbrake = enableHandbrakeInput && Input.GetKey(KeyCode.Space);
-                _nitro = Input.GetKey(KeyCode.LeftShift);
-                _gearUp = Input.GetKeyDown(KeyCode.E);
-                _gearDown = Input.GetKeyDown(KeyCode.Q);
-                _clutchInput = Input.GetKey(KeyCode.C) ? 0f : 1f; // C = сцепление
-                return;
-            }
-
-            _gas = _inputActions.Vehicle.GasInput.ReadValue<float>();
-            _brake = _inputActions.Vehicle.BrakeInput.ReadValue<float>();
-            _steer = _inputActions.Vehicle.HorizontalInput.ReadValue<float>();
-            _handbrake = enableHandbrakeInput && (_inputActions.Vehicle.HandbrakeInput.ReadValue<float>() != 0);
-            _nitro = _inputActions.Vehicle.NitroBoostInput.ReadValue<float>() != 0;
-            _gearUp = _inputActions.Vehicle.GearUpInput.WasPerformedThisFrame();
-            _gearDown = _inputActions.Vehicle.GearDownInput.WasPerformedThisFrame();
+            // Ручная коробка читается отсюда через GetCurrentGear(). Sequential и
+            // Automatic обрабатываются самим CustomVehicleController через
+            // GetGearUpInput()/GetGearDownInput() — дублировать эту логику здесь не нужно.
+            if (_transmissionMode == TransmissionMode.Manual)
+                ProcessManualShifting();
         }
 
         // --- Подписки ---
         private void SubscribeWheel()
         {
-            _wheelInput.ClutchCallback += Wheel_OnClutch; //  СЦЕПЛЕНИЕ
+            _wheelInput.ClutchCallback += Wheel_OnClutch;
             _wheelInput.ThrottleCallback += Wheel_OnThrottle;
             _wheelInput.BrakeCallback += Wheel_OnBrake;
             _wheelInput.SteeringCallback += Wheel_OnSteering;
@@ -184,7 +110,6 @@ namespace Assets.VehicleController
             _wheelInput.OnNorthButtonCallback += Wheel_OnNorth;
             _wheelInput.OnSouthButtonCallback += Wheel_OnSouth;
 
-            // Shifters
             _wheelInput.Shifter1Callback += Wheel_OnShifter1;
             _wheelInput.Shifter2Callback += Wheel_OnShifter2;
             _wheelInput.Shifter3Callback += Wheel_OnShifter3;
@@ -196,9 +121,7 @@ namespace Assets.VehicleController
 
         private void UnsubscribeWheel()
         {
-            if (_wheelInput == null) return;
-
-            _wheelInput.ClutchCallback -= Wheel_OnClutch; // ✅ СЦЕПЛЕНИЕ
+            _wheelInput.ClutchCallback -= Wheel_OnClutch;
             _wheelInput.ThrottleCallback -= Wheel_OnThrottle;
             _wheelInput.BrakeCallback -= Wheel_OnBrake;
             _wheelInput.SteeringCallback -= Wheel_OnSteering;
@@ -220,64 +143,57 @@ namespace Assets.VehicleController
             _wheelInput.Shifter7Callback -= Wheel_OnShifter7;
         }
 
-        // --- Wheel Input Callbacks ---
-        private void Wheel_OnClutch(float clutchValue)
+        // --- Callbacks (руль + клавиатура, объединены в InputController.inputactions) ---
+        private void Wheel_OnClutch(float v) => _clutchInput = v;
+        private void Wheel_OnThrottle(float v) => _gas = v;
+
+        private void Wheel_OnBrake(float v)
         {
-            _clutchInput = clutchValue;
-            Debug.Log($"Clutch: {_clutchInput:F2}");
+            _brake = v;
+            OnBrakeChanged?.Invoke(v);
         }
 
-        private void Wheel_OnThrottle(float v) { _gas = v; _lastWheelInputTime = Time.time; }
-        private void Wheel_OnBrake(float v) { _brake = v; OnBrakeChanged?.Invoke(v); _lastWheelInputTime = Time.time; }
-        private void Wheel_OnSteering(float v) { _steer = v; _lastWheelInputTime = Time.time; }
+        private void Wheel_OnSteering(float v) => _steer = v;
+
         private void Wheel_OnHandbrake(float v)
         {
-            _handbrake = enableHandbrakeInput && (v > handbrakeDeadzone);
-            _lastWheelInputTime = Time.time;
+            _handbrake = enableHandbrakeInput && v > handbrakeDeadzone;
         }
 
-        private void Wheel_OnRightShift(bool p) { if (_transmissionMode == TransmissionMode.Sequential) _gearUp = p; }
-        private void Wheel_OnLeftShift(bool p) { if (_transmissionMode == TransmissionMode.Sequential) _gearDown = p; }
-
-        // --- КНОПКИ ---
-        private void Wheel_OnEast(bool p)
+        // _gearUp/_gearDown читаются и сбрасываются в GetGearUpInput()/GetGearDownInput(),
+        // которые CustomVehicleController вызывает раз за кадр в Sequential-режиме.
+        private void Wheel_OnRightShift(bool pressed)
         {
-            _eastPressedRaw = p;
-            if (!p) return;
-            if (Time.time - _lastEastTime < _buttonCooldown) return;
-            _lastEastTime = Time.time;
-            Debug.Log("EAST pressed");
-            OnEastPressed?.Invoke();
+            if (pressed && _transmissionMode == TransmissionMode.Sequential) _gearUp = true;
         }
 
-        private void Wheel_OnWest(bool p)
+        private void Wheel_OnLeftShift(bool pressed)
         {
-            _westPressedRaw = p;
-            if (!p) return;
-            if (Time.time - _lastWestTime < _buttonCooldown) return;
-            _lastWestTime = Time.time;
-            Debug.Log("WEST pressed");
-            OnWestPressed?.Invoke();
+            if (pressed && _transmissionMode == TransmissionMode.Sequential) _gearDown = true;
         }
 
-        private void Wheel_OnNorth(bool p)
+        private void Wheel_OnEast(bool pressed)
         {
-            _northPressedRaw = p;
-            if (!p) return;
-            if (Time.time - _lastNorthTime < _buttonCooldown) return;
-            _lastNorthTime = Time.time;
-            Debug.Log("NORTH pressed");
-            OnNorthPressed?.Invoke();
+            _eastPressedRaw = pressed;
+            if (pressed) OnEastPressed?.Invoke();
         }
 
-        private void Wheel_OnSouth(bool p)
+        private void Wheel_OnWest(bool pressed)
         {
-            _southPressedRaw = p;
-            if (!p) return;
-            if (Time.time - _lastSouthTime < _buttonCooldown) return;
-            _lastSouthTime = Time.time;
-            Debug.Log("SOUTH pressed");
-            OnSouthPressed?.Invoke();
+            _westPressedRaw = pressed;
+            if (pressed) OnWestPressed?.Invoke();
+        }
+
+        private void Wheel_OnNorth(bool pressed)
+        {
+            _northPressedRaw = pressed;
+            if (pressed) OnNorthPressed?.Invoke();
+        }
+
+        private void Wheel_OnSouth(bool pressed)
+        {
+            _southPressedRaw = pressed;
+            if (pressed) OnSouthPressed?.Invoke();
         }
 
         private void Wheel_OnShifter1(bool pressed) => _manualGears[1] = pressed;
@@ -288,38 +204,26 @@ namespace Assets.VehicleController
         private void Wheel_OnShifter6(bool pressed) => _manualGears[6] = pressed;
         private void Wheel_OnShifter7(bool pressed) => _manualGears[7] = pressed;
 
-        // ✅ СЦЕПЛЕНИЕ + Manual
         private void ProcessManualShifting()
         {
-            int selectedGear = -1;
+            if (_clutchInput < 0.1f)
+            {
+                _currentGear = 0;
+                return;
+            }
+
+            int selectedGear = 0;
             for (int i = 1; i < _manualGears.Length; i++)
             {
                 if (_manualGears[i]) { selectedGear = i; break; }
             }
 
-            // СЦЕПЛЕНИЕ: если разомкнуто - нейтраль
-            if (_clutchInput < 0.1f)
-            {
-                _currentGear = 0;
-                return;
-            }
-
-            _currentGear = selectedGear != -1 ? selectedGear : 0;
-        }
-
-        private void ProcessSequentialShifting()
-        {
-            if (_clutchInput < 0.1f)
-            {
-                _currentGear = 0;
-                return;
-            }
-            // Sequential логика (+1/-1)
+            _currentGear = selectedGear;
         }
 
         private void ResetInputs()
         {
-            _gas = _brake = _steer = _clutchInput = 0;
+            _gas = _brake = _steer = _clutchInput = 0f;
             _handbrake = _gearUp = _gearDown = _nitro = false;
             _northPressedRaw = _southPressedRaw = _eastPressedRaw = _westPressedRaw = false;
             for (int i = 0; i < _manualGears.Length; i++) _manualGears[i] = false;
@@ -333,7 +237,6 @@ namespace Assets.VehicleController
             if (!enable) ResetInputs();
         }
 
-        // ✅ СЦЕПЛЕНИЕ
         public float GetClutchInput() => _clutchInput;
 
         public float GetGasInput() => _gas;
@@ -353,9 +256,6 @@ namespace Assets.VehicleController
 
         public void ReinitializeInputSystem()
         {
-            if (_inputActions == null) _inputActions = new PlayerVehicleInputActions();
-            try { _inputActions.Enable(); _initialized = true; }
-            catch { _initialized = false; }
             ResetInputs();
             _inputMode = InputMode.Auto;
         }

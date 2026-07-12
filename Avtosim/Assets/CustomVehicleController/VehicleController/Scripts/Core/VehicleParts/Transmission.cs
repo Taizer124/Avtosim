@@ -275,6 +275,20 @@ namespace Assets.VehicleController
             OnShifted?.Invoke();
         }
 
+        // Прямая установка передачи для механики (H-паттерн). В отличие от
+        // ShiftGear(+1/-1) — без проверки _inCooldown и без задержки: водитель
+        // сам решает, когда сцепление/рычаг позволяют переключиться, это уже
+        // отражено в ProcessManualShifting (AllInOneInputProvider) через
+        // сцепление. Кулдаун здесь имитирует время механического
+        // переключения секвентальной/автоматической коробки — к H-паттерну
+        // неприменим.
+        public void SetGear(int gearId)
+        {
+            _shifter.SetGear(gearId);
+            _lastShiftTime = Time.time;
+            OnShifted?.Invoke();
+        }
+
         public bool InShiftingCooldown() => _inCooldown;
 
         public bool Redlining() => _redlining;
