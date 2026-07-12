@@ -9,6 +9,7 @@ namespace Assets.VehicleController
     {
         bool IsManualTransmission();
         int GetCurrentGear();
+        float GetClutchInput();
     }
 
 
@@ -41,6 +42,13 @@ namespace Assets.VehicleController
         }
 
         public EnginePartsContainer GetEnginePartsContainer() => _enginePartsContainer;
+
+        public float GetClutchInput()
+        {
+            if (_inputProvider is IManualTransmissionInputProvider manualInput && manualInput.IsManualTransmission())
+                return manualInput.GetClutchInput();
+            return 0f;
+        }
 
         //Reference type field allows other classes to cache it and use the up-to-date parts scriptable objects.
         //This class holds the parts that the vehicle is using either in the form of VehiclePartsPresetSO of a VehiclePartsCustomizableSet.

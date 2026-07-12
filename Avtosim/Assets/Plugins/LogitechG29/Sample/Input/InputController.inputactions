@@ -503,17 +503,6 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "",
-                    "id": "a1b2c3d4-0006-4000-8000-000000000001",
-                    "path": "<HID::Gudsen MOZA R5 Base>/stick/x",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "MOZA",
-                    "action": "Steering_Stick",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
                     "name": "1D Axis",
                     "id": "a1b2c3d4-0002-4000-8000-000000000001",
                     "path": "1DAxis",
@@ -605,17 +594,6 @@
                 },
                 {
                     "name": "",
-                    "id": "a1b2c3d4-0007-4000-8000-000000000001",
-                    "path": "<HID::Gudsen MOZA R5 Base>/z",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "MOZA",
-                    "action": "Throttle",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "23c462a6-d9b2-4140-ae65-03d64daa6a0d",
                     "path": "<Logitech G29 Racing Wheel>/clutchAxis",
                     "interactions": "",
@@ -654,17 +632,6 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard",
-                    "action": "Brake",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "a1b2c3d4-0007-4000-8000-000000000002",
-                    "path": "<HID::Gudsen MOZA R5 Base>/rz",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "MOZA",
                     "action": "Brake",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -733,6 +700,15 @@
                     "name": "Shifter 7",
                     "type": "PassThrough",
                     "id": "05a540fb-c032-40e5-a9da-09a8ef28c029",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Neutral",
+                    "type": "PassThrough",
+                    "id": "a1b2c3d4-0009-4000-8000-000000000001",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -893,6 +869,17 @@
                     "action": "Shifter 7",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a1b2c3d4-0009-4000-8000-000000000002",
+                    "path": "<Keyboard>/0",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "Neutral",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -954,17 +941,6 @@
             "devices": [
                 {
                     "devicePath": "<Keyboard>",
-                    "isOptional": false,
-                    "isOR": false
-                }
-            ]
-        },
-        {
-            "name": "MOZA",
-            "bindingGroup": "MOZA",
-            "devices": [
-                {
-                    "devicePath": "<HID::Gudsen MOZA R5 Base>",
                     "isOptional": false,
                     "isOR": false
                 }

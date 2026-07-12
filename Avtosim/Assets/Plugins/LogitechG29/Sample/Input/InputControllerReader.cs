@@ -116,6 +116,7 @@ namespace LogitechG29.Sample.Input
         public bool Shifter5 { get; private set; }
         public bool Shifter6 { get; private set; }
         public bool Shifter7 { get; private set; }
+        public bool Neutral { get; private set; }
 
         public float Steering { get; private set; }
         public float Throttle { get; private set; }
@@ -157,6 +158,7 @@ namespace LogitechG29.Sample.Input
         public event Action<bool> Shifter5Callback;
         public event Action<bool> Shifter6Callback;
         public event Action<bool> Shifter7Callback;
+        public event Action<bool> NeutralCallback;
 
         public event Action<float> SteeringCallback;
         public event Action<float> ThrottleCallback;
@@ -203,6 +205,7 @@ namespace LogitechG29.Sample.Input
             Shifter5Callback += value => PrintDebug($"{nameof(Shifter5Callback)}: {value}");
             Shifter6Callback += value => PrintDebug($"{nameof(Shifter6Callback)}: {value}");
             Shifter7Callback += value => PrintDebug($"{nameof(Shifter7Callback)}: {value}");
+            NeutralCallback += value => PrintDebug($"{nameof(NeutralCallback)}: {value}");
             SteeringCallback += value => PrintDebug($"{nameof(SteeringCallback)}: {value}");
             ThrottleCallback += value => PrintDebug($"{nameof(ThrottleCallback)}: {value}");
             BrakeCallback += value => PrintDebug($"{nameof(BrakeCallback)}: {value}");
@@ -238,6 +241,7 @@ namespace LogitechG29.Sample.Input
             Shifter5Callback -= value => PrintDebug($"{nameof(Shifter5Callback)}: {value}");
             Shifter6Callback -= value => PrintDebug($"{nameof(Shifter6Callback)}: {value}");
             Shifter7Callback -= value => PrintDebug($"{nameof(Shifter7Callback)}: {value}");
+            NeutralCallback -= value => PrintDebug($"{nameof(NeutralCallback)}: {value}");
             SteeringCallback -= value => PrintDebug($"{nameof(SteeringCallback)}: {value}");
             ThrottleCallback -= value => PrintDebug($"{nameof(ThrottleCallback)}: {value}");
             BrakeCallback -= value => PrintDebug($"{nameof(BrakeCallback)}: {value}");
@@ -397,6 +401,12 @@ namespace LogitechG29.Sample.Input
         {
             Shifter7 = context.ReadValueAsButton();
             Shifter7Callback?.Invoke(Shifter7);
+        }
+
+        public void OnNeutral(InputAction.CallbackContext context)
+        {
+            Neutral = context.ReadValueAsButton();
+            NeutralCallback?.Invoke(Neutral);
         }
 
         public void OnSouth(InputAction.CallbackContext context)

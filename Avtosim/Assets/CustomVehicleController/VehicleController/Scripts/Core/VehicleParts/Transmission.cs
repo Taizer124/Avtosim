@@ -162,21 +162,49 @@ namespace Assets.VehicleController
         {
             UpdateEngineRPMRange();
 
-            float highestRPM = 0;
-            int size = driveAxleArray.Length;
-
-            for (int i = 0; i < size; i++)
+            bool isDisconnected = _shifter.InNeutralGear();
+            float clutch = 0f;
+            CustomVehicleController owner = _partsPresetWrapper.Owner;
+            if (owner != null)
             {
-                if (Mathf.Abs(driveAxleArray[i].LeftHalfShaft.WheelController.VisualRPM) > highestRPM)
-                    highestRPM = Mathf.Abs(driveAxleArray[i].LeftHalfShaft.WheelController.VisualRPM);
-
-                if (Mathf.Abs(driveAxleArray[i].RightHalfShaft.WheelController.VisualRPM) > highestRPM)
-                    highestRPM = Mathf.Abs(driveAxleArray[i].RightHalfShaft.WheelController.VisualRPM);
+                clutch = owner.GetClutchInput();
+            }
+            if (clutch > 0.1f)
+            {
+                isDisconnected = true;
             }
 
-            float imaginaryEngineRPM = CalculateRealRPM(Mathf.Abs(highestRPM) * _partsPresetWrapper.Transmission.FinalDriveRatio * 60 / 6.28f);
+            if (isDisconnected)
+            {
+                float targetRPM = _modifiedEngineMinRPM;
+                if (gasInput > 0.05f)
+                {
+                    targetRPM = Mathf.Lerp(_currentEngineRPM, _modifiedEngineMaxRPM, gasInput * Time.deltaTime * 6.0f);
+                }
+                else
+                {
+                    targetRPM = Mathf.Lerp(_currentEngineRPM, _modifiedEngineMinRPM, Time.deltaTime * 3.0f);
+                }
+                _currentEngineRPM = targetRPM;
+            }
+            else
+            {
+                float highestRPM = 0;
+                int size = driveAxleArray.Length;
 
-            _currentEngineRPM = Mathf.SmoothDamp(_currentEngineRPM, imaginaryEngineRPM, ref smDampVelocity, SM_DAMP_SPEED);
+                for (int i = 0; i < size; i++)
+                {
+                    if (Mathf.Abs(driveAxleArray[i].LeftHalfShaft.WheelController.VisualRPM) > highestRPM)
+                        highestRPM = Mathf.Abs(driveAxleArray[i].LeftHalfShaft.WheelController.VisualRPM);
+
+                    if (Mathf.Abs(driveAxleArray[i].RightHalfShaft.WheelController.VisualRPM) > highestRPM)
+                        highestRPM = Mathf.Abs(driveAxleArray[i].RightHalfShaft.WheelController.VisualRPM);
+                }
+
+                float imaginaryEngineRPM = CalculateRealRPM(Mathf.Abs(highestRPM) * _partsPresetWrapper.Transmission.FinalDriveRatio * 60 / 6.28f);
+
+                _currentEngineRPM = Mathf.SmoothDamp(_currentEngineRPM, imaginaryEngineRPM, ref smDampVelocity, SM_DAMP_SPEED);
+            }
 
             _inCooldown = Time.time < _lastShiftTime + _partsPresetWrapper.Transmission.ShiftCooldown;
             PerformRedliningEffect(gasInput);
@@ -278,15 +306,27 @@ namespace Assets.VehicleController
         // Прямая установка передачи для механики (H-паттерн). В отличие от
         // ShiftGear(+1/-1) — без проверки _inCooldown и без задержки: водитель
         // сам решает, когда сцепление/рычаг позволяют переключиться, это уже
-        // отражено в ProcessManualShifting (AllInOneInputProvider) через
-        // сцепление. Кулдаун здесь имитирует время механического
-        // переключения секвентальной/автоматической коробки — к H-паттерну
-        // неприменим.
+        // отражено в TrySelectGear (AllInOneInputProvider) через сцепление.
+        // Кулдаун здесь имитирует время механического переключения
+        // секвентальной/автоматической коробки — к H-паттерну неприменим.
+        //
+        // CustomVehicleController вызывает SetGear() КАЖДЫЙ кадр, пока активна
+        // механика (не только при реальной смене передачи) — поэтому _lastShiftTime
+        // обновляем и OnShifted шлём ТОЛЬКО когда передача действительно изменилась.
+        // Иначе _inCooldown держится постоянно true (ShiftCooldown "не успевает"
+        // истечь между кадрами), а Engine.CalculateAccelerationForce() при активном
+        // _inCooldown всегда возвращает нулевой крутящий момент — газ перестаёт
+        // работать полностью, хотя передача формально включена.
         public void SetGear(int gearId)
         {
+            bool changed = gearId != _shifter.GetRawGearId();
             _shifter.SetGear(gearId);
-            _lastShiftTime = Time.time;
-            OnShifted?.Invoke();
+
+            if (changed)
+            {
+                _lastShiftTime = Time.time;
+                OnShifted?.Invoke();
+            }
         }
 
         public bool InShiftingCooldown() => _inCooldown;

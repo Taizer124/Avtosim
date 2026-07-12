@@ -34,15 +34,29 @@ namespace Assets.VehicleController
 
         public void Accelerate(VehicleAxle[] driveAxleArray, float gasInput, float breakInput, bool nitroBoostInput, float rpm)
         {
+            if (_shifter.InNeutralGear())
+            {
+                _totalTorque = 0;
+                SetTorque(0, driveAxleArray);
+                return;
+            }
+
             float input = _transmission.DetermineGasInput(gasInput, breakInput);
             float forcedInductionBoost = _forcedInduction.GetForcedInductionBoost(_transmission.InShiftingCooldown() ? 0 : Mathf.Abs(input));
             float nitroBoost = _nitrousBoost.GetNitroBoost(nitroBoostInput);
 
-
             float defaultEngineTorque = CalculateAccelerationForce(input, rpm);
             float customEnginePartsTorque = GetBoostFromParts(Mathf.Sign(defaultEngineTorque), input);
             _totalTorque = defaultEngineTorque + customEnginePartsTorque;
-            SetTorque(_totalTorque * (1 + forcedInductionBoost * 0.07f) + nitroBoost, driveAxleArray);
+
+            float clutch = 0f;
+            if (_partsPresetWrapper.Owner != null)
+            {
+                clutch = _partsPresetWrapper.Owner.GetClutchInput();
+            }
+            float clutchFactor = Mathf.Clamp01(1.0f - clutch);
+
+            SetTorque((_totalTorque * (1 + forcedInductionBoost * 0.07f) + nitroBoost) * clutchFactor, driveAxleArray);
         }
 
         public float GetForcedInductionBoostPressureMax()

@@ -144,7 +144,6 @@ namespace Assets.VehicleController
 
             UpdateStatsMenu();
             HandleAudio();
-            HandlePartsChanges();
             UpdateWheelButtonStates();
 
             // R/T/Y/U теперь приходят через Input Actions (карта Buttons,
@@ -155,7 +154,7 @@ namespace Assets.VehicleController
 
             if (_westButtonPressed && canPress)
             {
-                SceneManager.LoadScene("mcp_day");
+                SceneManager.LoadScene("MVP");
                 _lastButtonTime = Time.time;
                 _westButtonPressed = false;
             }
@@ -298,88 +297,7 @@ namespace Assets.VehicleController
             };
         }
 
-        private void HandlePartsChanges()
-        {
-            ChangeEngine();
-            ChangeNitrous();
-            ChangeTransmission();
-            ChangeSuspension();
-            ChangeTires();
-            ChangeBrakes();
-            ChangeBody();
-            ChangeEnginePart();
-            ChangeFI();
-        }
 
-        private void ChangeEnginePart()
-        {
-            if (!Input.GetKeyDown(KeyCode.Alpha8)) return;
-            _enginePartName.text = _customEngineParts[_currentEnginePartID].name;
-            _vehicleController.SetNewEnginePart(_customEngineParts[_currentEnginePartID]);
-            _currentEnginePartID = (_currentEnginePartID + 1) % _customEngineParts.Length;
-        }
-
-        private void ChangeEngine()
-        {
-            if (!Input.GetKeyDown(KeyCode.Alpha1) || _vehicleController.UsePreset) return;
-            _partsIdArray[0] = (_partsIdArray[0] + 1) % _engineArray.Length;
-            _vehicleController.SetNewPartToCustomizableSet(_engineArray[_partsIdArray[0]]);
-            UpdateEngineSoundFromPart();
-        }
-
-        private void ChangeNitrous()
-        {
-            if (!Input.GetKeyDown(KeyCode.Alpha2) || _vehicleController.UsePreset) return;
-            _partsIdArray[1] = (_partsIdArray[1] + 1) % _nitrousArray.Length;
-            _vehicleController.SetNewPartToCustomizableSet(_nitrousArray[_partsIdArray[1]]);
-        }
-
-        private void ChangeTransmission()
-        {
-            if (!Input.GetKeyDown(KeyCode.Alpha3) || _vehicleController.UsePreset) return;
-            _partsIdArray[2] = (_partsIdArray[2] + 1) % _transmissionArray.Length;
-            _vehicleController.SetNewPartToCustomizableSet(_transmissionArray[_partsIdArray[2]]);
-        }
-
-        private void ChangeTires()
-        {
-            if (!Input.GetKeyDown(KeyCode.Alpha4) || _vehicleController.UsePreset) return;
-            _partsIdArray[3] = (_partsIdArray[3] + 1) % _tireArray.Length;
-            _vehicleController.SetNewPartToCustomizableSet(_tireArray[_partsIdArray[3]], true);
-            _vehicleController.SetNewPartToCustomizableSet(_tireArray[_partsIdArray[3]], false);
-        }
-
-        private void ChangeSuspension()
-        {
-            if (!Input.GetKeyDown(KeyCode.Alpha5) || _vehicleController.UsePreset) return;
-            _partsIdArray[4] = (_partsIdArray[4] + 1) % _suspensionArray.Length;
-            _vehicleController.SetNewPartToCustomizableSet(_suspensionArray[_partsIdArray[4]], true);
-            _vehicleController.SetNewPartToCustomizableSet(_suspensionArray[_partsIdArray[4]], false);
-        }
-
-        private void ChangeBrakes()
-        {
-            if (!Input.GetKeyDown(KeyCode.Alpha6) || _vehicleController.UsePreset) return;
-            _partsIdArray[5] = (_partsIdArray[5] + 1) % _brakesArray.Length;
-            _vehicleController.SetNewPartToCustomizableSet(_brakesArray[_partsIdArray[5]]);
-        }
-
-        private void ChangeBody()
-        {
-            if (!Input.GetKeyDown(KeyCode.Alpha7) || _vehicleController.UsePreset) return;
-            _partsIdArray[6] = (_partsIdArray[6] + 1) % _vehicleBodyArray.Length;
-            _vehicleController.SetNewPartToCustomizableSet(_vehicleBodyArray[_partsIdArray[6]]);
-        }
-
-        private void ChangeFI()
-        {
-            if (!Input.GetKeyDown(KeyCode.Alpha9) || _vehicleController.UsePreset) return;
-            _partsIdArray[7] = (_partsIdArray[7] + 1) % _forcedInductionArray.Length;
-            if (_forcedInductionArray[_partsIdArray[7]] != null)
-                _vehicleController.SetNewPartToCustomizableSet(_forcedInductionArray[_partsIdArray[7]]);
-            else
-                _vehicleController.RemoveForcedInduction();
-        }
 
         private void UpdateEngineSoundFromPart()
         {

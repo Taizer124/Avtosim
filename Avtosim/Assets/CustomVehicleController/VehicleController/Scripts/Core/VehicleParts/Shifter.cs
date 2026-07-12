@@ -7,6 +7,13 @@ namespace Assets.VehicleController
     {
         private int _currentGear = 0;
 
+        // Последнее "сырое" значение gearId, переданное в SetGear (0 = нейтраль,
+        // -1 = задний ход, 1..N = передача) — отдельно от _currentGear, который
+        // является 0-based индексом в GearRatiosList и не различает нейтраль/
+        // передачу 1 (оба дают индекс 0). Нужен только для сравнения "изменилась
+        // ли передача" в Transmission.SetGear().
+        private int _lastSetGearId = 0;
+
         private VehiclePartsSetWrapper _partsPresetWrapper;
 
         private ShifterStates.ShifterState _shifterState;
@@ -27,6 +34,11 @@ namespace Assets.VehicleController
         public void Initialize(VehiclePartsSetWrapper partsPresetWrapper)
         {
             _partsPresetWrapper = partsPresetWrapper;
+            // ShifterState.Drive — это C#-дефолт для неинициализированного enum
+            // (Drive объявлен первым = значение 0). Без явной установки машина
+            // считалась бы "уже на 1-й передаче" с самого создания, до того как
+            // игрок вообще коснулся ввода.
+            _shifterState = ShifterStates.ShifterState.Neutral;
         }
 
         public bool InNeutralGear() => _shifterState == ShifterStates.ShifterState.Neutral;
@@ -42,10 +54,30 @@ namespace Assets.VehicleController
         // сцеплением. Никакой задержки/кулдауна.
         public void SetGear(int gearId)
         {
-            int clamped = Mathf.Clamp(gearId, 0, _partsPresetWrapper.Transmission.GearRatiosList.Count - 1);
-            _currentGear = clamped;
-            _shifterState = ShifterStates.ShifterState.Drive;
+            _lastSetGearId = gearId;
+
+            if (gearId == 0) // Нейтраль
+            {
+                _shifterState = ShifterStates.ShifterState.Neutral;
+                _currentGear = 0;
+            }
+            else if (gearId == -1) // Задний ход
+            {
+                _shifterState = ShifterStates.ShifterState.Reverse;
+                _currentGear = 0;
+            }
+            else // Drive (1-я передача и выше)
+            {
+                int maxGearIndex = _partsPresetWrapper.Transmission.GearRatiosList.Count - 1;
+                _currentGear = Mathf.Clamp(gearId - 1, 0, maxGearIndex);
+                _shifterState = ShifterStates.ShifterState.Drive;
+            }
         }
+
+        // "Сырое" значение gearId, которое в последний раз передали в SetGear
+        // (0 = нейтраль, -1 = задний ход, 1..N = передача). Используется
+        // Transmission.SetGear() для определения реальной смены передачи.
+        public int GetRawGearId() => _lastSetGearId;
 
         public bool TryChangeGear(int i, float delay)
         {

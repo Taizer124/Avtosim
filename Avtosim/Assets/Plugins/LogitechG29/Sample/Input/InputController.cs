@@ -589,17 +589,6 @@ public partial class @InputController: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 },
                 {
-                    ""name"": """",
-                    ""id"": ""a1b2c3d4-0006-4000-8000-000000000001"",
-                    ""path"": ""<HID::Gudsen MOZA R5 Base>/stick/x"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""MOZA"",
-                    ""action"": ""Steering_Stick"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
                     ""name"": ""1D Axis"",
                     ""id"": ""a1b2c3d4-0002-4000-8000-000000000001"",
                     ""path"": ""1DAxis"",
@@ -691,17 +680,6 @@ public partial class @InputController: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""a1b2c3d4-0007-4000-8000-000000000001"",
-                    ""path"": ""<HID::Gudsen MOZA R5 Base>/z"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""MOZA"",
-                    ""action"": ""Throttle"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""23c462a6-d9b2-4140-ae65-03d64daa6a0d"",
                     ""path"": ""<Logitech G29 Racing Wheel>/clutchAxis"",
                     ""interactions"": """",
@@ -740,17 +718,6 @@ public partial class @InputController: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard"",
-                    ""action"": ""Brake"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""a1b2c3d4-0007-4000-8000-000000000002"",
-                    ""path"": ""<HID::Gudsen MOZA R5 Base>/rz"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""MOZA"",
                     ""action"": ""Brake"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -819,6 +786,15 @@ public partial class @InputController: IInputActionCollection2, IDisposable
                     ""name"": ""Shifter 7"",
                     ""type"": ""PassThrough"",
                     ""id"": ""05a540fb-c032-40e5-a9da-09a8ef28c029"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Neutral"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""a1b2c3d4-0009-4000-8000-000000000001"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -979,6 +955,17 @@ public partial class @InputController: IInputActionCollection2, IDisposable
                     ""action"": ""Shifter 7"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a1b2c3d4-0009-4000-8000-000000000002"",
+                    ""path"": ""<Keyboard>/0"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""Neutral"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -1044,17 +1031,6 @@ public partial class @InputController: IInputActionCollection2, IDisposable
                     ""isOR"": false
                 }
             ]
-        },
-        {
-            ""name"": ""MOZA"",
-            ""bindingGroup"": ""MOZA"",
-            ""devices"": [
-                {
-                    ""devicePath"": ""<HID::Gudsen MOZA R5 Base>"",
-                    ""isOptional"": false,
-                    ""isOR"": false
-                }
-            ]
         }
     ]
 }");
@@ -1097,6 +1073,7 @@ public partial class @InputController: IInputActionCollection2, IDisposable
         m_Transmission_Shifter5 = m_Transmission.FindAction("Shifter 5", throwIfNotFound: true);
         m_Transmission_Shifter6 = m_Transmission.FindAction("Shifter 6", throwIfNotFound: true);
         m_Transmission_Shifter7 = m_Transmission.FindAction("Shifter 7", throwIfNotFound: true);
+        m_Transmission_Neutral = m_Transmission.FindAction("Neutral", throwIfNotFound: true);
         // Handbrake
         m_Handbrake = asset.FindActionMap("Handbrake", throwIfNotFound: true);
         m_Handbrake_Handbrake = m_Handbrake.FindAction("Handbrake", throwIfNotFound: true);
@@ -1710,6 +1687,7 @@ public partial class @InputController: IInputActionCollection2, IDisposable
     private readonly InputAction m_Transmission_Shifter5;
     private readonly InputAction m_Transmission_Shifter6;
     private readonly InputAction m_Transmission_Shifter7;
+    private readonly InputAction m_Transmission_Neutral;
     /// <summary>
     /// Provides access to input actions defined in input action map "Transmission".
     /// </summary>
@@ -1749,6 +1727,10 @@ public partial class @InputController: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Transmission/Shifter7".
         /// </summary>
         public InputAction @Shifter7 => m_Wrapper.m_Transmission_Shifter7;
+        /// <summary>
+        /// Provides access to the underlying input action "Transmission/Neutral".
+        /// </summary>
+        public InputAction @Neutral => m_Wrapper.m_Transmission_Neutral;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1796,6 +1778,9 @@ public partial class @InputController: IInputActionCollection2, IDisposable
             @Shifter7.started += instance.OnShifter7;
             @Shifter7.performed += instance.OnShifter7;
             @Shifter7.canceled += instance.OnShifter7;
+            @Neutral.started += instance.OnNeutral;
+            @Neutral.performed += instance.OnNeutral;
+            @Neutral.canceled += instance.OnNeutral;
         }
 
         /// <summary>
@@ -1828,6 +1813,9 @@ public partial class @InputController: IInputActionCollection2, IDisposable
             @Shifter7.started -= instance.OnShifter7;
             @Shifter7.performed -= instance.OnShifter7;
             @Shifter7.canceled -= instance.OnShifter7;
+            @Neutral.started -= instance.OnNeutral;
+            @Neutral.performed -= instance.OnNeutral;
+            @Neutral.canceled -= instance.OnNeutral;
         }
 
         /// <summary>
@@ -1981,19 +1969,6 @@ public partial class @InputController: IInputActionCollection2, IDisposable
         {
             if (m_KeyboardSchemeIndex == -1) m_KeyboardSchemeIndex = asset.FindControlSchemeIndex("Keyboard");
             return asset.controlSchemes[m_KeyboardSchemeIndex];
-        }
-    }
-    private int m_MOZASchemeIndex = -1;
-    /// <summary>
-    /// Provides access to the input control scheme.
-    /// </summary>
-    /// <seealso cref="UnityEngine.InputSystem.InputControlScheme" />
-    public InputControlScheme MOZAScheme
-    {
-        get
-        {
-            if (m_MOZASchemeIndex == -1) m_MOZASchemeIndex = asset.FindControlSchemeIndex("MOZA");
-            return asset.controlSchemes[m_MOZASchemeIndex];
         }
     }
     /// <summary>
@@ -2244,6 +2219,13 @@ public partial class @InputController: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnShifter7(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Neutral" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnNeutral(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Handbrake" which allows adding and removing callbacks.

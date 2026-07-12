@@ -9,8 +9,8 @@ EditorBuildSettings:
     path: Assets/Scenes/MainMenu.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
-    path: Assets/MCP/Demo/Scenes/mcp_day.unity
-    guid: a5983b762b0a45b47b33909e74704735
+    path: Assets/Scenes/MVP.unity
+    guid: 5c8bf232bede7174684746a8b90cc5e6
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 9ccce04f7e9fb524ea39a7b4cec70d97, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 9d6d511a87663dc4e873f2b8f1c619db, type: 3}
