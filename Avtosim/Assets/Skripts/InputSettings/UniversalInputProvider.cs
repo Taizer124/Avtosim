@@ -27,8 +27,17 @@ namespace Assets.VehicleController
         [SerializeField] private bool enableHandbrakeInput = true;
         [SerializeField, Range(0f, 1f)] private float handbrakeDeadzone = 0.3f;
 
+        // Полный диапазон поворота руля "стопор-в-стопор" в градусах для
+        // устройств, для которых мы не знаем реальный физический угол (Logitech
+        // через generic-ось, клавиатура). Подставь значение, настроенное в
+        // драйвере руля (Logitech G HUB → Rotation), чтобы 3D-модель руля в
+        // кабине поворачивалась 1-в-1 с реальным. Для MOZA диапазон приходит
+        // напрямую с руля через SetMozaInputs и это значение игнорируется.
+        [SerializeField] private float _defaultWheelRotationRangeDegrees = 900f;
+
         private bool _enabled = true;
         private bool _mozaConnected = false;
+        private float _mozaWheelRangeDegrees = 0f;
 
         private float _clutchInput;
         private float _gas, _brake, _steer;
@@ -57,7 +66,7 @@ namespace Assets.VehicleController
         public event System.Action OnNorthPressed;
         public event System.Action OnSouthPressed;
 
-        public void SetMozaInputs(float gas, float brake, float clutch, float steer, bool handbrake, int gear)
+        public void SetMozaInputs(float gas, float brake, float clutch, float steer, bool handbrake, int gear, float wheelRangeDegrees = 0f)
         {
             _mozaConnected = true;
             _gas = gas;
@@ -65,6 +74,7 @@ namespace Assets.VehicleController
             _clutchInput = clutch;
             _steer = steer;
             _handbrake = handbrake;
+            _mozaWheelRangeDegrees = wheelRangeDegrees;
 
             // Тот же гейт по сцеплению, что и для клавиатуры/Logitech (см.
             // TrySelectGear): передача меняется только при выжатом сцеплении.
@@ -80,6 +90,14 @@ namespace Assets.VehicleController
         {
             _mozaConnected = false;
         }
+
+        // Реальный физический диапазон поворота руля "стопор-в-стопор" в
+        // градусах — для 3D-модели руля в кабине (CockpitSteeringWheel), чтобы
+        // её поворот совпадал с реальным рулём 1-в-1 по интенсивности. Для MOZA
+        // берём то, что реально настроено на руле (SetMozaInputs передаёт его
+        // с каждым кадром из getMotorLimitAngle), иначе — ручную настройку.
+        public float GetWheelRotationRangeDegrees() =>
+            (_mozaConnected && _mozaWheelRangeDegrees > 0f) ? _mozaWheelRangeDegrees : _defaultWheelRotationRangeDegrees;
 
         // Кнопки MOZA приходят через поллинг в MozaSdkManager.Update() (SDK не
         // даёт событий нажатия сам), поэтому фронт нажатия (переход false→true)

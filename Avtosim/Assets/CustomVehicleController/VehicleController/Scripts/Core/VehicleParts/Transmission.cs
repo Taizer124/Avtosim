@@ -274,7 +274,12 @@ namespace Assets.VehicleController
             if (!_currentCarStats.Accelerating)
                 return;
 
-            if (_shifter.InReverseGear())
+            // InNeutralGear() — стартовая нейтраль (или откат в неё во время
+            // задержки переключения) сама по себе никогда не выйдет по RPM-порогу
+            // ниже: скорость вращения колёс не растёт без крутящего момента
+            // (Engine.Accelerate() отдаёт 0 в нейтрали), а currentRPM тут считается
+            // от скорости колёс, а не от свободных оборотов двигателя.
+            if (_shifter.InReverseGear() || _shifter.InNeutralGear())
                 ShiftGear(+1);
 
             if (currentRPM > _upShiftRPM)

@@ -48,6 +48,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: RPM
+    uniqueID: 3376261767
+    locked: 0
   m_RenderingLayers:
   - Default
   - Light Layer 1

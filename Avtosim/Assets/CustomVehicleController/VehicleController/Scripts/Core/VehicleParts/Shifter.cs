@@ -116,6 +116,13 @@ namespace Assets.VehicleController
             if (_shifterState == ShifterStates.ShifterState.Reverse)
                 return (true, 0, ShifterStates.ShifterState.Drive);
 
+            // Из нейтрали при разгоне — тоже сразу на 1-ю (id 0), а не на
+            // _currentGear+1: в нейтрали _currentGear всё ещё хранит "передачу
+            // до нейтрали" (обычно 0), поэтому обычный +1 приземлился бы на
+            // 2-ю передачу, пропустив 1-ю.
+            if (_shifterState == ShifterStates.ShifterState.Neutral)
+                return (true, 0, ShifterStates.ShifterState.Drive);
+
             if (newGearID >= _partsPresetWrapper.Transmission.GearRatiosList.Count)
                 return (false, _partsPresetWrapper.Transmission.GearRatiosList.Count - 1, ShifterStates.ShifterState.Drive);
 

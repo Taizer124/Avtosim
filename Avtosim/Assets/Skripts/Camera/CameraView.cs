@@ -62,9 +62,6 @@ public class SplitScreenVRManager : MonoBehaviour
         var uadM = mirrorCamera.GetUniversalAdditionalCameraData();
         if (uadM != null) uadM.allowXRRendering = false;
 
-        mirrorCamera.clearFlags = CameraClearFlags.SolidColor;
-        mirrorCamera.backgroundColor = Color.black;
-
         CreateCanvas();
         CreateFadeCanvas();
 

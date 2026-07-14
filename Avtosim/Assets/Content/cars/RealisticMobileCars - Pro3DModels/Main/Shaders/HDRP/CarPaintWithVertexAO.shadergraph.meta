@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: f73a2dea202db408f9895da305823dde
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 625f186215c104763be7675aa2d941aa, type: 3}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 305319
+  packageName: Realistic Mobile Car #26 (Demo)
+  packageVersion: 1.0
+  assetPath: Assets/RealisticMobileCars - Pro3DModels/Main/Shaders/HDRP/CarPaintWithVertexAO.shadergraph
+  uploadId: 717843

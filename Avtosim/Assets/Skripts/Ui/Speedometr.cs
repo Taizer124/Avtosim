@@ -5,6 +5,9 @@ using Assets.VehicleController;
 
 public class SimpleSpeedDisplay : MonoBehaviour
 {
+    public enum NeedleDisplayMode { Rotation, Fill, PhysicalRotation }
+
+
     [Header("Vehicle Reference")]
     [SerializeField] private CustomVehicleController _vehicleController;
 
@@ -17,9 +20,26 @@ public class SimpleSpeedDisplay : MonoBehaviour
     [Header("UI Sliders")]
     [SerializeField] private Slider _rpmSlider;
 
-    [Header("Needle References")]
+    [Header("Needle Mode")]
+    [SerializeField] private NeedleDisplayMode _speedNeedleMode = NeedleDisplayMode.Rotation;
+    [SerializeField] private NeedleDisplayMode _rpmNeedleMode = NeedleDisplayMode.Rotation;
+
+    [Header("Needle References (Rotation)")]
     [SerializeField] private Image _speedNeedle;
     [SerializeField] private Image _rpmNeedle;
+
+    [Header("Needle References (Fill)")]
+    [SerializeField] private Image _speedNeedleFill;
+    [SerializeField] private Image _rpmNeedleFill;
+
+    // РћС‚РґРµР»СЊРЅС‹Р№ С„РёР·РёС‡РµСЃРєРёР№ GameObject (РѕР±С‹С‡РЅС‹Р№ Transform, РЅРµ UI Image) вЂ”
+    // РЅР°РїСЂРёРјРµСЂ СЃС‚СЂРµР»РєР° РЅР° 3D-РјРѕРґРµР»Рё РїСЂРёР±РѕСЂРЅРѕР№ РїР°РЅРµР»Рё РІ РєР°Р±РёРЅРµ, Р° РЅРµ РЅР°
+    // Canvas. РџРѕРІРѕСЂР°С‡РёРІР°РµС‚СЃСЏ С‡РµСЂРµР· Transform.localRotation, Р° РЅРµ
+    // localEulerAngles РЅР° RectTransform, Рё РјРѕР¶РµС‚ РєСЂСѓС‚РёС‚СЊСЃСЏ РІРѕРєСЂСѓРі Р»СЋР±РѕР№ РѕСЃРё
+    // (Р·Р°РґР°С‘С‚СЃСЏ _speedPhysicalRotationAxis), Р° РЅРµ С‚РѕР»СЊРєРѕ РІРѕРєСЂСѓРі Z РєР°Рє Сѓ UI.
+    [Header("Needle Reference (Physical GameObject)")]
+    [SerializeField] private Transform _speedNeedlePhysical;
+    [SerializeField] private Transform _rpmNeedlePhysical;
 
     [Header("Needle Settings")]
     [SerializeField] private float _speedMinAngle = 45f;
@@ -28,6 +48,20 @@ public class SimpleSpeedDisplay : MonoBehaviour
     [SerializeField] private float _rpmMaxAngle = -225f;
     [SerializeField] private float _maxSpeed = 200f;
 
+    [Header("Needle Settings (Fill)")]
+    [SerializeField] private float _speedFillMin = 0f;
+    [SerializeField] private float _speedFillMax = 1f;
+    [SerializeField] private float _rpmFillMin = 0f;
+    [SerializeField] private float _rpmFillMax = 1f;
+
+    [Header("Needle Settings (Physical GameObject)")]
+    [SerializeField] private float _speedPhysicalMinAngle = 0f;
+    [SerializeField] private float _speedPhysicalMaxAngle = -270f;
+    [SerializeField] private Vector3 _speedPhysicalRotationAxis = Vector3.forward;
+    [SerializeField] private float _rpmPhysicalMinAngle = 0f;
+    [SerializeField] private float _rpmPhysicalMaxAngle = -270f;
+    [SerializeField] private Vector3 _rpmPhysicalRotationAxis = Vector3.forward;
+
     [Header("Display Settings")]
     [SerializeField] private bool _roundToInteger = true;
     [SerializeField] private bool _showGear = true;
@@ -35,7 +69,7 @@ public class SimpleSpeedDisplay : MonoBehaviour
 
     private void Start()
     {
-        // Автоматически находим автомобиль если не назначен
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (_vehicleController == null)
         {
             GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -46,7 +80,7 @@ public class SimpleSpeedDisplay : MonoBehaviour
                 _vehicleController = FindAnyObjectByType<CustomVehicleController>();
         }
 
-        // Предупреждение если нет текстовых компонентов
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (_speedText == null && _speedTextTMP == null)
         {
             Debug.LogWarning("SimpleSpeedDisplay: No text components assigned!");
@@ -57,23 +91,23 @@ public class SimpleSpeedDisplay : MonoBehaviour
     {
         if (_vehicleController == null)
         {
-            // Продолжаем поиск автомобиля если не нашли
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
             _vehicleController = FindAnyObjectByType<CustomVehicleController>();
             if (_vehicleController == null) return;
         }
 
         var carStats = _vehicleController.GetCurrentCarStats();
 
-        // Обновляем скорость
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         UpdateSpeedDisplay(carStats.SpeedInKMperH);
 
-        // Обновляем дополнительные показатели
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         UpdateAdditionalDisplays(carStats);
 
-        // Обновляем слайдер
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         UpdateSlider(carStats);
 
-        // Обновляем стрелки
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         UpdateNeedles(carStats);
     }
 
@@ -83,7 +117,7 @@ public class SimpleSpeedDisplay : MonoBehaviour
             Mathf.Abs((int)speed).ToString() :
             Mathf.Abs(speed).ToString("F1");
 
-        // Обновляем текстовые компоненты (оба типа)
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ)
         if (_speedTextTMP != null)
             _speedTextTMP.text = speedText;
 
@@ -93,11 +127,11 @@ public class SimpleSpeedDisplay : MonoBehaviour
 
     private void UpdateAdditionalDisplays(CurrentCarStats carStats)
     {
-        // Обновляем передачу
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (_showGear && _gearTextTMP != null)
             _gearTextTMP.text = carStats.CurrentGear;
 
-        // Обновляем RPM текст
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ RPM пїЅпїЅпїЅпїЅпїЅ
         if (_showRPM && _rpmTextTMP != null)
         {
             string rpmText = _roundToInteger ?
@@ -110,7 +144,7 @@ public class SimpleSpeedDisplay : MonoBehaviour
 
     private void UpdateSlider(CurrentCarStats carStats)
     {
-        // Обновляем слайдер RPM
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ RPM
         if (_rpmSlider != null)
             _rpmSlider.value = carStats.EngineRPMPercent;
     }
@@ -118,24 +152,45 @@ public class SimpleSpeedDisplay : MonoBehaviour
 
     private void UpdateNeedles(CurrentCarStats carStats)
     {
-        // Обновляем стрелку скорости
-        if (_speedNeedle != null)
+        float speedNormalized = Mathf.Clamp01(carStats.SpeedInKMperH / _maxSpeed);
+        float rpmNormalized = Mathf.Clamp01(carStats.EngineRPMPercent / 100f);
+
+        // РЎРїРёРґРѕРјРµС‚СЂ: Р»РёР±Рѕ РїРѕРІРѕСЂРѕС‚ С„РёР·РёС‡РµСЃРєРѕР№ СЃС‚СЂРµР»РєРё, Р»РёР±Рѕ Fill Amount
+        // РіСЂР°С„РёС‡РµСЃРєРѕР№ (Image Type = Filled) вЂ” РІС‹Р±РёСЂР°РµС‚СЃСЏ С‡РµСЂРµР· _speedNeedleMode,
+        // СЂР°Р±РѕС‚Р°РµС‚ РЅРµР·Р°РІРёСЃРёРјРѕ РѕС‚ С‚Р°С…РѕРјРµС‚СЂР°.
+        if (_speedNeedleMode == NeedleDisplayMode.Rotation && _speedNeedle != null)
         {
-            float speedNormalized = Mathf.Clamp01(carStats.SpeedInKMperH / _maxSpeed);
             float speedAngle = Mathf.Lerp(_speedMinAngle, _speedMaxAngle, speedNormalized);
             _speedNeedle.transform.localEulerAngles = new Vector3(0, 0, speedAngle);
         }
-
-        // Обновляем стрелку RPM
-        if (_rpmNeedle != null)
+        else if (_speedNeedleMode == NeedleDisplayMode.Fill && _speedNeedleFill != null)
         {
-            float rpmNormalized = Mathf.Clamp01(carStats.EngineRPMPercent / 100f);
+            _speedNeedleFill.fillAmount = Mathf.Lerp(_speedFillMin, _speedFillMax, speedNormalized);
+        }
+        else if (_speedNeedleMode == NeedleDisplayMode.PhysicalRotation && _speedNeedlePhysical != null)
+        {
+            float speedPhysicalAngle = Mathf.Lerp(_speedPhysicalMinAngle, _speedPhysicalMaxAngle, speedNormalized);
+            _speedNeedlePhysical.localRotation = Quaternion.AngleAxis(speedPhysicalAngle, _speedPhysicalRotationAxis);
+        }
+
+        // РўР°С…РѕРјРµС‚СЂ: С‚Р° Р¶Рµ Р»РѕРіРёРєР° РІС‹Р±РѕСЂР° СЂРµР¶РёРјР°, РѕС‚РґРµР»СЊРЅР°СЏ РѕС‚ СЃРїРёРґРѕРјРµС‚СЂР°.
+        if (_rpmNeedleMode == NeedleDisplayMode.Rotation && _rpmNeedle != null)
+        {
             float rpmAngle = Mathf.Lerp(_rpmMinAngle, _rpmMaxAngle, rpmNormalized);
             _rpmNeedle.transform.localEulerAngles = new Vector3(0, 0, rpmAngle);
         }
+        else if (_rpmNeedleMode == NeedleDisplayMode.Fill && _rpmNeedleFill != null)
+        {
+            _rpmNeedleFill.fillAmount = Mathf.Lerp(_rpmFillMin, _rpmFillMax, rpmNormalized);
+        }
+        else if (_rpmNeedleMode == NeedleDisplayMode.PhysicalRotation && _rpmNeedlePhysical != null)
+        {
+            float rpmPhysicalAngle = Mathf.Lerp(_rpmPhysicalMinAngle, _rpmPhysicalMaxAngle, rpmNormalized);
+            _rpmNeedlePhysical.localRotation = Quaternion.AngleAxis(rpmPhysicalAngle, _rpmPhysicalRotationAxis);
+        }
     }
 
-    // Методы для настройки из других скриптов
+    // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     public void SetVehicle(CustomVehicleController vehicle)
     {
         _vehicleController = vehicle;
@@ -172,5 +227,9 @@ public class SimpleSpeedDisplay : MonoBehaviour
             _rpmSlider.gameObject.SetActive(show);
         if (_rpmNeedle != null)
             _rpmNeedle.gameObject.SetActive(show);
+        if (_rpmNeedleFill != null)
+            _rpmNeedleFill.gameObject.SetActive(show);
+        if (_rpmNeedlePhysical != null)
+            _rpmNeedlePhysical.gameObject.SetActive(show);
     }
 }

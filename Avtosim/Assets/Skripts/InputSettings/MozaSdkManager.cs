@@ -138,7 +138,10 @@ namespace Assets.VehicleController
                             break;
                     }
 
-                    _inputProvider.SetMozaInputs(gas, brake, clutch, steer, handbrake, gear);
+                    // _limitAngle уже хранит полный диапазон "стопор-в-стопор"
+                    // (см. Start() — halfLimit там же считается как _limitAngle/2),
+                    // поэтому для CockpitSteeringWheel передаём как есть.
+                    _inputProvider.SetMozaInputs(gas, brake, clutch, steer, handbrake, gear, _limitAngle);
 
                     // 5. Кнопки Y/X/B/A — соответствуют North/West/East/South у
                     // Logitech G29 (та же Xbox-style раскладка, физически то же
