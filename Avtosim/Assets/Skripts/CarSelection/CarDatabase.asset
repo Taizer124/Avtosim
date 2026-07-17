@@ -18,7 +18,7 @@ MonoBehaviour:
     Price: 0
     OwnedByDefault: 1
     RacePrefab: {fileID: 391493333271996057, guid: 0ec41abd4f2a86b468870e608d62eab2, type: 3}
-  - DisplayName: Ford mustang shelby cobra GT500
+  - DisplayName: Ford mustang shelby cobra
     Description: 
     Price: 1500
     OwnedByDefault: 0

@@ -28,6 +28,12 @@ public class RaceStartZone : MonoBehaviour
     public bool disableArrivalVehicleOnStart = true;
     private GameObject _arrivalVehicle;
 
+    [Header("Pre-Race Menu (опционально)")]
+    [Tooltip("Если задано — при въезде откроется сетап-меню, а обратный отсчёт стартует только после подтверждения (меню вызовет StartCountdown). Пусто — гонка стартует сразу, как раньше.")]
+    public PreRaceMenu preRaceMenu;
+    [Tooltip("Профиль этой гонки: имя + рекомендованные коробка/привод для pre-race меню.")]
+    public RaceProfile raceProfile;
+
     [Header("Events")]
     public UnityEvent OnCountdownStarted = new UnityEvent();
     public UnityEvent OnCountdownFinished = new UnityEvent();
@@ -43,13 +49,25 @@ public class RaceStartZone : MonoBehaviour
         if (requirePlayerTag && !other.CompareTag(playerTag))
             return;
 
+        // Уже идёт отсчёт (игрок подтвердил сетап и заезд стартует) — повторный
+        // въезд не должен ни открывать меню заново, ни рестартовать отсчёт.
+        if (_isCountdownRunning)
+            return;
+
         // Запоминаем корневой объект именно той машины, что въехала в зону —
         // её и выключим при старте гонки (какая бы из выбираемых машин это ни
         // была), вместо заранее вбитого в инспектор списка.
         _arrivalVehicle = other.transform.root.gameObject;
 
-        if (!_isCountdownRunning)
-            StartCountdown();
+        // Если назначено pre-race меню — сперва сетап заезда, а отсчёт запустит
+        // само меню по кнопке подтверждения (PreRaceMenu.Confirm → StartCountdown).
+        if (preRaceMenu != null)
+        {
+            preRaceMenu.Open(this, raceProfile);
+            return;
+        }
+
+        StartCountdown();
     }
 
     private void OnTriggerExit(Collider other)

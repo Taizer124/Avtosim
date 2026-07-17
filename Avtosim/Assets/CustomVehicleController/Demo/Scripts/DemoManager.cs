@@ -85,6 +85,14 @@ namespace Assets.VehicleController
         // ���� �����
         public bool IsPaused { get; private set; }
 
+        // Блокировка ручного тюнинга на время гонки: pre-race меню фиксирует
+        // выбранные коробку/привод, поэтому переключать их с руля (North/East),
+        // менять пресет (South) и перезагружать сцену (West) во время заезда
+        // нельзя. Само городское меню сохраняется — блокировка снимается на
+        // финише гонки.
+        private bool _tuningLocked;
+        public void SetTuningLocked(bool locked) => _tuningLocked = locked;
+
         private void Start()
         {
             ResolvePlayerReferences();
@@ -184,34 +192,44 @@ namespace Assets.VehicleController
             // экшены West/North/South/East) наравне с Logitech и MOZA —
             // _westButtonPressed/etc уже объединяют все подключённые
             // устройства, отдельная проверка Input.GetKeyDown не нужна.
-            bool canPress = (Time.time - _lastButtonTime > _buttonCooldown);
-
-            if (_westButtonPressed && canPress)
+            if (_tuningLocked)
             {
-                SceneManager.LoadScene("MVP");
-                _lastButtonTime = Time.time;
-                _westButtonPressed = false;
+                // Идёт гонка — тюнинг зафиксирован pre-race меню. Гасим
+                // накопленные нажатия, чтобы они не сработали разом на финише
+                // при разблокировке.
+                _westButtonPressed = _northButtonPressed = _southButtonPressed = _eastButtonPressed = false;
             }
-
-            if (_northButtonPressed && canPress)
+            else
             {
-                SwapTransmissionType();
-                _lastButtonTime = Time.time;
-                _northButtonPressed = false;
-            }
+                bool canPress = (Time.time - _lastButtonTime > _buttonCooldown);
 
-            if (_southButtonPressed && canPress)
-            {
-                SwapPreset();
-                _lastButtonTime = Time.time;
-                _southButtonPressed = false;
-            }
+                if (_westButtonPressed && canPress)
+                {
+                    SceneManager.LoadScene("MVP");
+                    _lastButtonTime = Time.time;
+                    _westButtonPressed = false;
+                }
 
-            if (_eastButtonPressed && canPress)
-            {
-                SwapDrivetrainType();
-                _lastButtonTime = Time.time;
-                _eastButtonPressed = false;
+                if (_northButtonPressed && canPress)
+                {
+                    SwapTransmissionType();
+                    _lastButtonTime = Time.time;
+                    _northButtonPressed = false;
+                }
+
+                if (_southButtonPressed && canPress)
+                {
+                    SwapPreset();
+                    _lastButtonTime = Time.time;
+                    _southButtonPressed = false;
+                }
+
+                if (_eastButtonPressed && canPress)
+                {
+                    SwapDrivetrainType();
+                    _lastButtonTime = Time.time;
+                    _eastButtonPressed = false;
+                }
             }
 
             OpenCloseMenus(_vehicleControlsMenu, KeyCode.F1, _demoControlsMenu);
