@@ -28,15 +28,31 @@ namespace Assets.VehicleController
             if (_vehicleController != null)
                 return;
 
+            ResolveVehicle();
+        }
+
+        // PlayerLocator живёт в Assembly-CSharp и недоступен из этой (vendor)
+        // ассембли CustomVehicleController, поэтому здесь оставлен локальный
+        // поиск активного игрока: сначала объект с тегом Player (выключенные
+        // машины Unity игнорирует), иначе — любая машина в сцене.
+        private void ResolveVehicle()
+        {
             GameObject go = GameObject.FindGameObjectWithTag("Player");
-            if(go != null)
-                _vehicleController = go.GetComponent<CustomVehicleController>();    
+            if (go != null)
+                _vehicleController = go.GetComponent<CustomVehicleController>();
+
+            if (_vehicleController == null)
+                _vehicleController = FindAnyObjectByType<CustomVehicleController>();
         }
 
         private void Update()
         {
-            if(_vehicleController == null)
-                _vehicleController = GameObject.FindAnyObjectByType<CustomVehicleController>();
+            if (_vehicleController == null)
+            {
+                ResolveVehicle();
+                if (_vehicleController == null)
+                    return; // раньше здесь был NRE, если игрок ещё не найден
+            }
             _currentGearText.text = _vehicleController.GetCurrentCarStats().CurrentGear;
             _nitroBottlesLeft.text = _vehicleController.GetCurrentCarStats().NitroBottlesLeft.ToString();
 

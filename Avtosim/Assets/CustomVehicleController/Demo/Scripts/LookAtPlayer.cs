@@ -11,6 +11,9 @@ namespace Assets.VehicleController
         void Update()
         {
             if (_vehicleController == null)
+                _vehicleController = PlayerLocator.GetActivePlayer();
+
+            if (_vehicleController == null)
                 return;
 
             Vector3 tempPos = _vehicleController.transform.position;

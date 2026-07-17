@@ -87,6 +87,15 @@ namespace Assets.VehicleController
 
         private void Start()
         {
+            ResolvePlayerReferences();
+
+            if (_vehicleController == null)
+            {
+                Debug.LogError("[DemoManager] Активный игрок не найден (нет машины с тегом Player). DemoManager отключён.");
+                enabled = false;
+                return;
+            }
+
             _engineSoundManager = _vehicleController.GetComponent<VehicleEngineSoundManager>();
             VehiclePartsSetWrapper.OnAnyPresetChanged += VehiclePartsSetWrapper_OnAnyPresetChanged;
 
@@ -113,6 +122,31 @@ namespace Assets.VehicleController
         private void OnDestroy()
         {
             VehiclePartsSetWrapper.OnAnyPresetChanged -= VehiclePartsSetWrapper_OnAnyPresetChanged;
+        }
+
+        // Раньше _vehicleController и _wheelInputProvider жёстко задавались в
+        // инспекторе на ОДНУ конкретную машину. DemoManager — сценовый синглтон
+        // (не внутри префаба машины), поэтому при выборе другой машины его
+        // инспекторная ссылка указывала бы на СТАРУЮ (теперь выключенную)
+        // машину. Поэтому активный игрок (машина с тегом Player от
+        // PlayerCarSelector) ПРИОРИТЕТНЕЕ инспектора: если он есть — берём его
+        // и его input-провайдер. Инспектор используется только как fallback для
+        // сцен без селектора (демо), где активного тегованного игрока нет.
+        private void ResolvePlayerReferences()
+        {
+            CustomVehicleController active = PlayerLocator.GetActivePlayer();
+            if (active != null)
+            {
+                _vehicleController = active;
+
+                AllInOneInputProvider provider = active.GetComponentInChildren<AllInOneInputProvider>();
+                if (provider != null)
+                    _wheelInputProvider = provider;
+            }
+
+            // fallback: провайдер с уже назначенной машины, если выше не нашли.
+            if (_wheelInputProvider == null && _vehicleController != null)
+                _wheelInputProvider = _vehicleController.GetComponentInChildren<AllInOneInputProvider>();
         }
 
         private void InitializeInputProvider()

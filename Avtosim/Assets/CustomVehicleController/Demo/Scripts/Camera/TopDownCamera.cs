@@ -20,8 +20,9 @@ namespace Assets.VehicleController
         {
             if (_vehicleController == null)
             {
-                _vehicleController = GameObject.FindGameObjectWithTag("Player").GetComponent<CustomVehicleController>();
-                return;
+                _vehicleController = PlayerLocator.GetActivePlayer();
+                if (_vehicleController == null)
+                    return;
             }
             float distance = _distance + _distanceGainFromSpeed * _vehicleController.GetCurrentCarStats().SpeedPercent;
             transform.position = new Vector3(_vehicleController.transform.position.x, distance, _vehicleController.transform.position.z);

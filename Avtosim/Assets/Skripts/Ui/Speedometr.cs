@@ -69,16 +69,9 @@ public class SimpleSpeedDisplay : MonoBehaviour
 
     private void Start()
     {
-        // ������������� ������� ���������� ���� �� ��������
+        // Автопоиск активного игрока, если ссылка не задана в инспекторе.
         if (_vehicleController == null)
-        {
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            if (player != null)
-                _vehicleController = player.GetComponent<CustomVehicleController>();
-
-            if (_vehicleController == null)
-                _vehicleController = FindAnyObjectByType<CustomVehicleController>();
-        }
+            _vehicleController = PlayerLocator.GetActivePlayer();
 
         // �������������� ���� ��� ��������� �����������
         if (_speedText == null && _speedTextTMP == null)
@@ -91,8 +84,7 @@ public class SimpleSpeedDisplay : MonoBehaviour
     {
         if (_vehicleController == null)
         {
-            // ���������� ����� ���������� ���� �� �����
-            _vehicleController = FindAnyObjectByType<CustomVehicleController>();
+            _vehicleController = PlayerLocator.GetActivePlayer();
             if (_vehicleController == null) return;
         }
 

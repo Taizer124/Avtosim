@@ -68,10 +68,9 @@ namespace Assets.VehicleController
         {
             if (_vehicleController == null)
             {
-                GameObject go = GameObject.FindGameObjectWithTag("Player");
-                if(go != null)
+                _vehicleController = PlayerLocator.GetActivePlayer();
+                if (_vehicleController != null)
                 {
-                    _vehicleController = go.GetComponent<CustomVehicleController>();
                     _focusPoint = _vehicleController.transform.position;
                     transform.forward = _vehicleController.transform.forward;
                     _orbitAngles.x = transform.rotation.eulerAngles.x;
@@ -84,7 +83,9 @@ namespace Assets.VehicleController
         {
             if(_vehicleController == null)
             {
-                _vehicleController = GameObject.FindAnyObjectByType<CustomVehicleController>();
+                _vehicleController = PlayerLocator.GetActivePlayer();
+                if (_vehicleController == null)
+                    return;
                 _focusPoint = _vehicleController.transform.position;
                 transform.forward = _vehicleController.transform.forward;
                 _orbitAngles.x = transform.rotation.eulerAngles.x;

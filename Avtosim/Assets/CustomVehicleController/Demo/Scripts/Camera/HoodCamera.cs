@@ -27,8 +27,12 @@ namespace Assets.VehicleController
         {
             if (_vehicleController == null)
             {
-                _vehicleController = GameObject.FindGameObjectWithTag("Player").GetComponent<CustomVehicleController>();
-                return;
+                // Раньше .GetComponent вызывался прямо на результате
+                // FindGameObjectWithTag — если тегованного игрока в сцене нет,
+                // это был NullReferenceException. PlayerLocator + guard безопаснее.
+                _vehicleController = PlayerLocator.GetActivePlayer();
+                if (_vehicleController == null)
+                    return;
             }
             transform.position = _vehicleController.transform.position + _vehicleController.transform.root.TransformDirection(_offset);
             transform.forward = _vehicleController.transform.forward;
