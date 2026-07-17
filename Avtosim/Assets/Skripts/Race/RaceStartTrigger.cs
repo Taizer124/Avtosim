@@ -134,6 +134,11 @@ public class RaceStartZone : MonoBehaviour
         // одной машине, едет другая).
         if (disableArrivalVehicleOnStart && _arrivalVehicle != null)
         {
+            // Передаём приехавшую машину финиш-зоне, чтобы после гонки включить
+            // обратно ИМЕННО её (выбранное авто) и ИМЕННО тут, на линии старта,
+            // где она сейчас стоит выключенной. Кладём ДО SetActive(false).
+            RaceReturnState.ArrivalVehicle = _arrivalVehicle;
+
             _arrivalVehicle.SetActive(false);
 
             // Игрок сменился (приехавшая машина выключена, активна заспавненная

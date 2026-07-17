@@ -9462,21 +9462,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34ed2d1c1613a87488ff1ebb68898f75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.VehicleController.EconomyManager
+  _database: {fileID: 11400000, guid: a6a3cb51945783146932e56d67e97415, type: 2}
   _startingCoins: 10000
   _placementRewards: f40100009600000032000000
-  _cars:
-  - DisplayName: Mercedes AMG GT
-    Description: 
-    Price: 0
-    OwnedByDefault: 1
-  - DisplayName: Mustang Shelby Cobra GT500
-    Description: 
-    Price: 1500
-    OwnedByDefault: 0
-  - DisplayName: Porshe 911 GT1
-    Description: 
-    Price: 3000
-    OwnedByDefault: 0
 --- !u!4 &1950298399
 Transform:
   m_ObjectHideFlags: 0

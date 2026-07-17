@@ -12,4 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48fea8fccd3e84b458ce251c10c71f48, type: 3}
   m_Name: CarDatabase
   m_EditorClassIdentifier: Assembly-CSharp::Assets.VehicleController.CarDatabase
-  _cars: []
+  _cars:
+  - DisplayName: Mercedes-Benz SLS AMG
+    Description: 
+    Price: 0
+    OwnedByDefault: 1
+    RacePrefab: {fileID: 391493333271996057, guid: 0ec41abd4f2a86b468870e608d62eab2, type: 3}
+  - DisplayName: Ford mustang shelby cobra GT500
+    Description: 
+    Price: 1500
+    OwnedByDefault: 0
+    RacePrefab: {fileID: 5249217126419551552, guid: bfa4d92c8d616de4c9bfd09344389488, type: 3}
+  - DisplayName: Porsche 911 GT1
+    Description: 
+    Price: 3000
+    OwnedByDefault: 0
+    RacePrefab: {fileID: 7495186467150914722, guid: bd4714e04fdefc14cb8038ecb7923772, type: 3}
