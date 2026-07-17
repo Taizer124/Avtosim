@@ -34,8 +34,3 @@
 - **VR:** XR Interaction Toolkit
 - **Оборудование:** Logitech Steering Wheel SDK, MOZA API SDK
 
-## 🚀 Запуск
-
-1. Открыть проект в Unity (папка `Avtosim/`).
-2. Сцена меню — `Assets/Scenes/MainMenu.unity`, игровая сцена — `Assets/Scenes/MVP.unity`.
-3. Нажать **Play** из сцены меню, выбрать машину и начать заезд.
