@@ -43,6 +43,26 @@ namespace Assets.VehicleController
             if (display)
                 _tireTrailArray[id].transform.position = _wheelMeshesArray[id].position - new Vector3(0, _radiusArray[id] - _parameters.VerticalOffset, 0);
         }
+
+        /// <summary>
+        /// Та же утечка, что и у дыма: следы инстанцируются и цепляются к
+        /// колёсам, а при выключении машины ссылка на них терялась — старый
+        /// комплект оставался висеть. За каждую гонку копился ещё один.
+        /// </summary>
+        public void Destroy()
+        {
+            if (_tireTrailArray == null)
+                return;
+
+            for (int i = 0; i < _tireTrailArray.Length; i++)
+            {
+                if (_tireTrailArray[i] == null)
+                    continue;
+                _tireTrailArray[i].emitting = false;
+                GameObject.Destroy(_tireTrailArray[i].gameObject);
+            }
+            _tireTrailArray = null;
+        }
     }
 
 }

@@ -36,6 +36,20 @@ namespace Assets.VehicleController
                 return;
             }
 
+            // «Режим езды» (пресет частей) применяем ДО коробки/привода: пресет
+            // задаёт трансмиссию/привод из своих частей, поэтому наши явные
+            // TransmissionType/DrivetrainType должны лечь поверх и победить.
+            if (RaceSetupSelection.Preset != null)
+            {
+                _vehicleController.SetVehiclePresetSO(RaceSetupSelection.Preset);
+                _vehicleController.UsePreset = true;
+            }
+            else
+            {
+                // «Без пресета» — как в DemoManager.SwapPreset при обнулении.
+                _vehicleController.UsePreset = false;
+            }
+
             _vehicleController.TransmissionType = RaceSetupSelection.Transmission;
             _vehicleController.DrivetrainType = RaceSetupSelection.Drivetrain;
 
@@ -45,7 +59,8 @@ namespace Assets.VehicleController
             if (_inputProvider != null)
                 _inputProvider.SetTransmissionMode(ToInputMode(RaceSetupSelection.Transmission));
 
-            Debug.Log($"[RaceCarSetupApplier] Сетап гонки применён: {RaceSetupSelection.Transmission} / {RaceSetupSelection.Drivetrain}.");
+            string presetName = RaceSetupSelection.Preset != null ? RaceSetupSelection.Preset.name : "без пресета";
+            Debug.Log($"[RaceCarSetupApplier] Сетап гонки применён: {RaceSetupSelection.Transmission} / {RaceSetupSelection.Drivetrain} / {presetName}.");
         }
 
         private static AllInOneInputProvider.TransmissionMode ToInputMode(TransmissionType t)

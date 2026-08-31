@@ -13,6 +13,8 @@ public class RaceFinishZone : MonoBehaviour
     private float _currentTimerTime;
     private TextMeshProUGUI _timerText;
     private GameObject _timerObject;
+    [Tooltip("Куда выводить отсчёт до возврата в город. Пусто — возьмётся дисплей стартового отсчёта активной машины.")]
+    [SerializeField] private TextMeshProUGUI _timerTextOverride;
 
     [Header("Objects to Manage")]
     public List<GameObject> objectsToEnable = new List<GameObject>();
@@ -41,8 +43,9 @@ public class RaceFinishZone : MonoBehaviour
 
     private void Start()
     {
-        // ������������� ������� ������ �� ����
-        FindTimerByTag();
+        // Ранний резолв — необязательный: на этот момент гоночной машины ещё
+        // может не быть. Настоящий резолв происходит в StartTimer().
+        ResolveTimerText();
 
         // ������������� ������� RaceSpawner ���� �� ��������
         if (_raceSpawner == null)
@@ -61,27 +64,69 @@ public class RaceFinishZone : MonoBehaviour
         }
     }
 
-    private void FindTimerByTag()
+    /// <summary>
+    /// Ищет дисплей для отсчёта до возврата в город. Старый вариант искал ТОЛЬКО
+    /// объект с тегом "FinishTimer", которого в проекте нет ни одного — поэтому
+    /// цифры после финиша не появлялись вообще. Теперь порядок такой:
+    ///   1) ручная ссылка в инспекторе (главнее всего);
+    ///   2) объект с тегом "FinishTimer" (если когда-нибудь появится);
+    ///   3) дисплей стартового отсчёта у АКТИВНОЙ машины — он живёт в её UI.
+    /// Пункт 3 — рабочий путь: искать надо в момент запуска таймера, потому что
+    /// на финише активна заспавненная гоночная машина, которой в Start() зоны
+    /// ещё не существовало.
+    /// </summary>
+    private void ResolveTimerText()
     {
+        if (_timerText != null)
+            return;
+
+        if (_timerTextOverride != null)
+        {
+            _timerText = _timerTextOverride;
+            _timerObject = _timerText.gameObject;
+            return;
+        }
+
         _timerObject = GameObject.FindGameObjectWithTag("FinishTimer");
         if (_timerObject != null)
         {
             _timerText = _timerObject.GetComponent<TextMeshProUGUI>();
             if (_timerText != null)
             {
-                Debug.Log($"Timer found by tag 'FinishTimer': {_timerObject.name}");
-                // ��������� ��������� TMPro �� ������
-                _timerText.enabled = false;
-            }
-            else
-            {
-                Debug.LogWarning($"Object with tag 'FinishTimer' found but no TextMeshProUGUI component: {_timerObject.name}");
+                ShowTimerText(false);
+                return;
             }
         }
-        else
+
+        // Берём дисплей стартового отсчёта у активного игрока.
+        CustomVehicleController player = PlayerLocator.GetActivePlayer();
+        RaceStartCountdown countdown = player != null
+            ? player.GetComponentInChildren<RaceStartCountdown>(true)
+            : FindAnyObjectByType<RaceStartCountdown>();
+
+        if (countdown != null && countdown.CountdownText != null)
         {
-            Debug.LogWarning($"No object found with tag 'FinishTimer'");
+            _timerText = countdown.CountdownText;
+            _timerObject = _timerText.gameObject;
+            ShowTimerText(false);
+            return;
         }
+
+        Debug.LogWarning("[RaceFinishZone] Дисплей отсчёта не найден: ни ручной ссылки, ни тега 'FinishTimer', ни RaceStartCountdown у игрока.");
+    }
+
+    /// <summary>
+    /// Показать/скрыть цифру. Важно дёргать И GameObject, И компонент:
+    /// RaceStartCountdown прячет свой текст через SetActive(false), поэтому
+    /// одного .enabled = true недостаточно — цифра осталась бы невидимой.
+    /// </summary>
+    private void ShowTimerText(bool show)
+    {
+        if (_timerText == null)
+            return;
+
+        _timerText.gameObject.SetActive(show);
+        _timerText.enabled = show;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -106,6 +151,10 @@ public class RaceFinishZone : MonoBehaviour
         if (_isTimerRunning)
             return;
 
+        // Резолвим ИМЕННО здесь: на финише активна заспавненная гоночная машина,
+        // её UI и надо использовать.
+        ResolveTimerText();
+
         _timerCoroutine = StartCoroutine(TimerRoutine());
     }
 
@@ -118,11 +167,7 @@ public class RaceFinishZone : MonoBehaviour
         }
         _isTimerRunning = false;
 
-        // ��������� ��������� TMPro
-        if (_timerText != null)
-        {
-            _timerText.enabled = false;
-        }
+        ShowTimerText(false);
     }
 
     private IEnumerator TimerRoutine()
@@ -130,11 +175,7 @@ public class RaceFinishZone : MonoBehaviour
         _isTimerRunning = true;
         _currentTimerTime = TimerDuration;
 
-        // �������� ��������� TMPro
-        if (_timerText != null)
-        {
-            _timerText.enabled = true;
-        }
+        ShowTimerText(true);
 
         // ������ �������
         OnTimerStarted?.Invoke();
@@ -149,6 +190,15 @@ public class RaceFinishZone : MonoBehaviour
             yield return null;
         }
 
+        // Гасим цифру ДО ManageObjects: там DestroyAllVehicles уничтожает
+        // гоночную машину вместе с её UI, а дисплей живёт именно в нём —
+        // после уничтожения обращаться к нему уже нельзя.
+        ShowTimerText(false);
+        // Ссылку сбрасываем, чтобы следующий заезд нашёл дисплей заново
+        // (у новой машины он будет свой).
+        _timerText = null;
+        _timerObject = null;
+
         // ���������� �������
         OnTimerFinished?.Invoke();
 
@@ -157,12 +207,6 @@ public class RaceFinishZone : MonoBehaviour
 
         _isTimerRunning = false;
         _timerCoroutine = null;
-
-        // ��������� ��������� TMPro ����� ����������
-        if (_timerText != null)
-        {
-            _timerText.enabled = false;
-        }
     }
 
     private void UpdateTimerDisplay()
@@ -273,6 +317,21 @@ public class RaceFinishZone : MonoBehaviour
         // �������� GameObject
         target.SetActive(true);
 
+        // Машину выключили ещё на ходу (игрок въехал в старт-зону на скорости),
+        // и Unity сохранил её линейную/угловую скорость. При включении корпус
+        // «летит» вперёд, а колёса сброшены в ноль → бешеная пробуксовка:
+        // VisualRPM ведущих колёс скачет к десяткам тысяч, Transmission считает
+        // из него обороты двигателя → отсечка, шинный дым и неверные передачи.
+        // Обнуляем скорость — машина возвращается стоящей на линии старта.
+        Rigidbody targetRb = target.GetComponent<Rigidbody>();
+        if (targetRb == null)
+            targetRb = target.GetComponentInChildren<Rigidbody>();
+        if (targetRb != null)
+        {
+            targetRb.linearVelocity = Vector3.zero;
+            targetRb.angularVelocity = Vector3.zero;
+        }
+
         // Тег Player мог «уехать» на заспавненную гоночную машину (её уже
         // уничтожил DestroyAllVehicles) — возвращаем его восстановленному авто
         // и сбрасываем кэш, иначе PlayerLocator продолжит искать уничтоженного.
@@ -362,11 +421,12 @@ public class RaceFinishZone : MonoBehaviour
         }
     }
 
-    // ����� ��� ������ ������� �� ���� �������
-    [ContextMenu("Find Timer by Tag")]
+    // ������ ����� ������� �������
+    [ContextMenu("Find Timer Text")]
     public void FindTimerManually()
     {
-        FindTimerByTag();
+        _timerText = null;
+        ResolveTimerText();
     }
 
     // ����� ��� ��������������� ���������/���������� �������

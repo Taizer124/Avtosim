@@ -83,7 +83,7 @@ namespace Assets.VehicleController
         }
         private void OnEnable()
         {
-            // При повторной активации пересоздаём все визуальные эффекты
+            // пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             if (_wheelControllerArray != null && _wheelMeshesArray != null)
             {
                 TryInstantiateExtraEffects();
@@ -102,7 +102,7 @@ namespace Assets.VehicleController
 
         private void TryInstantiateExtraEffects()
         {
-            DestroyAllEffects(); // гарантируем, что старые эффекты удалены
+            DestroyAllEffects(); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
             if (EnableTireSmoke)
                 _tireSmoke = new(_wheelMeshesArray, _wheelControllerArray, transform, _tireSmokeParameters);
@@ -217,14 +217,24 @@ namespace Assets.VehicleController
 
         private void DestroyAllEffects()
         {
-            // Уничтожаем коллизионные эффекты с отпиской
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             if (_collisionEffects != null)
             {
                 _collisionEffects.Destroy();
                 _collisionEffects = null;
             }
 
-            // Сбрасываем остальные эффекты
+            // Р”С‹Рј Рё СЃР»РµРґС‹ РёРЅСЃС‚Р°РЅС†РёСЂСѓСЋС‚ СЃРѕР±СЃС‚РІРµРЅРЅС‹Рµ РѕР±СЉРµРєС‚С‹ Рё С†РµРїР»СЏСЋС‚ РёС… Рє
+            // РєРѕР»С‘СЃР°Рј. Р Р°РЅСЊС€Рµ Р·РґРµСЃСЊ СЃСЃС‹Р»РєР° РїСЂРѕСЃС‚Рѕ РѕР±РЅСѓР»СЏР»Р°СЃСЊ вЂ” РѕР±СЉРµРєС‚С‹
+            // РѕСЃС‚Р°РІР°Р»РёСЃСЊ РІРёСЃРµС‚СЊ, Рё РµСЃР»Рё РІ РјРѕРјРµРЅС‚ РІС‹РєР»СЋС‡РµРЅРёСЏ РјР°С€РёРЅС‹ РґС‹Рј РёРіСЂР°Р»,
+            // РѕСЃС‚Р°РЅРѕРІРёС‚СЊ РµРіРѕ Р±С‹Р»Рѕ СѓР¶Рµ РЅРµРєРѕРјСѓ (РѕРЅ РґС‹РјРёР» РІРµС‡РЅРѕ), Р° РЅР° РєР°Р¶РґРѕРј
+            // СЃР»РµРґСѓСЋС‰РµРј РІРєР»СЋС‡РµРЅРёРё СЃРѕР·РґР°РІР°Р»СЃСЏ РµС‰С‘ РѕРґРёРЅ РєРѕРјРїР»РµРєС‚.
+            if (_tireSmoke != null)
+                _tireSmoke.Destroy();
+            if (_tireTrails != null)
+                _tireTrails.Destroy();
+
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             _tireSmoke = null;
             _tireTrails = null;
             _brakeLightsEffect = null;

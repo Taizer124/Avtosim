@@ -39,6 +39,8 @@ public class RaceStartZone : MonoBehaviour
     public UnityEvent OnCountdownFinished = new UnityEvent();
 
     private bool _isCountdownRunning = false;
+    private bool _awaitingSetup = false;
+    private bool _raceStarted = false;
     private Coroutine _countdownCoroutine;
 
     public float CurrentCountdownTime => _currentCountdownTime;
@@ -49,9 +51,9 @@ public class RaceStartZone : MonoBehaviour
         if (requirePlayerTag && !other.CompareTag(playerTag))
             return;
 
-        // Уже идёт отсчёт (игрок подтвердил сетап и заезд стартует) — повторный
-        // въезд не должен ни открывать меню заново, ни рестартовать отсчёт.
-        if (_isCountdownRunning)
+        // Идёт отсчёт, открыто сетап-меню или заезд уже стартовал — повторный
+        // въезд ничего не перезапускает.
+        if (_isCountdownRunning || _awaitingSetup || _raceStarted)
             return;
 
         // Запоминаем корневой объект именно той машины, что въехала в зону —
@@ -59,14 +61,10 @@ public class RaceStartZone : MonoBehaviour
         // была), вместо заранее вбитого в инспектор списка.
         _arrivalVehicle = other.transform.root.gameObject;
 
-        // Если назначено pre-race меню — сперва сетап заезда, а отсчёт запустит
-        // само меню по кнопке подтверждения (PreRaceMenu.Confirm → StartCountdown).
-        if (preRaceMenu != null)
-        {
-            preRaceMenu.Open(this, raceProfile);
-            return;
-        }
-
+        // Порядок: сперва отсчёт 3-2-1-GO (TimerBefore). Если назначено pre-race
+        // меню — оно откроется ПО ЗАВЕРШЕНИИ отсчёта (см. CountdownRoutine), а
+        // сам матч (спавн) запустит подтверждение в меню (Confirm → StartRaceNow).
+        // Без меню матч стартует сразу по концу отсчёта.
         StartCountdown();
     }
 
@@ -111,11 +109,33 @@ public class RaceStartZone : MonoBehaviour
             yield return null;
         }
 
-        OnCountdownFinished?.Invoke();
-        ManageObjects();
-
         _isCountdownRunning = false;
         _countdownCoroutine = null;
+        OnCountdownFinished?.Invoke();
+
+        if (preRaceMenu != null)
+        {
+            // Отсчёт прошёл — ставим паузу и открываем сетап-меню. Спавн матча
+            // запустит PreRaceMenu.Confirm → StartRaceNow (не здесь).
+            _awaitingSetup = true;
+            preRaceMenu.Open(this, raceProfile);
+        }
+        else
+        {
+            // Без pre-race меню — прежнее поведение: матч сразу по концу отсчёта.
+            StartRaceNow();
+        }
+    }
+
+    // Запускает сам матч (спавн гоночных машин, включение объектов гонки).
+    // Вызывается концом отсчёта (без меню) или подтверждением сетапа в меню.
+    public void StartRaceNow()
+    {
+        if (_raceStarted)
+            return;
+        _awaitingSetup = false;
+        _raceStarted = true;
+        ManageObjects();
     }
 
     private void ManageObjects()

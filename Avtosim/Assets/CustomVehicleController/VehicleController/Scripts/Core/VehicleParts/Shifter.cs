@@ -14,6 +14,10 @@ namespace Assets.VehicleController
         // ли передача" в Transmission.SetGear().
         private int _lastSetGearId = 0;
 
+        // true с момента TryChangeGear (шифтер уведён в нейтраль) и до момента,
+        // когда DelayGearSwitch воткнёт целевую передачу.
+        private bool _isShifting = false;
+
         private VehiclePartsSetWrapper _partsPresetWrapper;
 
         private ShifterStates.ShifterState _shifterState;
@@ -55,6 +59,9 @@ namespace Assets.VehicleController
         public void SetGear(int gearId)
         {
             _lastSetGearId = gearId;
+            // Прямая установка (H-паттерн) отменяет незавершённое секвентальное
+            // переключение — иначе флаг завис бы и заблокировал автомат.
+            _isShifting = false;
 
             if (gearId == 0) // Нейтраль
             {
@@ -84,11 +91,14 @@ namespace Assets.VehicleController
             (bool success, int nextGearID, ShifterStates.ShifterState nextShifterState) = WrapGear(_currentGear + i);
             if (success)
             {
+                _isShifting = true;
                 SetInNeutral();
                 _partsPresetWrapper.Owner.StartCoroutine(DelayGearSwitch(delay, nextGearID, nextShifterState));
             }
             return success;
         }
+
+        public bool IsShifting() => _isShifting;
 
         private IEnumerator DelayGearSwitch(float delay, int nextID, ShifterStates.ShifterState nextShifterState)
         {
@@ -96,6 +106,7 @@ namespace Assets.VehicleController
 
             _currentGear = nextID;
             _shifterState = nextShifterState;
+            _isShifting = false;
         }
 
 

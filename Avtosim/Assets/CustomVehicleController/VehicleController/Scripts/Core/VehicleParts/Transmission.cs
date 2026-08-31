@@ -21,7 +21,15 @@ namespace Assets.VehicleController
 
         private bool _redlining = false;
 
-        private bool _inCooldown;
+        // Кулдаун переключения считается ПО ТРЕБОВАНИЮ, а не кэшируется.
+        // Раньше это было поле, которое присваивалось в EvaluateRPM (вызов из
+        // Update), а читалось в HandleGearChanges/ShiftGear (вызов из
+        // FixedUpdate). Такты разные: между двумя Update может пройти несколько
+        // FixedUpdate, и всё это время флаг оставался устаревшим — сразу после
+        // переключения он ещё показывал false, хотя коробка уже была занята.
+        // Свойство всегда даёт актуальное значение на момент обращения.
+        private bool InCooldown =>
+            Time.time < _lastShiftTime + _partsPresetWrapper.Transmission.ShiftCooldown;
 
         private float _engineMinRPM;
         private float _engineMaxRPM;
@@ -100,7 +108,7 @@ namespace Assets.VehicleController
 
         public void HandleGearChanges(TransmissionType transmissionType, VehicleAxle[] axleArray)
         {
-            if (_inCooldown)
+            if (InCooldown)
                 return;
 
             _transmissionType = transmissionType;
@@ -206,7 +214,6 @@ namespace Assets.VehicleController
                 _currentEngineRPM = Mathf.SmoothDamp(_currentEngineRPM, imaginaryEngineRPM, ref smDampVelocity, SM_DAMP_SPEED);
             }
 
-            _inCooldown = Time.time < _lastShiftTime + _partsPresetWrapper.Transmission.ShiftCooldown;
             PerformRedliningEffect(gasInput);
 
             return _currentEngineRPM;
@@ -248,7 +255,18 @@ namespace Assets.VehicleController
 
         private void SwitchGearsAutomatically(float rpmFromSpeed, float imaginaryRPM, int gearDown)
         {
-            if (_inCooldown)
+            if (InCooldown)
+                return;
+
+            // Переключение ещё не завершено: TryChangeGear увёл шифтер в
+            // нейтраль, а корутина DelayGearSwitch воткнёт передачу позже.
+            // Корутина крутится в Update, а сюда мы попадаем из FixedUpdate —
+            // поэтому есть кадр, где кулдаун уже истёк, а передача ещё не
+            // вставлена. Без этой проверки TryUpShift видел техническую
+            // нейтраль и звал ShiftGear(+1), а WrapGear из нейтрали ВСЕГДА
+            // возвращает индекс 0 — то есть 1-ю передачу. Замер показал ровно
+            // это: срыв 2→1 на 131 км/ч в момент "сЛастШифта 0,22-0,24с".
+            if (_shifter.IsShifting())
                 return;
 
             if (_currentCarStats.Reversing && _currentCarStats.Accelerating)
@@ -298,7 +316,7 @@ namespace Assets.VehicleController
 
         public void ShiftGear(int i)
         {
-            if (_inCooldown)
+            if (InCooldown)
                 return;
 
             if (!_shifter.TryChangeGear(i, _partsPresetWrapper.Transmission.ShiftCooldown))
@@ -309,7 +327,7 @@ namespace Assets.VehicleController
         }
 
         // Прямая установка передачи для механики (H-паттерн). В отличие от
-        // ShiftGear(+1/-1) — без проверки _inCooldown и без задержки: водитель
+        // ShiftGear(+1/-1) — без проверки InCooldown и без задержки: водитель
         // сам решает, когда сцепление/рычаг позволяют переключиться, это уже
         // отражено в TrySelectGear (AllInOneInputProvider) через сцепление.
         // Кулдаун здесь имитирует время механического переключения
@@ -318,9 +336,9 @@ namespace Assets.VehicleController
         // CustomVehicleController вызывает SetGear() КАЖДЫЙ кадр, пока активна
         // механика (не только при реальной смене передачи) — поэтому _lastShiftTime
         // обновляем и OnShifted шлём ТОЛЬКО когда передача действительно изменилась.
-        // Иначе _inCooldown держится постоянно true (ShiftCooldown "не успевает"
+        // Иначе InCooldown держится постоянно true (ShiftCooldown "не успевает"
         // истечь между кадрами), а Engine.CalculateAccelerationForce() при активном
-        // _inCooldown всегда возвращает нулевой крутящий момент — газ перестаёт
+        // InCooldown всегда возвращает нулевой крутящий момент — газ перестаёт
         // работать полностью, хотя передача формально включена.
         public void SetGear(int gearId)
         {
@@ -334,7 +352,7 @@ namespace Assets.VehicleController
             }
         }
 
-        public bool InShiftingCooldown() => _inCooldown;
+        public bool InShiftingCooldown() => InCooldown;
 
         public bool Redlining() => _redlining;
 

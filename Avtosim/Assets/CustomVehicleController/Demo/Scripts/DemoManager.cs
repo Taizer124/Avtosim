@@ -93,6 +93,11 @@ namespace Assets.VehicleController
         private bool _tuningLocked;
         public void SetTuningLocked(bool locked) => _tuningLocked = locked;
 
+        // Тот же список пресетов, что перебирает SwapPreset (кнопка Y/South).
+        // Pre-race меню берёт его отсюда, чтобы «режим езды» в меню и в городе
+        // был одним и тем же набором — без дублирующего массива.
+        public VehiclePartsPresetSO[] TuningPresets => _vehiclePartsPressets;
+
         private void Start()
         {
             ResolvePlayerReferences();

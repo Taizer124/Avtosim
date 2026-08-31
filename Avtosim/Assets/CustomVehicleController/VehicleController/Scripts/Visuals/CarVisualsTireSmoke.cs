@@ -116,6 +116,45 @@ namespace Assets.VehicleController
                 DisplayPS(display, id, rbVelocityNorm, speed);
         }
 
+        /// <summary>
+        /// Уничтожает созданные эффекты. Без этого каждый цикл выключения/
+        /// включения машины (а он происходит на каждой гонке: городскую машину
+        /// гасят на время заезда и включают на финише) оставлял прошлый комплект
+        /// партиклов висеть на колёсах. Ссылку на них теряли, поэтому Stop()
+        /// звать было уже некому — и если в момент выключения дым играл, он
+        /// продолжал идти бесконечно.
+        /// </summary>
+        public void Destroy()
+        {
+            if (_tireSmokePSArray != null)
+            {
+                for (int i = 0; i < _tireSmokePSArray.Length; i++)
+                {
+                    if (_tireSmokePSArray[i] == null)
+                        continue;
+                    _tireSmokePSArray[i].Stop();
+                    GameObject.Destroy(_tireSmokePSArray[i].gameObject);
+                }
+                _tireSmokePSArray = null;
+            }
+
+#if VISUAL_EFFECT_GRAPH_INSTALLED
+            // VFX-вариант добавляет компонент прямо на меш колеса — иначе при
+            // каждом включении на колесе копился ещё один VisualEffect.
+            if (_tireSmokeVFXArray != null)
+            {
+                for (int i = 0; i < _tireSmokeVFXArray.Length; i++)
+                {
+                    if (_tireSmokeVFXArray[i] == null)
+                        continue;
+                    _tireSmokeVFXArray[i].Stop();
+                    GameObject.Destroy(_tireSmokeVFXArray[i]);
+                }
+                _tireSmokeVFXArray = null;
+            }
+#endif
+        }
+
         private void DisplayPS(bool display, int id, Vector3 rbVelocityNorm, float speed)
         {
             if (_effectParameters.VisualEffect.ParticleSystem == null)

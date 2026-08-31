@@ -121,13 +121,21 @@ namespace Assets.VehicleController
                 speed = 1;
 
             float burnOutSpeed = speed * tireGrip * _lockedGripMultiplier;
-            if (relativeTorque > burnOutSpeed)
+            if (burnOutSpeed > 0f && relativeTorque > burnOutSpeed)
             {
                 _forwardSlip = relativeTorque / burnOutSpeed;
                 return;
             }
 
-            if (accelForce < maxLoad)
+            // maxLoad == 0 бывает у только что включённой машины: подвеска ещё
+            // не нагружена, нагрузка на колесо нулевая. Если при этом не нажат
+            // газ (accelForce == 0), то условие "0 < 0" ложно, и старый код
+            // уходил в деление 0/0 = NaN. Дальше NaN уже не лечится: он течёт в
+            // _slipWheelRPM (накопитель, Mathf.Clamp его не чинит), оттуда в
+            // VisualRPM, а из него — в накопительный поворот колеса
+            // (localRotation *= ...) и в флаг пробуксовки, то есть в дым.
+            // Замер поймал это через 0,02 с после возврата из гонки в город.
+            if (maxLoad <= 0f || accelForce < maxLoad)
                 _forwardSlip = 0;
             else
                 _forwardSlip = accelForce / maxLoad;
