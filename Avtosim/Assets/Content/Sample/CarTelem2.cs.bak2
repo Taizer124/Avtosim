@@ -40,24 +40,14 @@ public class CarTelemetryHandler1 : MonoBehaviour
     [SerializeField] private float yawGain = 1f;
     [SerializeField] private float angleGain = 1f;
 
-    [Header("Фильтрация (защита приводов от дрожания)")]
-    [Tooltip("Ускорение получается численным дифференцированием скорости и потому шумное. " +
-             "Слишком малая постоянная времени пропускает этот шум прямо на приводы и капсулу трясёт.")]
-    [SerializeField] private float accelPrefilterTau = 0.035f;
-    [SerializeField] private float accelAttackTau = 0.05f;
-    [SerializeField] private float accelReleaseTau = 0.15f;
-    [Tooltip("Вертикальный канал самый шумный - подвеска и неровности. Фильтруется сильнее прочих.")]
-    [SerializeField] private float heavePrefilterTau = 0.06f;
-    [SerializeField] private float heaveAttackTau = 0.06f;
-    [SerializeField] private float heaveReleaseTau = 0.18f;
-    [SerializeField] private float yawTau = 0.08f;
+    [Header("Response (с): атака — как быстро нарастает, спад — как затухает")]
+    [Tooltip("Почти мгновенная атака нужна, чтобы резкое торможение и удар в стену пробивались")]
+    [SerializeField] private float accelAttackTau = 0.012f;
+    [SerializeField] private float accelReleaseTau = 0.12f;
+    [SerializeField] private float heaveAttackTau = 0.008f;
+    [SerializeField] private float heaveReleaseTau = 0.09f;
+    [SerializeField] private float yawTau = 0.06f;
     [SerializeField] private float angleTau = 0.10f;
-
-    [Header("Ограничители")]
-    [Tooltip("Мёртвая зона по ускорению, м/с^2: мелкая дрожь ниже порога на платформу не идёт.")]
-    [SerializeField] private float accelDeadzone = 0.4f;
-    [Tooltip("Предел скорости изменения канала, единиц/с: не даёт скачком бросить привод в упор.")]
-    [SerializeField] private float accelSlewPerSecond = 45f;
 
     private float currentPitch = 0f;
     private float currentRoll = 0f;
@@ -66,9 +56,6 @@ public class CarTelemetryHandler1 : MonoBehaviour
     private float currentHeave = 0f;
     private float currentYawRate = 0f;
     private Vector3 lastVelocity = Vector3.zero;
-    private float filteredSurge = 0f;
-    private float filteredSway = 0f;
-    private float filteredHeave = 0f;
 
     [Header("bHaptics Feedback")]
     [SerializeField] private bool enableHaptics = true;
@@ -208,16 +195,9 @@ public class CarTelemetryHandler1 : MonoBehaviour
 
         Vector3 accelLocal = vehicleTransform.InverseTransformDirection(accelWorld);
 
-        // Предварительный фильтр СРАЗУ после дифференцирования: до него сигнал
-        // несёт численный шум, который иначе уходит прямо на приводы.
-        filteredSurge = Smooth(filteredSurge, Mathf.Clamp(accelLocal.z, -maxAccel, maxAccel), dt, accelPrefilterTau);
-        filteredSway = Smooth(filteredSway, Mathf.Clamp(accelLocal.x, -maxAccel, maxAccel), dt, accelPrefilterTau);
-        filteredHeave = Smooth(filteredHeave, Mathf.Clamp(accelLocal.y, -maxAccel, maxAccel), dt, heavePrefilterTau);
-
-        // Мёртвая зона убирает постоянную мелкую дрожь на ровной дороге.
-        float surgeRaw = ApplyDeadzone(filteredSurge, accelDeadzone);
-        float swayRaw = ApplyDeadzone(filteredSway, accelDeadzone);
-        float heaveRaw = ApplyDeadzone(filteredHeave, accelDeadzone);
+        float surgeRaw = Mathf.Clamp(accelLocal.z, -maxAccel, maxAccel);
+        float swayRaw = Mathf.Clamp(accelLocal.x, -maxAccel, maxAccel);
+        float heaveRaw = Mathf.Clamp(accelLocal.y, -maxAccel, maxAccel);
 
         // --- скорость рыскания в град/с ---
         Vector3 angVelLocal = vehicleTransform.InverseTransformDirection(rb.angularVelocity);
@@ -230,11 +210,9 @@ public class CarTelemetryHandler1 : MonoBehaviour
         // Сглаживание, не зависящее от частоты кадров (раньше был Lerp с
         // постоянным коэффициентом ~1 с — из-за него резкие ускорения
         // размазывались и отклик был ватным).
-        // Сглаживание + ограничение скорости изменения: привод не может быть
-        // брошен в упор одним шагом, даже если ускорение скакнуло.
-        currentSurge = Slew(currentSurge, SmoothAsym(currentSurge, surgeRaw, dt, accelAttackTau, accelReleaseTau), dt, accelSlewPerSecond);
-        currentSway = Slew(currentSway, SmoothAsym(currentSway, swayRaw, dt, accelAttackTau, accelReleaseTau), dt, accelSlewPerSecond);
-        currentHeave = Slew(currentHeave, SmoothAsym(currentHeave, heaveRaw, dt, heaveAttackTau, heaveReleaseTau), dt, accelSlewPerSecond);
+        currentSurge = SmoothAsym(currentSurge, surgeRaw, dt, accelAttackTau, accelReleaseTau);
+        currentSway = SmoothAsym(currentSway, swayRaw, dt, accelAttackTau, accelReleaseTau);
+        currentHeave = SmoothAsym(currentHeave, heaveRaw, dt, heaveAttackTau, heaveReleaseTau);
         currentYawRate = Smooth(currentYawRate, yawRateRaw, dt, yawTau);
         currentPitch = Smooth(currentPitch, pitchRaw, dt, angleTau);
         currentRoll = Smooth(currentRoll, rollRaw, dt, angleTau);
@@ -254,32 +232,6 @@ public class CarTelemetryHandler1 : MonoBehaviour
     /// Быстрая атака, медленный спад: пик (удар, резкий тормоз) проходит почти
     /// мгновенно, а возврат остаётся плавным.
     /// </summary>
-    /// <summary>Мёртвая зона без ступеньки на границе.</summary>
-    private static float ApplyDeadzone(float value, float deadzone)
-    {
-        if (deadzone <= 0f)
-        {
-            return value;
-        }
-
-        var magnitude = Mathf.Abs(value);
-
-        return magnitude <= deadzone ? 0f : Mathf.Sign(value) * (magnitude - deadzone);
-    }
-
-    /// <summary>Ограничение скорости изменения канала.</summary>
-    private static float Slew(float current, float target, float dt, float maxPerSecond)
-    {
-        if (maxPerSecond <= 0f)
-        {
-            return target;
-        }
-
-        var maxStep = maxPerSecond * dt;
-
-        return Mathf.Clamp(target, current - maxStep, current + maxStep);
-    }
-
     private static float SmoothAsym(float current, float target, float dt, float tauAttack, float tauRelease)
     {
         var rising = Mathf.Abs(target) > Mathf.Abs(current);
