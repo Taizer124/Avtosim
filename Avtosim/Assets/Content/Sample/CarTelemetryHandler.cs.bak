@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using _2DOF;
 using UnityEngine;
-using Bhaptics.SDK2; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Bhaptics SDK
+using Bhaptics.SDK2; // Используем Bhaptics SDK
 
 public class CarTelemetryHandler : MonoBehaviour
 {
@@ -15,7 +15,7 @@ public class CarTelemetryHandler : MonoBehaviour
     [SerializeField] private float maxTiltAngle = 15f;
     [SerializeField] private float tiltResponseSpeed = 2f;
     [SerializeField] private float accelerationThreshold = 1f;
-    [SerializeField] private float deadZone = 0.1f; // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    [SerializeField] private float deadZone = 0.1f; // Зона нечувствительности
 
     [Header("Debug")]
     [SerializeField] private bool debugTilt = false;
@@ -26,28 +26,6 @@ public class CarTelemetryHandler : MonoBehaviour
     private float _previousTime;
     private float _currentTiltAngle;
     private float _tiltVelocity;
-
-    private const float MaxAccel = 20f;
-    private const float MaxYawRate = 120f;
-    private const float MaxAngleDeg = 20f;
-    private const float AccelPrefilterTau = 0.035f;
-    private const float HeavePrefilterTau = 0.06f;
-    private const float AccelTau = 0.05f;
-    private const float HeaveTau = 0.06f;
-    private const float YawTau = 0.08f;
-    private const float AngleTau = 0.10f;
-    private const float AccelDeadzone = 0.4f;
-
-    private Vector3 _lastVelocity;
-    private float _filteredSurge;
-    private float _filteredSway;
-    private float _filteredHeave;
-    private float _currentSurge;
-    private float _currentSway;
-    private float _currentHeave;
-    private float _currentYawRate;
-    private float _currentPitch;
-    private float _currentRoll;
 
     [SerializeField] private Vector3 centerOfMassOffset = Vector3.zero;
 
@@ -91,61 +69,18 @@ public class CarTelemetryHandler : MonoBehaviour
         }
     }
 
-    // РљРѕРЅС‚СЂР°РєС‚ СЃРѕРІРїР°РґР°РµС‚ СЃ CarTelemetryHandler1, РёРЅР°С‡Рµ РїР»Р°С‚С„РѕСЂРјР° РІРµР»Р° Р±С‹ СЃРµР±СЏ
-    // РїРѕ-СЂР°Р·РЅРѕРјСѓ РЅР° СЂР°Р·РЅС‹С… РјР°С€РёРЅР°С…:
-    //   Angles   = (С‚Р°РЅРіР°Р¶ РіСЂР°Рґ, РєСЂРµРЅ РіСЂР°Рґ, СЃРєРѕСЂРѕСЃС‚СЊ СЂС‹СЃРєР°РЅРёСЏ РіСЂР°Рґ/СЃ)
-    //   Velocity = (surge, sway, heave) - СѓСЃРєРѕСЂРµРЅРёСЏ РІ РѕСЃСЏС… РјР°С€РёРЅС‹, Рј/СЃ^2
-    private void FixedUpdate()
-    {
-        if (_telemetryDataData == null || rigidbody == null || vehicleTransform == null)
-        {
-            return;
-        }
-
-        float dt = Mathf.Max(Time.fixedDeltaTime, 0.0001f);
-
-        Vector3 velocity = rigidbody.linearVelocity;
-        Vector3 accelLocal = vehicleTransform.InverseTransformDirection((velocity - _lastVelocity) / dt);
-        _lastVelocity = velocity;
-
-        _filteredSurge = Smooth(_filteredSurge, Mathf.Clamp(accelLocal.z, -MaxAccel, MaxAccel), dt, AccelPrefilterTau);
-        _filteredSway = Smooth(_filteredSway, Mathf.Clamp(accelLocal.x, -MaxAccel, MaxAccel), dt, AccelPrefilterTau);
-        _filteredHeave = Smooth(_filteredHeave, Mathf.Clamp(accelLocal.y, -MaxAccel, MaxAccel), dt, HeavePrefilterTau);
-
-        _currentSurge = Smooth(_currentSurge, Deadzone(_filteredSurge), dt, AccelTau);
-        _currentSway = Smooth(_currentSway, Deadzone(_filteredSway), dt, AccelTau);
-        _currentHeave = Smooth(_currentHeave, Deadzone(_filteredHeave), dt, HeaveTau);
-
-        Vector3 angVelLocal = vehicleTransform.InverseTransformDirection(rigidbody.angularVelocity);
-        _currentYawRate = Smooth(_currentYawRate,
-            Mathf.Clamp(angVelLocal.y * Mathf.Rad2Deg, -MaxYawRate, MaxYawRate), dt, YawTau);
-
-        _currentPitch = Smooth(_currentPitch,
-            Mathf.Clamp(NormalizeAngle(vehicleTransform.eulerAngles.x), -MaxAngleDeg, MaxAngleDeg), dt, AngleTau);
-        _currentRoll = Smooth(_currentRoll,
-            Mathf.Clamp(NormalizeAngle(vehicleTransform.eulerAngles.z), -MaxAngleDeg, MaxAngleDeg), dt, AngleTau);
-
-        _telemetryDataData.Angles = new Vector3(_currentPitch, _currentRoll, _currentYawRate);
-        _telemetryDataData.Velocity = new Vector3(_currentSurge, _currentSway, _currentHeave);
-    }
-
-    private static float Deadzone(float value)
-    {
-        var magnitude = Mathf.Abs(value);
-        return magnitude <= AccelDeadzone ? 0f : Mathf.Sign(value) * (magnitude - AccelDeadzone);
-    }
-
-    private static float Smooth(float current, float target, float dt, float tau)
-    {
-        return tau <= 0f ? target : Mathf.Lerp(current, target, 1f - Mathf.Exp(-dt / tau));
-    }
-
     private void UpdateVelocity()
     {
+        _telemetryDataData.Velocity = rigidbody.linearVelocity;
     }
 
     private void UpdateAngles()
     {
+        var euler = vehicleTransform.localEulerAngles;
+        euler.x = NormalizeAngle(euler.x);
+        euler.y = NormalizeAngle(euler.y);
+        euler.z = NormalizeAngle(euler.z);
+        _telemetryDataData.Angles = new Vector3(euler.z, euler.y, euler.x);
     }
 
     private float NormalizeAngle(float angle)
@@ -167,12 +102,12 @@ public class CarTelemetryHandler : MonoBehaviour
             float forwardAcceleration = Vector3.Dot(acceleration, vehicleTransform.forward);
             float forwardSpeed = Vector3.Dot(currentVelocity, vehicleTransform.forward);
 
-            // G-пїЅпїЅпїЅпїЅ
+            // G-сила
             float gForce = forwardAcceleration / 9.81f;
 
             float targetTiltAngle = 0f;
 
-            // --- пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ ---
+            // --- ЭФФЕКТ РЕМНЯ ---
             if (forwardSpeed > 2f && gForce < -0.3f)
             {
                 float intensityValue = Mathf.Clamp01(Mathf.Abs(gForce) / 3f);
@@ -187,7 +122,7 @@ public class CarTelemetryHandler : MonoBehaviour
                 //Debug.Log("Bhaptics: remen_bez, intensity=" + intensityValue);
             }
 
-            // --- пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ ---
+            // --- ЭФФЕКТ ДАВЛЕНИЯ В СПИНУ ---
             if (forwardSpeed > 1f && gForce > 0.3f)
             {
                 float intensityValue = Mathf.Clamp01(gForce / 2f);
@@ -202,18 +137,18 @@ public class CarTelemetryHandler : MonoBehaviour
                 //Debug.Log("Bhaptics: davlenie_kovsha, intensity=" + intensityValue);
             }
 
-            // --- пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ ---
-            // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅРЁпїЅ
+            // --- Исправленный наклон ---
+            // Теперь при ускорении вперёд — наклон НАЗАД, при торможении — ВПЕРЁД
             if (Mathf.Abs(forwardAcceleration) > accelerationThreshold)
             {
                 if (forwardAcceleration > accelerationThreshold)
                 {
-                    // пїЅпїЅпїЅпїЅпїЅпїЅ: пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+                    // Разгон: наклон назад
                     targetTiltAngle = Mathf.Clamp(forwardAcceleration / 10f * maxTiltAngle, 0f, maxTiltAngle);
                 }
                 else if (forwardAcceleration < -accelerationThreshold)
                 {
-                    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ/пїЅпїЅпїЅпїЅпїЅпїЅ: пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+                    // Торможение/реверс: наклон вперёд
                     targetTiltAngle = -Mathf.Clamp(-forwardAcceleration / 10f * maxTiltAngle, 0f, maxTiltAngle);
                 }
             }
@@ -230,6 +165,7 @@ public class CarTelemetryHandler : MonoBehaviour
             if (Mathf.Abs(_currentTiltAngle) < deadZone)
                 _currentTiltAngle = 0f;
 
+            ApplyTiltToRigidbody();
 
             if (debugTilt)
             {
@@ -241,26 +177,23 @@ public class CarTelemetryHandler : MonoBehaviour
         _previousTime = currentTime;
     }
 
-    /// <summary>
-    /// Р‘РћР›Р¬РЁР• РќР• РўР РћР“РђР•Рў Р¤РР—РРљРЈ. Р Р°РЅСЊС€Рµ Р·РґРµСЃСЊ РєР°Р¶РґС‹Р№ С‚РёРє РІС‹Р·С‹РІР°Р»СЃСЏ
-    /// rigidbody.MoveRotation(), РєРѕС‚РѕСЂС‹Р№ РїСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕ РґРѕРІРѕСЂР°С‡РёРІР°Р» РєСѓР·РѕРІ Рё
-    /// РІРѕРµРІР°Р» СЃ РїРѕРґРІРµСЃРєРѕР№, РїСЂРёС‡С‘Рј РёР· РєРѕСЂСѓС‚РёРЅС‹, Р° РЅРµ РёР· FixedUpdate.
-    /// РР·-Р·Р° СЌС‚РѕРіРѕ РјР°С€РёРЅС‹ РїРѕРґРїСЂС‹РіРёРІР°Р»Рё Рё С‚СЂСЏСЃР»Рё РєР°РїСЃСѓР»Сѓ.
-    /// РќР°РєР»РѕРЅ РєСѓР·РѕРІР° РґРѕР»Р¶РЅР° Р·Р°РґР°РІР°С‚СЊ РїРѕРґРІРµСЃРєР°, Р° РЅРµ С‚РµР»РµРјРµС‚СЂРёСЏ.
-    /// </summary>
     private void ApplyTiltToRigidbody()
     {
-        // РЅР°РјРµСЂРµРЅРЅРѕ РїСѓСЃС‚Рѕ
+        Quaternion currentRotation = rigidbody.rotation;
+        Quaternion targetRotation = Quaternion.Euler(-_currentTiltAngle, currentRotation.eulerAngles.y, currentRotation.eulerAngles.z);
+        rigidbody.MoveRotation(targetRotation);
     }
 
     public void SetTiltAngle(float angle)
     {
         _currentTiltAngle = Mathf.Clamp(angle, -maxTiltAngle, maxTiltAngle);
+        ApplyTiltToRigidbody();
     }
 
     public void ResetTilt()
     {
         _currentTiltAngle = 0f;
+        ApplyTiltToRigidbody();
     }
 
     public float GetCurrentTiltAngle()
