@@ -1,4 +1,4 @@
-using _2DOF;
+﻿using _2DOF;
 using Assets.VehicleController;
 using Bhaptics.SDK2;
 using System.Collections;
@@ -43,21 +43,35 @@ public class CarTelemetryHandler1 : MonoBehaviour
     [Header("Фильтрация (защита приводов от дрожания)")]
     [Tooltip("Ускорение получается численным дифференцированием скорости и потому шумное. " +
              "Слишком малая постоянная времени пропускает этот шум прямо на приводы и капсулу трясёт.")]
-    [SerializeField] private float accelPrefilterTau = 0.035f;
-    [SerializeField] private float accelAttackTau = 0.05f;
-    [SerializeField] private float accelReleaseTau = 0.15f;
+    [SerializeField] private float accelPrefilterTau = 0.02f;
+    [SerializeField] private float accelAttackTau = 0.025f;
+    [SerializeField] private float accelReleaseTau = 0.12f;
     [Tooltip("Вертикальный канал самый шумный - подвеска и неровности. Фильтруется сильнее прочих.")]
-    [SerializeField] private float heavePrefilterTau = 0.06f;
-    [SerializeField] private float heaveAttackTau = 0.06f;
-    [SerializeField] private float heaveReleaseTau = 0.18f;
-    [SerializeField] private float yawTau = 0.08f;
+    [SerializeField] private float heavePrefilterTau = 0.03f;
+    [SerializeField] private float heaveAttackTau = 0.025f;
+    [SerializeField] private float heaveReleaseTau = 0.12f;
+    [SerializeField] private float yawTau = 0.05f;
     [SerializeField] private float angleTau = 0.10f;
+
+    [Header("Неровности: бордюры, ямы, лежачие полицейские")]
+    [Tooltip("Перекос платформы при наезде одним бортом на препятствие, град. " +
+             "Считается по разности хода стоек левого и правого бортов, поэтому " +
+             "срабатывает даже там, где кузов почти не наклоняется.")]
+    [SerializeField] private float curbRollDegrees = 9f;
+    [Tooltip("Клевок при въезде передней осью на препятствие и съезде с него, град.")]
+    [SerializeField] private float curbPitchDegrees = 5f;
+    [Tooltip("Подъём платформы при поджатии всех стоек. Условные м/с^2 " +
+             "вертикального канала: капсула держится приподнятой, пока машина на бордюре.")]
+    [SerializeField] private float curbHeaveGain = 7f;
+    [Tooltip("Толчок на кромке препятствия: реакция на СКОРОСТЬ поджатия стоек, " +
+             "а не на само поджатие. Даёт короткий удар в момент наезда.")]
+    [SerializeField] private float curbJoltGain = 1.2f;
 
     [Header("Ограничители")]
     [Tooltip("Мёртвая зона по ускорению, м/с^2: мелкая дрожь ниже порога на платформу не идёт.")]
-    [SerializeField] private float accelDeadzone = 0.4f;
+    [SerializeField] private float accelDeadzone = 0.25f;
     [Tooltip("Предел скорости изменения канала, единиц/с: не даёт скачком бросить привод в упор.")]
-    [SerializeField] private float accelSlewPerSecond = 45f;
+    [SerializeField] private float accelSlewPerSecond = 120f;
 
     private float currentPitch = 0f;
     private float currentRoll = 0f;
@@ -65,6 +79,7 @@ public class CarTelemetryHandler1 : MonoBehaviour
     private float currentSway = 0f;
     private float currentHeave = 0f;
     private float currentYawRate = 0f;
+    private readonly SuspensionMotionSampler suspension = new SuspensionMotionSampler();
     private Vector3 lastVelocity = Vector3.zero;
     private float filteredSurge = 0f;
     private float filteredSway = 0f;
@@ -85,6 +100,7 @@ public class CarTelemetryHandler1 : MonoBehaviour
     private void Awake()
     {
         _sendingData = new SendingData();
+        suspension.Initialize(vehicleTransform != null ? vehicleTransform : transform);
         telemetryDataData = _sendingData.ObjectTelemetryData;
         _previousVelocity = rb.linearVelocity;
         _previousTime = Time.time;
@@ -223,9 +239,29 @@ public class CarTelemetryHandler1 : MonoBehaviour
         Vector3 angVelLocal = vehicleTransform.InverseTransformDirection(rb.angularVelocity);
         float yawRateRaw = Mathf.Clamp(angVelLocal.y * Mathf.Rad2Deg, -maxYawRate, maxYawRate);
 
+        // --- перекос подвески: бордюры и прочие неровности ---
+        // Ускорение центра масс наезд одним колесом на бордюр почти не видит:
+        // кузов при этом вертикально почти не разгоняется. Перекос заметен
+        // только по ходу отдельных стоек, поэтому берём его оттуда.
+        suspension.Sample(dt);
+
         // --- углы кузова ---
         float pitchRaw = Mathf.Clamp(NormalizeAngle(vehicleTransform.eulerAngles.x), -maxPlatformAngle, maxPlatformAngle);
         float rollRaw = Mathf.Clamp(NormalizeAngle(vehicleTransform.eulerAngles.z), -maxPlatformAngle, maxPlatformAngle);
+
+        // Левый борт поджат вверх -> тот же знак, что и крен кузова левым
+        // бортом вверх, поэтому просто складываем.
+        rollRaw = Mathf.Clamp(rollRaw + suspension.Roll * curbRollDegrees,
+            -maxPlatformAngle, maxPlatformAngle);
+        pitchRaw = Mathf.Clamp(pitchRaw + suspension.Pitch * curbPitchDegrees,
+            -maxPlatformAngle, maxPlatformAngle);
+
+        // Вертикальный канал: удержание на бордюре плюс удар на его кромке.
+        // Мёртвую зону сюда НЕ применяем — она относится к шуму
+        // дифференцирования скорости, а этот сигнал берётся прямо с подвески.
+        heaveRaw = Mathf.Clamp(
+            heaveRaw + suspension.Heave * curbHeaveGain + suspension.HeaveRate * curbJoltGain,
+            -maxAccel, maxAccel);
 
         // Сглаживание, не зависящее от частоты кадров (раньше был Lerp с
         // постоянным коэффициентом ~1 с — из-за него резкие ускорения

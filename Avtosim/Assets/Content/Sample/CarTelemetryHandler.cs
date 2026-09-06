@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using _2DOF;
 using UnityEngine;
@@ -30,14 +30,22 @@ public class CarTelemetryHandler : MonoBehaviour
     private const float MaxAccel = 20f;
     private const float MaxYawRate = 120f;
     private const float MaxAngleDeg = 20f;
-    private const float AccelPrefilterTau = 0.035f;
-    private const float HeavePrefilterTau = 0.06f;
-    private const float AccelTau = 0.05f;
-    private const float HeaveTau = 0.06f;
-    private const float YawTau = 0.08f;
+    private const float AccelPrefilterTau = 0.02f;
+    private const float HeavePrefilterTau = 0.03f;
+    private const float AccelTau = 0.025f;
+    private const float HeaveTau = 0.025f;
+    private const float YawTau = 0.05f;
     private const float AngleTau = 0.10f;
-    private const float AccelDeadzone = 0.4f;
+    private const float AccelDeadzone = 0.25f;
 
+    // Неровности: значения совпадают с CarTelemetryHandler1, иначе платформа
+    // вела бы себя по-разному на разных машинах.
+    private const float CurbRollDegrees = 9f;
+    private const float CurbPitchDegrees = 5f;
+    private const float CurbHeaveGain = 7f;
+    private const float CurbJoltGain = 1.2f;
+
+    private readonly SuspensionMotionSampler _suspension = new SuspensionMotionSampler();
     private Vector3 _lastVelocity;
     private float _filteredSurge;
     private float _filteredSway;
@@ -54,6 +62,7 @@ public class CarTelemetryHandler : MonoBehaviour
     private void Awake()
     {
         _sendingData = new SendingData();
+        _suspension.Initialize(vehicleTransform != null ? vehicleTransform : transform);
         _telemetryDataData = _sendingData.ObjectTelemetryData;
         _previousVelocity = rigidbody.linearVelocity;
         _previousTime = Time.time;
@@ -112,18 +121,33 @@ public class CarTelemetryHandler : MonoBehaviour
         _filteredSway = Smooth(_filteredSway, Mathf.Clamp(accelLocal.x, -MaxAccel, MaxAccel), dt, AccelPrefilterTau);
         _filteredHeave = Smooth(_filteredHeave, Mathf.Clamp(accelLocal.y, -MaxAccel, MaxAccel), dt, HeavePrefilterTau);
 
+        // Перекос стоек: наезд одним колесом на бордюр по ускорению кузова
+        // не виден, его показывает только ход отдельных стоек.
+        _suspension.Sample(dt);
+
+        float heaveTarget = Mathf.Clamp(
+            Deadzone(_filteredHeave)
+            + _suspension.Heave * CurbHeaveGain
+            + _suspension.HeaveRate * CurbJoltGain,
+            -MaxAccel, MaxAccel);
+
         _currentSurge = Smooth(_currentSurge, Deadzone(_filteredSurge), dt, AccelTau);
         _currentSway = Smooth(_currentSway, Deadzone(_filteredSway), dt, AccelTau);
-        _currentHeave = Smooth(_currentHeave, Deadzone(_filteredHeave), dt, HeaveTau);
+        _currentHeave = Smooth(_currentHeave, heaveTarget, dt, HeaveTau);
 
         Vector3 angVelLocal = vehicleTransform.InverseTransformDirection(rigidbody.angularVelocity);
         _currentYawRate = Smooth(_currentYawRate,
             Mathf.Clamp(angVelLocal.y * Mathf.Rad2Deg, -MaxYawRate, MaxYawRate), dt, YawTau);
 
-        _currentPitch = Smooth(_currentPitch,
-            Mathf.Clamp(NormalizeAngle(vehicleTransform.eulerAngles.x), -MaxAngleDeg, MaxAngleDeg), dt, AngleTau);
-        _currentRoll = Smooth(_currentRoll,
-            Mathf.Clamp(NormalizeAngle(vehicleTransform.eulerAngles.z), -MaxAngleDeg, MaxAngleDeg), dt, AngleTau);
+        float pitchTarget = Mathf.Clamp(
+            NormalizeAngle(vehicleTransform.eulerAngles.x) + _suspension.Pitch * CurbPitchDegrees,
+            -MaxAngleDeg, MaxAngleDeg);
+        float rollTarget = Mathf.Clamp(
+            NormalizeAngle(vehicleTransform.eulerAngles.z) + _suspension.Roll * CurbRollDegrees,
+            -MaxAngleDeg, MaxAngleDeg);
+
+        _currentPitch = Smooth(_currentPitch, pitchTarget, dt, AngleTau);
+        _currentRoll = Smooth(_currentRoll, rollTarget, dt, AngleTau);
 
         _telemetryDataData.Angles = new Vector3(_currentPitch, _currentRoll, _currentYawRate);
         _telemetryDataData.Velocity = new Vector3(_currentSurge, _currentSway, _currentHeave);

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -67,10 +67,21 @@ namespace Assets.VehicleController
         private int[] _partsIdArray;
 
         // ��������� ������
+        // Флаг «сработало нажатие» — теперь это ФРОНТ (переход отпущена->зажата),
+        // а не уровень. Прежний вариант читал уровень и гасил только локальную
+        // копию, которую в следующем же кадре перезаписывал из провайдера, —
+        // поэтому зажатая (или залипшая) кнопка перебирала пресеты бесконечно,
+        // раз в _buttonCooldown, и подвеска скакала вместе с машиной.
         private bool _westButtonPressed;
         private bool _northButtonPressed;
         private bool _southButtonPressed;
         private bool _eastButtonPressed;
+
+        // Уровень с прошлого кадра — нужен для выделения фронта.
+        private bool _westButtonPrev;
+        private bool _northButtonPrev;
+        private bool _southButtonPrev;
+        private bool _eastButtonPrev;
 
         private System.Type _wheelInputType;
         private System.Reflection.PropertyInfo _westButtonProp;
@@ -271,16 +282,30 @@ namespace Assets.VehicleController
 
             try
             {
-                if (_westButtonProp != null)
-                    _westButtonPressed = (bool)_westButtonProp.GetValue(_wheelInputProvider);
-                if (_northButtonProp != null)
-                    _northButtonPressed = (bool)_northButtonProp.GetValue(_wheelInputProvider);
-                if (_southButtonProp != null)
-                    _southButtonPressed = (bool)_southButtonProp.GetValue(_wheelInputProvider);
-                if (_eastButtonProp != null)
-                    _eastButtonPressed = (bool)_eastButtonProp.GetValue(_wheelInputProvider);
+                // Провайдер отдаёт УРОВЕНЬ (зажата сейчас или нет), поэтому
+                // фронт выделяем здесь: сработает ровно один кадр на нажатие.
+                // Это же чинит автоповтор при удержании клавиши на клавиатуре.
+                UpdateEdge(_westButtonProp, ref _westButtonPressed, ref _westButtonPrev);
+                UpdateEdge(_northButtonProp, ref _northButtonPressed, ref _northButtonPrev);
+                UpdateEdge(_southButtonProp, ref _southButtonPressed, ref _southButtonPrev);
+                UpdateEdge(_eastButtonProp, ref _eastButtonPressed, ref _eastButtonPrev);
             }
             catch { }
+        }
+
+        /// <summary>
+        /// Читает уровень кнопки и выставляет <paramref name="pressed"/> только
+        /// на фронте — в момент перехода из отпущенной в зажатую.
+        /// </summary>
+        private void UpdateEdge(System.Reflection.PropertyInfo prop, ref bool pressed, ref bool previous)
+        {
+            if (prop == null)
+                return;
+
+            bool level = (bool)prop.GetValue(_wheelInputProvider);
+
+            pressed = level && !previous;
+            previous = level;
         }
 
 

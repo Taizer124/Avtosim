@@ -1,9 +1,19 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using mozaAPI;
 
 namespace Assets.VehicleController
 {
+    /// <summary>
+    /// Опрос руля MOZA. Раскладывает HIDData в <see cref="MozaWheelInput"/>
+    /// (все кнопки, крестовины, энкодеры) и в AllInOneInputProvider (педали,
+    /// руль, КПП + четыре кнопки ромба, которые использует сама игра).
+    ///
+    /// DefaultExecutionOrder = -1000: менеджер обязан отработать раньше всех,
+    /// кто читает MozaWheelInput, иначе GetButtonDown у них будет опаздывать
+    /// на кадр или пропадать.
+    /// </summary>
+    [DefaultExecutionOrder(-1000)]
     public class MozaSdkManager : MonoBehaviour
     {
         private static MozaSdkManager _instance;
@@ -67,11 +77,12 @@ namespace Assets.VehicleController
         {
             if (!_isSdkInstalled) return;
 
+            // Провайдер ищем, но его отсутствие НЕ повод бросать опрос: руль
+            // может использоваться и без него — напрямую через MozaWheelInput.
+            // Раньше здесь стоял return, и в сцене без AllInOneInputProvider
+            // кнопки не читались вообще.
             if (_inputProvider == null)
-            {
                 FindInputProvider();
-                if (_inputProvider == null) return;
-            }
 
             try
             {
@@ -141,34 +152,124 @@ namespace Assets.VehicleController
                     // _limitAngle уже хранит полный диапазон "стопор-в-стопор"
                     // (см. Start() — halfLimit там же считается как _limitAngle/2),
                     // поэтому для CockpitSteeringWheel передаём как есть.
-                    _inputProvider.SetMozaInputs(gas, brake, clutch, steer, handbrake, gear, _limitAngle);
+                    // Оси уходят и в MozaWheelInput — чтобы собственный провайдер
+                    // студента мог читать руль и педали, не завися от
+                    // AllInOneInputProvider.
+                    MozaWheelInput.SetAxes(
+                        steer, gas, brake, clutch,
+                        float.IsNaN(data.fSteeringWheelAngle) ? 0f : data.fSteeringWheelAngle,
+                        _limitAngle);
 
-                    // 5. Кнопки Y/X/B/A — соответствуют North/West/East/South у
-                    // Logitech G29 (та же Xbox-style раскладка, физически то же
-                    // место на руле). Номера взяты из официального MOZA Button
-                    // Numbering Guide для раскладки ES (support.mozaracing.com):
-                    // 1=A(низ/Юг), 2=B(право/Восток), 3=Y(верх/Север), 4=X(лево/Запад),
-                    // переведены в 0-based индекс data.buttons[номер-1].
-                    // НЕ проверено на реальном железе — подтверди после подключения.
-                    bool north = false, south = false, east = false, west = false;
+                    if (_inputProvider != null)
+                        _inputProvider.SetMozaInputs(gas, brake, clutch, steer, handbrake, gear, _limitAngle);
+
+                    // 5. КНОПКИ. Разбираем ВЕСЬ обод, а не четыре кнопки:
+                    // плагином пользуются извне, и там могут понадобиться любые.
+                    // Полное состояние уходит в MozaWheelInput, откуда его
+                    // читают по номеру или по имени (MozaButton.Start и т.д.).
+                    //
+                    // НУМЕРАЦИЯ 1-BASED. data.buttons[N] — кнопка с номером N
+                    // на схеме руля; buttons[0] в схеме не участвует. Основания:
+                    //   * официальный пример SDK sdk_api_test.cc перебирает
+                    //     for (int i = 1; i < 113; i++) d->buttons[i];
+                    //   * имена полей HIDData кодируют номера напрямую —
+                    //     leftRocker5_8, rightRocker9_12, knobL45_46, knobR47_48,
+                    //     multiSegmentKnob26_27or53_64 и т.д.;
+                    //   * на схеме обода крестовина подписана 5..8 — ровно то же,
+                    //     что и поле leftRocker5_8.
+                    //
+                    // Состояние берём через LastPressState(), а НЕ через
+                    // startValue. getHIDData отдаёт данные за цикл опроса
+                    // ("all hid data during the cycle"): startValue — состояние
+                    // на НАЧАЛО окна, changeNum — сколько раз оно менялось
+                    // внутри. Актуальное состояние на конец окна SDK считает сам
+                    // по чётности changeNum — это и есть LastPressState().
+                    // IsPressed() тут не подходит: она отвечает на другой вопрос
+                    // ("нажималась ли хоть раз за цикл") и залипает на true.
+                    // PressNum() добираем отдельно — она ловит нажатие, целиком
+                    // уместившееся между двумя опросами.
+                    MozaWheelInput.BeginFrame();
+                    MozaWheelInput.SetConnected(true);
+
                     if (data.buttons != null)
                     {
-                        if (data.buttons.Length > 0) south = data.buttons[0].startValue; // 1 = A
-                        if (data.buttons.Length > 1) east = data.buttons[1].startValue;  // 2 = B
-                        if (data.buttons.Length > 2) north = data.buttons[2].startValue; // 3 = Y
-                        if (data.buttons.Length > 3) west = data.buttons[3].startValue;  // 4 = X
+                        int last = Mathf.Min(data.buttons.Length, MozaWheelInput.MaxButtons);
+
+                        for (int number = 1; number < last; number++)
+                        {
+                            MozaWheelInput.SetButton(
+                                number,
+                                data.buttons[number].LastPressState(),
+                                data.buttons[number].PressNum());
+                        }
                     }
-                    _inputProvider.SetMozaButtons(north, south, east, west);
+
+                    MozaWheelInput.SetRockers(
+                        ToDirection(data.leftRocker5_8.LastDir()),
+                        ToDirection(data.rightRocker9_12.LastDir()));
+
+                    // У энкодеров GetOffset() — сумма щелчков за цикл опроса,
+                    // со знаком. Это уже дельта, накапливать её не нужно.
+                    MozaWheelInput.SetKnobs(
+                        data.knobL45_46.GetOffset(),
+                        data.knobR47_48.GetOffset());
+
+                    MozaWheelInput.SetMultiSegmentKnob(0, data.multiSegmentKnob26_27or53_64.GetLastKey());
+                    MozaWheelInput.SetMultiSegmentKnob(1, data.multiSegmentKnob28_29or65_76.GetLastKey());
+                    MozaWheelInput.SetMultiSegmentKnob(2, data.multiSegmentKnob30_31or77_88.GetLastKey());
+                    MozaWheelInput.SetMultiSegmentKnob(3, data.multiSegmentKnob39_40or89_100.GetLastKey());
+                    MozaWheelInput.SetMultiSegmentKnob(4, data.multiSegmentKnob43_44or101_112.GetLastKey());
+
+                    MozaWheelInput.SetVehicleState(gear, handbrake);
+
+                    // Четвёрка ромба для самой игры. Раскладка по схеме обода:
+                    // 1=A (низ), 2=B (право), 3=X (лево), 4=Y (верх).
+                    // Раньше здесь читались buttons[0..3] — слот вне схемы плюс
+                    // сдвиг на единицу, из-за чего кнопка 4 не читалась совсем,
+                    // а X и Y были перепутаны местами.
+                    if (_inputProvider != null)
+                    {
+                        _inputProvider.SetMozaButtons(
+                            MozaWheelInput.GetButton(MozaButton.Y),
+                            MozaWheelInput.GetButton(MozaButton.A),
+                            MozaWheelInput.GetButton(MozaButton.B),
+                            MozaWheelInput.GetButton(MozaButton.X));
+                    }
                 }
                 else
                 {
-                    _inputProvider.SetMozaDisconnected();
+                    MozaWheelInput.SetConnected(false);
+
+                    if (_inputProvider != null)
+                        _inputProvider.SetMozaDisconnected();
                 }
             }
             catch (Exception)
             {
+                MozaWheelInput.SetConnected(false);
+
                 if (_inputProvider != null)
                     _inputProvider.SetMozaDisconnected();
+            }
+        }
+
+        /// <summary>
+        /// Переводит направление крестовины из SDK в наш enum.
+        /// Имена в SDK с опечатками (DOWM, RIGHTDOWM) — так в оригинале.
+        /// </summary>
+        private static MozaDirection ToDirection(ROCKEREDIR dir)
+        {
+            switch (dir)
+            {
+                case ROCKEREDIR.UP: return MozaDirection.Up;
+                case ROCKEREDIR.RIGHTUP: return MozaDirection.UpRight;
+                case ROCKEREDIR.RIGHT: return MozaDirection.Right;
+                case ROCKEREDIR.RIGHTDOWM: return MozaDirection.DownRight;
+                case ROCKEREDIR.DOWM: return MozaDirection.Down;
+                case ROCKEREDIR.LEFTDOWM: return MozaDirection.DownLeft;
+                case ROCKEREDIR.LEFT: return MozaDirection.Left;
+                case ROCKEREDIR.LEFTUP: return MozaDirection.UpLeft;
+                default: return MozaDirection.None;
             }
         }
 

@@ -339651,7 +339651,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5249217126419551552, guid: bfa4d92c8d616de4c9bfd09344389488, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5740402728583021238, guid: bfa4d92c8d616de4c9bfd09344389488, type: 3}
       propertyPath: near clip plane
@@ -339727,11 +339727,11 @@ PrefabInstance:
       objectReference: {fileID: 1954147905}
     - target: {fileID: 6467136987802879481, guid: 0ec41abd4f2a86b468870e608d62eab2, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6706614928850121401, guid: 0ec41abd4f2a86b468870e608d62eab2, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6906229576898794298, guid: 0ec41abd4f2a86b468870e608d62eab2, type: 3}
       propertyPath: GameManager
@@ -339784,6 +339784,10 @@ PrefabInstance:
     - target: {fileID: 7549869563604191142, guid: 0ec41abd4f2a86b468870e608d62eab2, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7585441470220043700, guid: 0ec41abd4f2a86b468870e608d62eab2, type: 3}
+      propertyPath: m_RequestedTrackingOriginMode
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8158860396073896516, guid: 0ec41abd4f2a86b468870e608d62eab2, type: 3}
       propertyPath: sourceText
@@ -339963,7 +339967,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7495186467150914722, guid: bd4714e04fdefc14cb8038ecb7923772, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8031807738309112660, guid: bd4714e04fdefc14cb8038ecb7923772, type: 3}
       propertyPath: near clip plane
