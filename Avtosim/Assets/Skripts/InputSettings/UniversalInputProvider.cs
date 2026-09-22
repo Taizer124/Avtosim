@@ -82,8 +82,23 @@ namespace Assets.VehicleController
             // "нажата ли кнопка N"), поэтому здесь достаточно сравнить со
             // сцеплением напрямую — латчить нечего, само железо уже держит
             // рычаг в положении физически.
-            if (clutch >= CLUTCH_ENGAGED_THRESHOLD)
+            // Только в механике: в секвентальном и автоматическом режимах
+            // передачу ведут лепестки/автомат, и положение рычага (или его
+            // отсутствие) не должно её перезаписывать.
+            if (_transmissionMode == TransmissionMode.Manual && clutch >= CLUTCH_ENGAGED_THRESHOLD)
                 _currentGear = gear;
+        }
+
+        // Подрулевые лепестки MOZA (кнопки 14 и 13). Приходят фронтом нажатия
+        // из MozaSdkManager; латч сбрасывается в GetGearUpInput/GetGearDownInput,
+        // как и для Logitech в Wheel_OnRightShift/Wheel_OnLeftShift.
+        public void SetMozaShiftPaddles(bool upPressed, bool downPressed)
+        {
+            if (_transmissionMode != TransmissionMode.Sequential)
+                return;
+
+            if (upPressed) _gearUp = true;
+            if (downPressed) _gearDown = true;
         }
 
         public void SetMozaDisconnected()

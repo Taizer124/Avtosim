@@ -33,7 +33,14 @@ namespace Assets.VehicleController
         DpadDown = 7,
         DpadLeft = 8,
 
-        // Подрулевые лепестки.
+        // Правая крестовина (есть не на всех ободах; на ES её нет).
+        RightDpadUp = 9,
+        RightDpadRight = 10,
+        RightDpadDown = 11,
+        RightDpadLeft = 12,
+
+        // Подрулевые лепестки переключения передач.
+        // 13 = левый (понижение), 14 = правый (повышение).
         LeftPaddle = 13,
         RightPaddle = 14,
 
@@ -101,7 +108,11 @@ namespace Assets.VehicleController
         /// <summary>Подключён ли руль и валидны ли данные в этом кадре.</summary>
         public static bool IsConnected { get; private set; }
 
-        /// <summary>Левая крестовина (кнопки 5-8) как направление.</summary>
+        /// <summary>
+        /// Левая крестовина (кнопки 5-8) как направление. Кнопки 5-8 при этом
+        /// тоже работают: менеджер сводит крестовину в них сам, в каком бы
+        /// режиме (кнопки/hat) она ни была настроена в Pit House.
+        /// </summary>
         public static MozaDirection LeftRocker { get; private set; }
 
         /// <summary>Правая крестовина (кнопки 9-12) как направление.</summary>
@@ -139,6 +150,25 @@ namespace Assets.VehicleController
 
         /// <summary>Педаль сцепления, 0..1.</summary>
         public static float Clutch { get; private set; }
+
+        /// <summary>
+        /// Аналоговые лепестки сцепления на ободе (есть у FSR, KS, CS и др.;
+        /// у ES их нет — там всегда 0). Совмещённая ось, 0..1.
+        /// Это НЕ подрулевые лепестки передач: те — кнопки 13 и 14.
+        /// </summary>
+        public static float ClutchPaddle { get; private set; }
+
+        /// <summary>Левый лепесток сцепления в раздельном режиме, 0..1.</summary>
+        public static float ClutchPaddleLeft { get; private set; }
+
+        /// <summary>Правый лепесток сцепления в раздельном режиме, 0..1.</summary>
+        public static float ClutchPaddleRight { get; private set; }
+
+        /// <summary>Скорость вращения руля, град/с (прошивка базы 1.2.4.x и новее, иначе 0).</summary>
+        public static float SteeringVelocity { get; private set; }
+
+        /// <summary>Ускорение вращения руля, град/с² (прошивка базы 1.2.4.x и новее, иначе 0).</summary>
+        public static float SteeringAcceleration { get; private set; }
 
         /// <summary>
         /// Фактический угол поворота руля в градусах от центра.
@@ -223,20 +253,20 @@ namespace Assets.VehicleController
 
         /// <summary>
         /// Обновляет одну кнопку. <paramref name="level"/> — состояние на конец
-        /// цикла опроса (LastPressState), <paramref name="presses"/> — сколько
-        /// нажатий SDK насчитал внутри цикла (PressNum).
+        /// цикла опроса, <paramref name="presses"/>/<paramref name="releases"/> —
+        /// сколько нажатий и отпусканий случилось внутри цикла.
         /// </summary>
-        internal static void SetButton(int number, bool level, int presses)
+        internal static void SetButton(int number, bool level, int presses, int releases)
         {
             if (!IsValid(number))
                 return;
 
             bool previous = _level[number];
 
-            // presses > 0 ловит нажатие, целиком уместившееся между двумя
+            // presses/releases ловят нажатие, целиком уместившееся между двумя
             // опросами: уровень при этом мог и не измениться.
             bool down = presses > 0 || (level && !previous);
-            bool up = (previous && !level) || (presses > 0 && !level);
+            bool up = releases > 0 || (previous && !level);
 
             _level[number] = level;
             _down[number] = down;
@@ -274,6 +304,19 @@ namespace Assets.VehicleController
         {
             Gear = gear;
             Handbrake = handbrake;
+        }
+
+        internal static void SetClutchPaddles(float combined, float left, float right)
+        {
+            ClutchPaddle = combined;
+            ClutchPaddleLeft = left;
+            ClutchPaddleRight = right;
+        }
+
+        internal static void SetSteeringDynamics(float velocity, float acceleration)
+        {
+            SteeringVelocity = velocity;
+            SteeringAcceleration = acceleration;
         }
 
         internal static void SetAxes(float steering, float throttle, float brake, float clutch,
@@ -329,6 +372,11 @@ namespace Assets.VehicleController
             Throttle = 0f;
             Brake = 0f;
             Clutch = 0f;
+            ClutchPaddle = 0f;
+            ClutchPaddleLeft = 0f;
+            ClutchPaddleRight = 0f;
+            SteeringVelocity = 0f;
+            SteeringAcceleration = 0f;
             SteeringAngleDegrees = 0f;
         }
     }

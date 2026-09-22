@@ -86,6 +86,21 @@ namespace Assets.VehicleController
                 ? "<b>MOZA: подключён</b>"
                 : "<b>MOZA: НЕ подключён</b>");
 
+            _sb.Append("Руль: ").Append(MozaWheelInput.Steering.ToString("+0.00;-0.00"));
+            _sb.Append(" (").Append(MozaWheelInput.SteeringAngleDegrees.ToString("0")).Append("° из ±");
+            _sb.Append((MozaWheelInput.SteeringRangeDegrees / 2f).ToString("0")).Append("°)");
+            _sb.Append("   Газ: ").Append(MozaWheelInput.Throttle.ToString("0.00"));
+            _sb.Append("   Тормоз: ").Append(MozaWheelInput.Brake.ToString("0.00"));
+            _sb.Append("   Сцепление: ").Append(MozaWheelInput.Clutch.ToString("0.00"));
+            _sb.AppendLine();
+
+            _sb.Append("Лепестки передач: L(13)=").Append(MozaWheelInput.GetButton(MozaButton.LeftPaddle) ? "ЗАЖАТ" : "—");
+            _sb.Append("  R(14)=").Append(MozaWheelInput.GetButton(MozaButton.RightPaddle) ? "ЗАЖАТ" : "—");
+            _sb.Append("   Лепестки сцепления: ").Append(MozaWheelInput.ClutchPaddle.ToString("0.00"));
+            _sb.Append(" (L ").Append(MozaWheelInput.ClutchPaddleLeft.ToString("0.00"));
+            _sb.Append(" / R ").Append(MozaWheelInput.ClutchPaddleRight.ToString("0.00")).Append(')');
+            _sb.AppendLine();
+
             _sb.Append("Передача: ").Append(GearName(MozaWheelInput.Gear));
             _sb.Append("    Ручник: ").Append(MozaWheelInput.Handbrake ? "да" : "нет");
             _sb.AppendLine();

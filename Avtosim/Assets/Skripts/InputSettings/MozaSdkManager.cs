@@ -163,6 +163,17 @@ namespace Assets.VehicleController
                     if (_inputProvider != null)
                         _inputProvider.SetMozaInputs(gas, brake, clutch, steer, handbrake, gear, _limitAngle);
 
+                    // Аналоговые лепестки сцепления (FSR, KS, CS...). У ES их
+                    // нет — SDK отдаёт значение по умолчанию 0x8001, то есть 0.
+                    MozaWheelInput.SetClutchPaddles(
+                        PaddleAxis(data.clutchSynthesisShaft),
+                        PaddleAxis(data.clutchIndependentShaftL),
+                        PaddleAxis(data.clutchIndependentShaftR));
+
+                    MozaWheelInput.SetSteeringDynamics(
+                        float.IsNaN(data.fSteeringWheelVelocity) ? 0f : data.fSteeringWheelVelocity,
+                        float.IsNaN(data.fSteeringWheelAcceleration) ? 0f : data.fSteeringWheelAcceleration);
+
                     // 5. КНОПКИ. Разбираем ВЕСЬ обод, а не четыре кнопки:
                     // плагином пользуются извне, и там могут понадобиться любые.
                     // Полное состояние уходит в MozaWheelInput, откуда его
@@ -178,18 +189,24 @@ namespace Assets.VehicleController
                     //   * на схеме обода крестовина подписана 5..8 — ровно то же,
                     //     что и поле leftRocker5_8.
                     //
-                    // Состояние берём через LastPressState(), а НЕ через
-                    // startValue. getHIDData отдаёт данные за цикл опроса
-                    // ("all hid data during the cycle"): startValue — состояние
-                    // на НАЧАЛО окна, changeNum — сколько раз оно менялось
-                    // внутри. Актуальное состояние на конец окна SDK считает сам
-                    // по чётности changeNum — это и есть LastPressState().
-                    // IsPressed() тут не подходит: она отвечает на другой вопрос
-                    // ("нажималась ли хоть раз за цикл") и залипает на true.
-                    // PressNum() добираем отдельно — она ловит нажатие, целиком
-                    // уместившееся между двумя опросами.
+                    // getHIDData отдаёт данные за цикл опроса ("all hid data
+                    // during the cycle"): startValue — состояние на НАЧАЛО окна,
+                    // changeNum — сколько раз оно менялось внутри (-1 — ни разу).
+                    // Состояние на конец окна — LastPressState(). IsPressed() не
+                    // подходит: она отвечает "нажималась ли хоть раз за цикл" и
+                    // залипает на true.
+                    //
+                    // Число нажатий считаем САМИ (см. CountEdges), а не через
+                    // PressNum(): та возвращает changeNum/2 + (changeNum & 1),
+                    // то есть число ИЗМЕНЕНИЙ пополам с округлением вверх.
+                    // Отпускание кнопки — одно изменение, и PressNum() = 1, из-за
+                    // чего GetButtonDown срабатывал и на нажатие, и на отпускание.
                     MozaWheelInput.BeginFrame();
                     MozaWheelInput.SetConnected(true);
+
+                    MozaDirection leftRocker = ToDirection(data.leftRocker5_8.LastDir());
+                    MozaDirection rightRocker = ToDirection(data.rightRocker9_12.LastDir());
+                    MozaWheelInput.SetRockers(leftRocker, rightRocker);
 
                     if (data.buttons != null)
                     {
@@ -197,16 +214,21 @@ namespace Assets.VehicleController
 
                         for (int number = 1; number < last; number++)
                         {
-                            MozaWheelInput.SetButton(
-                                number,
-                                data.buttons[number].LastPressState(),
-                                data.buttons[number].PressNum());
+                            HIDButton button = data.buttons[number];
+                            bool level = button.LastPressState();
+                            CountEdges(button, out int presses, out int releases);
+
+                            // Крестовина в Pit House может быть в режиме hat
+                            // switch — тогда кнопки 5-12 в buttons[] молчат, а
+                            // направление приходит только в leftRocker/rightRocker.
+                            // Сводим направление обратно в кнопки, чтобы
+                            // GetButton(MozaButton.DpadUp) работал в любом режиме.
+                            if (number >= 5 && number <= 12)
+                                level |= RockerHolds(number, leftRocker, rightRocker);
+
+                            MozaWheelInput.SetButton(number, level, presses, releases);
                         }
                     }
-
-                    MozaWheelInput.SetRockers(
-                        ToDirection(data.leftRocker5_8.LastDir()),
-                        ToDirection(data.rightRocker9_12.LastDir()));
 
                     // У энкодеров GetOffset() — сумма щелчков за цикл опроса,
                     // со знаком. Это уже дельта, накапливать её не нужно.
@@ -221,6 +243,19 @@ namespace Assets.VehicleController
                     MozaWheelInput.SetMultiSegmentKnob(4, data.multiSegmentKnob43_44or101_112.GetLastKey());
 
                     MozaWheelInput.SetVehicleState(gear, handbrake);
+
+                    // Подрулевые лепестки -> секвентальная коробка игры.
+                    // Раньше их в игру не передавали вовсе: провайдер получал
+                    // только педали и ромб, а GetGearUpInput/GetGearDownInput
+                    // заполнялись лишь из Input System (раскладка Logitech G29).
+                    // С рулём MOZA лепестки читались в MozaWheelInput, но
+                    // передачу не переключали.
+                    if (_inputProvider != null)
+                    {
+                        _inputProvider.SetMozaShiftPaddles(
+                            MozaWheelInput.GetButtonDown(MozaButton.RightPaddle),
+                            MozaWheelInput.GetButtonDown(MozaButton.LeftPaddle));
+                    }
 
                     // Четвёрка ромба для самой игры. Раскладка по схеме обода:
                     // 1=A (низ), 2=B (право), 3=X (лево), 4=Y (верх).
@@ -252,6 +287,39 @@ namespace Assets.VehicleController
                     _inputProvider.SetMozaDisconnected();
             }
         }
+
+        /// <summary>
+        /// Сколько нажатий и отпусканий уместилось в цикл опроса.
+        /// Изменения чередуются, начиная от startValue: из отпущенного
+        /// состояния первое изменение — нажатие, из зажатого — отпускание.
+        /// </summary>
+        private static void CountEdges(HIDButton button, out int presses, out int releases)
+        {
+            int changes = Math.Max(button.changeNum, 0);
+            int odd = (changes + 1) / 2;
+            int even = changes / 2;
+
+            presses = button.startValue ? even : odd;
+            releases = button.startValue ? odd : even;
+        }
+
+        /// <summary>Держит ли крестовина направление, соответствующее кнопке 5-12.</summary>
+        private static bool RockerHolds(int number, MozaDirection left, MozaDirection right)
+        {
+            MozaDirection dir = number <= 8 ? left : right;
+
+            switch ((number - 5) % 4) // 0 = верх, 1 = право, 2 = низ, 3 = лево
+            {
+                case 0: return dir == MozaDirection.Up || dir == MozaDirection.UpLeft || dir == MozaDirection.UpRight;
+                case 1: return dir == MozaDirection.Right || dir == MozaDirection.UpRight || dir == MozaDirection.DownRight;
+                case 2: return dir == MozaDirection.Down || dir == MozaDirection.DownLeft || dir == MozaDirection.DownRight;
+                default: return dir == MozaDirection.Left || dir == MozaDirection.UpLeft || dir == MozaDirection.DownLeft;
+            }
+        }
+
+        /// <summary>Ось лепестка сцепления: int16 -32767..32767 -> 0..1.</summary>
+        private static float PaddleAxis(short raw) =>
+            Mathf.Clamp01((raw + 32767f) / 65534f);
 
         /// <summary>
         /// Переводит направление крестовины из SDK в наш enum.
